@@ -1,11 +1,12 @@
+import { globalStyles } from '@/styles/globalStyles';
 import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 export default function ScoreScreen() {
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Welcome!</Text>
-            <Text style={styles.sectionTitle}>Top 3</Text>
+        <View style={globalStyles.container}>
+            <Text style={globalStyles.title}>Welcome!</Text>
+            <Text style={globalStyles.sectionTitle}>Top 3</Text>
     
             <View style={styles.scoreContainer}>
             <Text style={styles.scoreText}>1. 1000</Text>
@@ -16,26 +17,7 @@ export default function ScoreScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    title: {
-        color: 'white',
-        fontSize: 32,
-        fontWeight: 'bold',
-    },
-    container: {
-      flex: 1,
-      backgroundColor: 'black',
-      padding: 20,
-      paddingTop: 40,
-    },
-    sectionTitle: {
-      color: 'white',
-      fontSize: 20,
-      marginTop: 20,
-      marginBottom: 10,
-      fontWeight: 'bold',
-      textAlign: 'center',
-    },
+const styles = StyleSheet.create({ 
     scoreContainer: {
       marginTop: 20,
       padding: 10,
