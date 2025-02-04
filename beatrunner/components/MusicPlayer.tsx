@@ -1,6 +1,7 @@
+import { globalStyles } from "@/styles/globalStyles";
+import { Audio } from "expo-av";
 import React, { useState } from "react";
-import { View, Button, Text } from "react-native";
-import { Audio, AVPlaybackStatus } from "expo-av";
+import { Text, TouchableOpacity, View } from "react-native";
 
 export default function MusicPlayer() {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
@@ -8,7 +9,7 @@ export default function MusicPlayer() {
 
   const playPauseSound = async () => {
     if (sound) {
-      const status = (await sound.getStatusAsync()) as AVPlaybackStatus;
+      const status = (await sound.getStatusAsync());
       if (status.isLoaded) {
         if (isPlaying) {
           await sound.pauseAsync();
@@ -19,7 +20,7 @@ export default function MusicPlayer() {
       }
     } else {
       const { sound } = await Audio.Sound.createAsync(
-        require("../assets/musics/song.mp3"), 
+        require("../assets/musics/song.mp3"),
         { shouldPlay: true }
       );
       setSound(sound);
@@ -29,7 +30,10 @@ export default function MusicPlayer() {
 
   return (
     <View style={{ padding: 20 }}>
-      <Button title={isPlaying ? "Pause" : "Play"} onPress={playPauseSound} />
+      <TouchableOpacity style={globalStyles.button} onPress={playPauseSound}>
+        <Text style={globalStyles.buttonText}>{isPlaying ? "Pause" : "Play"}</Text>
+      </TouchableOpacity>
     </View>
   );
 }
+
