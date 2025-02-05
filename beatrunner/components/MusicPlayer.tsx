@@ -3,7 +3,12 @@ import { Audio } from "expo-av";
 import React, { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
-export default function MusicPlayer() {
+type MusicPlayerProps = {
+  songname: string;
+};
+
+export default function MusicPlayer({songname} : MusicPlayerProps) {
+
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
@@ -20,7 +25,7 @@ export default function MusicPlayer() {
       }
     } else {
       const { sound } = await Audio.Sound.createAsync(
-        require("../assets/musics/song.mp3"),
+        require(`../assets/musics/song.mp3`),
         { shouldPlay: true }
       );
       setSound(sound);
@@ -31,7 +36,7 @@ export default function MusicPlayer() {
   return (
     <View style={{ padding: 20 }}>
       <TouchableOpacity style={globalStyles.button} onPress={playPauseSound}>
-        <Text style={globalStyles.buttonText}>{isPlaying ? "Pause" : "Play"}</Text>
+        <Text style={globalStyles.buttonText}>{isPlaying ? "Pause" : "Start running"}</Text>
       </TouchableOpacity>
     </View>
   );
