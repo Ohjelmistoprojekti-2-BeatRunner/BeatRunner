@@ -1,45 +1,37 @@
-import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform } from 'react-native';
+import { Text, StyleSheet } from 'react-native';
+import { useThemeColor } from '@/hooks/useThemeColor';
+import { Drawer } from 'expo-router/drawer';
+import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
+function DrawerTitleLogo(props: any) {
+  const titleColor = useThemeColor({ light: 'black', dark: 'white' }, 'text');
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-    </Tabs>
+    <DrawerContentScrollView {...props}>
+      <Text style={[styles.title, { color: titleColor }]}>BeatRunner</Text>
+      <DrawerItemList {...props} />
+    </DrawerContentScrollView>
   );
 }
+
+export default function Layout() {
+  return (
+    <Drawer
+      drawerContent={(props) => <DrawerTitleLogo {...props} />}>
+      <Drawer.Screen name="index" options={{ title: 'Start Running' }} />
+      <Drawer.Screen name="highscore" options={{ title: 'Highscore' }} />
+      <Drawer.Screen name="settings" options={{ title: 'Settings' }} />
+      <Drawer.Screen name="help" options={{ title: 'Help' }} />
+      <Drawer.Screen name="about" options={{ title: 'About' }} />
+    </Drawer>
+  );
+}
+
+const styles = StyleSheet.create({
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginVertical: 20,
+  },
+});
