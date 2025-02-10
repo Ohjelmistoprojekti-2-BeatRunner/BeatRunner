@@ -12,11 +12,6 @@ Alustavasti suunniteltuja teknologioita, joita ohjelmassa tullaan tarvitsemaan
 - Firebase käyttäjätilien hallintaan ja mahdollisesti tietokantoihin
 - Spotify (Android) SDK musiikin hallintaan
 
-## Käyttöliittymä
-- Käyttöliittymäkaavio
-
-![Käyttöliittymäkaavio](./Images/Kayttoliittymakaavio.PNG)
-
 ---
 
 The program is an assignment for the course "Ohjelmistoprojekti 2" (Software Project 2) at Haaga-Helia University of Applied Sciences.
