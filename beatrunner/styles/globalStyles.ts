@@ -41,7 +41,7 @@ export const globalStyles = StyleSheet.create({
         padding: 12,
         borderRadius: 8,
         alignItems: 'center',
-        width: '30%',
+        width: '35%',
       },
     buttonText: {
         color: 'white',
@@ -86,5 +86,10 @@ export const globalStyles = StyleSheet.create({
         color: 'white',
         fontSize: 18,
         marginVertical: 5,
+    },
+    link: {
+        marginTop: 20,
+        color: 'lightblue',
+        textDecorationLine: 'underline',
     },
 });
