@@ -12,6 +12,10 @@ Alustavasti suunniteltuja teknologioita, joita ohjelmassa tullaan tarvitsemaan
 - Firebase käyttäjätilien hallintaan ja mahdollisesti tietokantoihin
 - Spotify (Android) SDK musiikin hallintaan
 
+## Käyttöliittymä
+- Käyttöliittymäkaavio
+
+![Käyttöliittymäkaavio](./Images/Kayttoliittymakaavio.PNG)
 
 ---
 
