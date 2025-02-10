@@ -24,6 +24,7 @@ export default function Layout() {
       <Drawer.Screen name="help" options={{ title: 'Help' }} />
       <Drawer.Screen name="about" options={{ title: 'About' }} />
       <Drawer.Screen name="login" options={{ title: 'Login' }} />
+      <Drawer.Screen name="register" options={{ title: 'Register' }} />
     </Drawer>
   );
 }

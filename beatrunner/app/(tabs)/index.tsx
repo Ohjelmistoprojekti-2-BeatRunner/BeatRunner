@@ -10,25 +10,25 @@ export default function HomeScreen() {
             title: 'Level 1',
             difficulty: 'easy',
             calories: 200,
-            song: 'song.mp3'
+            song: 'song1.mp3'
         },
         {
             title: 'Level 2',
             difficulty: 'moderate',
             calories: 300,
-            song: 'song.mp3'
+            song: 'song2.mp3'
         },
         {
             title: 'Level 3',
             difficulty: 'hard',
             calories: 400,
-            song: 'song.mp3'
+            song: 'song1.mp3'
         },
         {
             title: 'Level 4',
             difficulty: 'hard',
             calories: 400,
-            song: 'song.mp3'
+            song: 'song2.mp3'
         }
     ];
 
@@ -37,8 +37,8 @@ export default function HomeScreen() {
 
     const Item = ({ title, difficulty, calories, song }: ItemProps) => (
         <View style={{ margin: 10, width: 300 }}>
-            <TouchableOpacity style={globalStyles.button} onPress={() => router.push({
-                pathname: "/(tabs)/level",
+            <TouchableOpacity style={globalStyles.button} onPress={() => router.navigate({  //if not in (tabs), need to be navigate instead of push
+                pathname: "/level",
                 params: { title, difficulty, calories, song }
             })}>
                 <Text style={globalStyles.buttonText}>{title}</Text>

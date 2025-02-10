@@ -8,12 +8,16 @@ export default function LevelScreen() {
 
     const { title, difficulty, calories, song } = useLocalSearchParams();
 
+    const params = useLocalSearchParams();
+    console.log("Params:", params);
+
+
     return (
         <View style={globalStyles.container}>
             <Text style={globalStyles.title}>{title}</Text>
             <Text style={globalStyles.contentText}>Difficulty: {difficulty}</Text>
             <Text style={globalStyles.contentText}>Calories: {calories}</Text>
-            <MusicPlayer songname={song.toString()} />
+            <MusicPlayer songName={song.toString()} />
         </View >
     )
 }
