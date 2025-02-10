@@ -15,7 +15,7 @@ Alustavasti suunniteltuja teknologioita, joita ohjelmassa tullaan tarvitsemaan
 ## Käyttöliittymä
 - Käyttöliittymäkaavio
 
-![Käyttöliittymäkaavio](./Images/Kayttoliittymakaavio.PNG)
+![Käyttöliittymäkaavio](./Images/Kayttoliittymakaavio.png)
 
 ---
 
