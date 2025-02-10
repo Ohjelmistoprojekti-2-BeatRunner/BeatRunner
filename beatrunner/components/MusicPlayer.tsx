@@ -20,16 +20,16 @@ export default function MusicPlayer({ songName }: MusicPlayerProps) {
 
     const [sound, setSound] = useState<Audio.Sound | null>(null);
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
-    const [isLoading, setIsLoading] = useState<boolean>(false); 
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
 
-    //handling multiple loads and problems with too late syncs. (with chatgpt):
+    //handling multiple similar time loadings and problems with too late syncs. (with chatgpt):
     useEffect(() => {
-        let isMounted = true; 
+        let isMounted = true;
         const loadSound = async () => {
-            if (isLoading) return; //no double loads
-            setIsLoading(true); 
-            
+            if (isLoading) return; 
+            setIsLoading(true);
+
             if (sound) {
                 await sound.unloadAsync();
                 setSound(null);
@@ -59,7 +59,7 @@ export default function MusicPlayer({ songName }: MusicPlayerProps) {
         loadSound();
 
         return () => {
-            isMounted = false; 
+            isMounted = false;
         };
     }, [songName]);
 
