@@ -12,6 +12,11 @@ Alustavasti suunniteltuja teknologioita, joita ohjelmassa tullaan tarvitsemaan
 - Firebase käyttäjätilien hallintaan ja mahdollisesti tietokantoihin
 - Docker kehitysvaiheen työympäristöjen halllintaan
 
+## Käyttöliittymä
+- Käyttöliittymäkaavio
+
+![Käyttöliittymäkaavio](./Images/Kayttoliittymakaavio.PNG)
+
 ---
 
 The program is an assignment for the course "Ohjelmistoprojekti 2" (Software Project 2) at Haaga-Helia University of Applied Sciences.
