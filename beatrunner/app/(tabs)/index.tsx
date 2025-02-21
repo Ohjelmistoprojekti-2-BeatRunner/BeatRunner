@@ -1,45 +1,42 @@
+import fetchLevels from '@/getLevelsData';
 import { globalStyles } from '@/styles/globalStyles';
 import { router } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FlatList, Text, TouchableOpacity, View } from 'react-native';
+
+interface Level {
+    id: string;
+    title: string;
+    difficulty: string;
+    calories: number; 
+}
 
 export default function HomeScreen() {
 
-    const levels = [
-        {
-            title: 'Level 1',
-            difficulty: 'easy',
-            calories: 200,
-            song: 'song1.mp3'
-        },
-        {
-            title: 'Level 2',
-            difficulty: 'moderate',
-            calories: 300,
-            song: 'song2.mp3'
-        },
-        {
-            title: 'Level 3',
-            difficulty: 'hard',
-            calories: 400,
-            song: 'song1.mp3'
-        },
-        {
-            title: 'Level 4',
-            difficulty: 'hard',
-            calories: 400,
-            song: 'song2.mp3'
-        }
-    ];
+    const [levels, setLevels] = useState<Level[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
 
-    type ItemProps = { title: string; difficulty: string, calories: number, song: string };
+    useEffect(() => {
+        const getLevels = async () => {
+            try {
+                const data = await fetchLevels();
+                setLevels(data);
+            } catch (error) {
+                console.error("Error loading levels: ", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        getLevels();
+    }, []);
 
 
-    const Item = ({ title, difficulty, calories, song }: ItemProps) => (
+    const Item = ({id, title, difficulty, calories }: Level) => (
         <View style={{ margin: 10, width: 300 }}>
             <TouchableOpacity style={globalStyles.button} onPress={() => router.navigate({  //if not in (tabs), need to be navigate instead of push
                 pathname: "/level",
-                params: { title, difficulty, calories, song }
+                params: { id, title, difficulty, calories }
             })}>
                 <Text style={globalStyles.buttonText}>{title}</Text>
             </TouchableOpacity>
@@ -57,7 +54,7 @@ export default function HomeScreen() {
                 <Text style={globalStyles.orText}>Choose level</Text>
                 <FlatList
                     data={levels}
-                    renderItem={({ item }) => <Item title={item.title} difficulty={item.difficulty} calories={item.calories} song={item.song} />}
+                    renderItem={({ item }) => <Item id={item.id} title={item.title} difficulty={item.difficulty} calories={item.calories} />}
                 />
 
                 <Text style={globalStyles.orText}>Custom level</Text>

@@ -49,7 +49,7 @@ export default function LoginScreen() {
         <Text style={globalStyles.buttonText}>{loading ? 'Logging in...' : 'Login'}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => router.push('/register')}>
+      <TouchableOpacity onPress={() => router.push('./register')}>
         <Text style={globalStyles.link}>Don't have an account? Register here</Text>
       </TouchableOpacity>
     </View>

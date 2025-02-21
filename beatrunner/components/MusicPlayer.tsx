@@ -4,19 +4,18 @@ import React, { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 type MusicPlayerProps = {
-    songName: string;
+    id: string;
 };
 
-export default function MusicPlayer({ songName }: MusicPlayerProps) {
+export default function MusicPlayer({ id }: MusicPlayerProps) {
 
     const musicFiles: Record<string, any> = {
-        "song1.mp3": require("../assets/musics/song1.mp3"),
-        "song2.mp3": require("../assets/musics/song2.mp3"),
-        "song3.mp3": require("../assets/musics/song1.mp3"),
-        "song4.mp3": require("../assets/musics/song2.mp3"),
+        "1": require("../assets/musics/song1.mp3"),
+        "2": require("../assets/musics/song2.mp3"),
+        "3": require("../assets/musics/song1.mp3"),
     };
 
-    console.log(songName);
+    console.log(id);
 
     const [sound, setSound] = useState<Audio.Sound | null>(null);
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -35,9 +34,9 @@ export default function MusicPlayer({ songName }: MusicPlayerProps) {
                 setSound(null);
             }
 
-            const source = musicFiles[songName];
+            const source = musicFiles[id];
             if (!source) {
-                console.error(`File "${songName}" not found`);
+                console.error(`File "${id}" not found`);
                 setIsLoading(false);
                 return;
             }
@@ -61,7 +60,7 @@ export default function MusicPlayer({ songName }: MusicPlayerProps) {
         return () => {
             isMounted = false;
         };
-    }, [songName]);
+    }, [id]);
 
     useEffect(() => {
         return () => {
@@ -84,9 +83,9 @@ export default function MusicPlayer({ songName }: MusicPlayerProps) {
                 setIsPlaying(!isPlaying);
             }
         } else {
-            const source = musicFiles[songName];
+            const source = musicFiles[id];
             if (!source) {
-                console.error(`File ${songName} not found`);
+                console.error(`File with id ${id} not found`);
                 return;
             }
             const { sound } = await Audio.Sound.createAsync(
