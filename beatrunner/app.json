@@ -1,5 +1,6 @@
 {
   "expo": {
+    "owner": "beatrunner",
     "name": "beatrunner",
     "slug": "beatrunner",
     "version": "1.0.0",
@@ -15,7 +16,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.ilohil.beatrunner"
     },
     "web": {
       "bundler": "metro",
@@ -37,6 +39,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "a65c339e-54cc-49ee-b426-b6093c23a71f"
+      }
     }
   }
 }
