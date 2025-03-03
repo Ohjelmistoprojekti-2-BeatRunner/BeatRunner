@@ -16,7 +16,7 @@ export default function HomeScreen() {
             title: 'Level 2',
             difficulty: 'moderate',
             calories: 300,
-            song: 'song2.mp3'
+            song: 'song2.mp3' 
         },
         {
             title: 'Level 3',
