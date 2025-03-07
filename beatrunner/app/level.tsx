@@ -6,7 +6,7 @@ import { Text, View } from 'react-native';
 
 export default function LevelScreen() {
 
-    const { id, title, difficulty, calories } = useLocalSearchParams();
+    const { id, title, bpm, difficulty, calories } = useLocalSearchParams();
 
     return (
         <View style={globalStyles.container}>

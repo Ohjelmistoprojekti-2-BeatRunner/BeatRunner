@@ -10,9 +10,10 @@ type MusicPlayerProps = {
 export default function MusicPlayer({ id }: MusicPlayerProps) {
 
     const musicFiles: Record<string, any> = {
-        "1": require("../assets/musics/song1.mp3"),
-        "2": require("../assets/musics/song2.mp3"),
-        "3": require("../assets/musics/song1.mp3"),
+        "1": require("../assets/musics/level1.mp3"),
+        "2": require("../assets/musics/level2.mp3"),
+        "3": require("../assets/musics/level3.mp3"),
+        "4": require("../assets/musics/level4.mp3")
     };
 
     console.log(id);

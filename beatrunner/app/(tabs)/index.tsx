@@ -7,6 +7,7 @@ import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 interface Level {
     id: string;
     title: string;
+    bpm: number;
     difficulty: string;
     calories: number; 
 }
@@ -32,11 +33,11 @@ export default function HomeScreen() {
     }, []);
 
 
-    const Item = ({id, title, difficulty, calories }: Level) => (
+    const Item = ({id, title, bpm, difficulty, calories }: Level) => (
         <View style={{ margin: 10, width: 300 }}>
             <TouchableOpacity style={globalStyles.button} onPress={() => router.navigate({  //if not in (tabs), need to be navigate instead of push
                 pathname: "/level",
-                params: { id, title, difficulty, calories }
+                params: { id, title, bpm, difficulty, calories }
             })}>
                 <Text style={globalStyles.buttonText}>{title}</Text>
             </TouchableOpacity>
@@ -54,7 +55,7 @@ export default function HomeScreen() {
                 <Text style={globalStyles.orText}>Choose level</Text>
                 <FlatList
                     data={levels}
-                    renderItem={({ item }) => <Item id={item.id} title={item.title} difficulty={item.difficulty} calories={item.calories} />}
+                    renderItem={({ item }) => <Item id={item.id} title={item.title} bpm={item.bpm} difficulty={item.difficulty} calories={item.calories} />}
                 />
 
                 <Text style={globalStyles.orText}>Custom level</Text>

@@ -11,6 +11,7 @@ const fetchLevels = async () => {
         return {
           id: doc.id,
           title: data.title,
+          bpm: data.bpm,
           difficulty: data.difficulty,
           calories: data.calories,
         };
