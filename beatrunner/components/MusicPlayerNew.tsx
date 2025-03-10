@@ -39,7 +39,7 @@ export default function MusicPlayer() {
             <View style={styles.controls}>
 
                 <Text style={globalStyles.buttonText}>
-                    {songPlaying ? 'Paused' : 'Music playing'}
+                    {songPlaying ? 'Music playing' : 'Paused'}
                 </Text>
 
             </View>
