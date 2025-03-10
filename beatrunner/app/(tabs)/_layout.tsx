@@ -1,14 +1,35 @@
-import React from 'react';
-import { Text, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Text, StyleSheet, View } from 'react-native';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { Drawer } from 'expo-router/drawer';
 import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
+import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
+import { globalStyles } from '@/styles/globalStyles';
 
 function DrawerTitleLogo(props: any) {
   const titleColor = useThemeColor({ light: 'black', dark: 'white' }, 'text');
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   return (
     <DrawerContentScrollView {...props}>
       <Text style={[styles.title, { color: titleColor }]}>BeatRunner</Text>
+      {user ? (
+        <View>
+          <Text style={[globalStyles.contentText, { color: titleColor }]}>Logged in as:</Text>
+          <Text style={[globalStyles.contentText, { color: titleColor }]}>{user.email}</Text>
+        </View>
+      ) : (
+        <Text style={[globalStyles.contentText, { color: titleColor }]}>Not logged in</Text>
+      )}
       <DrawerItemList {...props} />
     </DrawerContentScrollView>
   );

@@ -4,14 +4,6 @@ import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 
-interface Level {
-    id: string;
-    title: string;
-    bpm: number;
-    difficulty: string;
-    calories: number; 
-}
-
 export default function HomeScreen() {
 
     const [levels, setLevels] = useState<Level[]>([]);
@@ -33,7 +25,7 @@ export default function HomeScreen() {
     }, []);
 
 
-    const Item = ({id, title, bpm, difficulty, calories }: Level) => (
+    const Item = ({ id, title, bpm, difficulty, calories }: Level) => (
         <View style={{ margin: 10, width: 300 }}>
             <TouchableOpacity style={globalStyles.button} onPress={() => router.navigate({  //if not in (tabs), need to be navigate instead of push
                 pathname: "/level",
