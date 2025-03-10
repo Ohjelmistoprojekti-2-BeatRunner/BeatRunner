@@ -5,7 +5,7 @@ import React, { useEffect } from 'react';
 import { Text, TouchableOpacity, View, StyleSheet } from 'react-native';
 
 export default function MusicPlayer() {
-    const { audioUri, songPlaying, currentSong, setSongPlaying } = useMusicContext();
+    const { audioUri, songPlaying, currentSong, setSongPlaying, toggleMusicPlayPause } = useMusicContext();
     const player = useAudioPlayer(audioUri);
 
     useEffect(() => {
@@ -21,15 +21,13 @@ export default function MusicPlayer() {
     }, []);
 
 
-    const togglePlayPause = () => {
-        if (player.playing) {
-            player.pause();
-            setSongPlaying(false);
-        } else {
+    useEffect(() => {
+        if (songPlaying) {
             player.play();
-            setSongPlaying(true);
+        } else {
+            player.pause();
         }
-    };
+    }, [songPlaying]);
 
     return (
         <View style={styles.bottomPanel}>
@@ -39,11 +37,11 @@ export default function MusicPlayer() {
                 </View>
             </View>
             <View style={styles.controls}>
-                <TouchableOpacity onPress={togglePlayPause}>
-                    <Text style={globalStyles.buttonText}>
-                        {songPlaying ? 'Pause' : 'Start running'}
-                    </Text>
-                </TouchableOpacity>
+
+                <Text style={globalStyles.buttonText}>
+                    {songPlaying ? 'Paused' : 'Music playing'}
+                </Text>
+
             </View>
         </View>
     );

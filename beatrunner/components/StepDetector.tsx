@@ -5,6 +5,7 @@ import { Accelerometer } from 'expo-sensors';
 import { Audio } from 'expo-av';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { globalStyles } from '@/styles/globalStyles';
+import { useMusicContext } from '@/contexts/MusicContext';
 
 interface StepDetectorProps {
   onStepDetected?: (stepCount: number, tempo: number) => void;
@@ -17,6 +18,7 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected }) => {
   const [tempo, setTempo] = useState(0);
   const [threshold, setThreshold] = useState(1.2); // Default threshold
   const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const { toggleMusicPlayPause } = useMusicContext();
   
   // References for step detection
   const accelerationRef = useRef({ x: 0, y: 0, z: 0 });
@@ -77,6 +79,7 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected }) => {
       accelerationRef.current = data;
       processAccelerometerData(data);
     });
+    toggleMusicPlayPause();
   };
   
   // Stop detection
@@ -84,6 +87,7 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected }) => {
     if (subscriptionRef.current) {
       subscriptionRef.current.remove();
     }
+    toggleMusicPlayPause();
   };
   
   // Process accelerometer data to detect steps

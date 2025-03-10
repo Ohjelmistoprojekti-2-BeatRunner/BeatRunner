@@ -4,6 +4,7 @@ import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect } from 'react';
 import { Text, View } from 'react-native';
 import { useMusicContext } from '../contexts/MusicContext';
+import StepDetector from '@/components/StepDetector';
 
 export default function LevelScreen() {
 
@@ -22,6 +23,8 @@ export default function LevelScreen() {
             <Text style={globalStyles.title}>{title}</Text>
             <Text style={globalStyles.contentText}>Difficulty: {difficulty}</Text>
             <Text style={globalStyles.contentText}>Calories: {calories}</Text>
+            <StepDetector />
+
         </View >
     )
 }
