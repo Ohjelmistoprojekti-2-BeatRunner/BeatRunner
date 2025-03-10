@@ -4,6 +4,14 @@ import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 
+interface Level {
+    id: string;
+    title: string;
+    bpm: number;
+    difficulty: string;
+    calories: number; 
+}
+
 export default function HomeScreen() {
 
     const [levels, setLevels] = useState<Level[]>([]);
