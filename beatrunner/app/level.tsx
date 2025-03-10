@@ -12,9 +12,9 @@ export default function LevelScreen() {
 
     
     useEffect(() => {
-        const songName = Array.isArray(`level${id}.mp3`) ? `level${id}.mp3`[0] : `level${id}.mp3`;
+        const songName = Array.isArray(id) ? id[0] : id;
         setCurrentSong(songName);
-    }, [`level${id}.mp3`, setCurrentSong]); 
+    }, [id, setCurrentSong]); 
 
 
     return (
