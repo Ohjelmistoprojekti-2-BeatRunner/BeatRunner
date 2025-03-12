@@ -25,12 +25,13 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+
 
 const auth = initializeAuth(app, {
     persistence: getReactNativePersistence(ReactNativeAsyncStorage)
 });
 const database = getDatabase();
+const db = getFirestore();
 //npm install - g firebase - tools
 //import { auth } from "./firebaseConfig" Login sivulle tämä
 
