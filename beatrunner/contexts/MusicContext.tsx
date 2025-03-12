@@ -14,7 +14,7 @@ interface MusicContextType {
     setAudioUri: (uri: string) => void;
     songPlaying: boolean;
     setSongPlaying: (playing: boolean) => void;
-    toggleMusicPlayPause: () => void;
+    toggleMusic: () => void;
 }
 
 const MusicContext = createContext<MusicContextType | undefined>(undefined);
@@ -33,7 +33,7 @@ export const MusicProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         updateAudioUri(songName);
     };
 
-    const toggleMusicPlayPause = () => {
+    const toggleMusic = () => {
         setSongPlaying(prevState => !prevState);
     };
 
@@ -44,12 +44,8 @@ export const MusicProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         setAudioUri,
         songPlaying,
         setSongPlaying,
-        toggleMusicPlayPause
+        toggleMusic
     }), [currentSong, audioUri, songPlaying]);
-
-    console.log("audiouri", audioUri);
-    console.log("song", currentSong)
-    console.log("songplaying", songPlaying);
 
     return (
         <MusicContext.Provider value={value}>

@@ -6,6 +6,7 @@ import StepDetector from '@/components/StepDetector';
 export default function StepCounter() {
   const handleStepDetected = (count: number, tempo: number) => {
     console.log(`Step detected! Count: ${count}, Tempo: ${tempo} SPM`);
+    
   };
 
   return (
