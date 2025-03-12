@@ -13,8 +13,11 @@ interface StepDetectorProps {
 
 const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected }) => {
     // StepDetectorContext variables
-    const { isDetecting, stepCount, setStepCount, tempo, setTempo, threshold, setThreshold } = useStepDetector();
+    const { isDetecting, threshold, setThreshold } = useStepDetector();
     // State variables 
+
+    const [stepCount, setStepCount] = useState(0);
+    const [tempo, setTempo] = useState(0);
     const [sound, setSound] = useState<Audio.Sound | null>(null);
 
     // References for step detection
@@ -140,7 +143,7 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected }) => {
             lastStepTimeRef.current = stepTime;
 
             // Update step count
-            setStepCount((prevCount: number) => {  //tsx-problem, but still works, i think
+            setStepCount((prevCount: number) => { 
                 const newCount = prevCount + 1;
                 if (onStepDetected) {
                     onStepDetected(newCount, tempo);

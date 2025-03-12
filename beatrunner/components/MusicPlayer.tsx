@@ -1,16 +1,16 @@
+import React, { useEffect, useRef } from 'react';
+import { setAudioModeAsync } from 'expo-audio';
+import { StyleSheet, Text, View } from 'react-native';
 import { useMusicContext } from '@/contexts/MusicContext';
 import { globalStyles } from '@/styles/globalStyles';
-import { setAudioModeAsync, useAudioPlayer } from 'expo-audio';
-import React, { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-
-
-//former musicplayerNew.
+import { useAudioPlayer } from 'expo-audio';
 
 export default function MusicPlayer() {
     const { audioUri, songPlaying, currentSong } = useMusicContext();
+
     const player = useAudioPlayer(audioUri);
 
+    // Setup audio mode when the component mounts
     useEffect(() => {
         async function setupAudioMode() {
             await setAudioModeAsync({
@@ -24,21 +24,25 @@ export default function MusicPlayer() {
     }, []);
 
     const startMusic = async () => {
-        player.play();
+        if (player) {
+            player.play();
+        }
     };
 
-    const stopMusic = () => {
-        player.pause();
-        player.remove();
+    const stopMusic = async () => {
+        if (player) {
+            player.pause();
+            player.remove();
+        }
     };
 
     useEffect(() => {
-        if (songPlaying) {
-            startMusic()
+        if (audioUri && songPlaying) {
+            startMusic();
         } else {
-            stopMusic()
+            stopMusic();
         }
-    }, [songPlaying]);
+    }, [audioUri, songPlaying]);
 
     return (
         <View style={globalStyles.contentContainer}>
@@ -49,7 +53,6 @@ export default function MusicPlayer() {
                 <Text style={globalStyles.buttonText}>
                     {songPlaying ? 'Music playing' : 'Paused'}
                 </Text>
-
             </View>
         </View>
     );
