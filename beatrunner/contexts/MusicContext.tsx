@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode, useMemo } from 'react';
+import { AudioPlayer } from 'expo-audio';
+import React, { createContext, useContext, useState, ReactNode, useMemo, useEffect, useRef } from 'react';
 
 const musicFiles: Record<string, any> = {
     "1": require("../assets/musics/level1.mp3"),
@@ -8,6 +9,11 @@ const musicFiles: Record<string, any> = {
 };
 
 interface MusicContextType {
+    player: AudioPlayer | null;
+    setPlayer: (player: AudioPlayer) => void;
+    currentTimeRef: React.MutableRefObject<number>;
+    currentTime: number;
+    setCurrentTime: (time: number) => void;
     currentSong: string | null;
     setCurrentSong: (songName: string) => void;
     audioUri: string | null;
@@ -20,9 +26,13 @@ interface MusicContextType {
 const MusicContext = createContext<MusicContextType | undefined>(undefined);
 
 export const MusicProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const [player, setPlayer] = useState<AudioPlayer | null>(null);
+    const [currentTime, setCurrentTime] = useState<number>(0);
     const [currentSong, setCurrentSong] = useState<string | null>(null);
     const [audioUri, setAudioUri] = useState<string | null>(null)
     const [songPlaying, setSongPlaying] = useState<boolean>(false);
+
+    const currentTimeRef = useRef<number>(0);
 
     const updateAudioUri = (songName: string) => {
         setAudioUri(musicFiles[songName]);
@@ -33,11 +43,32 @@ export const MusicProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         updateAudioUri(songName);
     };
 
+    useEffect(() => {
+        currentTimeRef.current = currentTime;
+    }, [currentTime]);
+
+    useEffect(() => {
+        if (player && songPlaying) {
+            const interval = setInterval(() => {
+                const currentTime = player.currentTime;
+                setCurrentTime(currentTime); 
+                setCurrentTime(player.currentTime); 
+            }, 100); // Update every 100ms
+
+            return () => clearInterval(interval);
+        }
+    }, [player, songPlaying]); 
+
     const toggleMusic = () => {
         setSongPlaying(prevState => !prevState);
     };
 
     const value = useMemo(() => ({
+        player,
+        setPlayer,
+        currentTimeRef,
+        currentTime,
+        setCurrentTime,
         currentSong,
         setCurrentSong: handleSongSelection,
         audioUri,

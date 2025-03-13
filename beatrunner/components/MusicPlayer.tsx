@@ -6,7 +6,7 @@ import { globalStyles } from '@/styles/globalStyles';
 import { useAudioPlayer } from 'expo-audio';
 
 export default function MusicPlayer() {
-    const { audioUri, songPlaying, currentSong } = useMusicContext();
+    const { setCurrentTime, setPlayer, audioUri, songPlaying, currentSong } = useMusicContext();
 
     const player = useAudioPlayer(audioUri);
 
@@ -22,6 +22,11 @@ export default function MusicPlayer() {
         }
         setupAudioMode();
     }, []);
+
+    
+    useEffect(() => {
+        setPlayer(player); 
+    }, [player]);
 
     const startMusic = async () => {
         if (player) {

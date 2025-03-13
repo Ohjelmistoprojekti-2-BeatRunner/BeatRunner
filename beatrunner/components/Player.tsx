@@ -13,12 +13,13 @@ const Player = () => {
     const [isPlaying, setIsPlaying] = useState(false);
 
     const { isDetecting } = useStepDetector();
-    const { songPlaying } = useMusicContext();
+    const { songPlaying, currentTime } = useMusicContext();
     const { startMusicDetector, stopMusicDetector } = useMusicDetector();
 
     console.log("is playing: ", isDetecting);
     console.log("is detecting: ", isDetecting);
     console.log("song playing: ", songPlaying);
+    console.log("song time: ", currentTime);
 
 
     const togglePlayPause = () => {

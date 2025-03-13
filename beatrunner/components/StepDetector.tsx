@@ -1,4 +1,6 @@
+import { useMusicContext } from '@/contexts/MusicContext';
 import { useStepDetector } from '@/contexts/StepDetectorContext';
+import { useMusicCurrentTime } from '@/hooks/useMusicCurrentTime';
 import { globalStyles } from '@/styles/globalStyles';
 import Slider from '@react-native-community/slider';
 import { Audio } from 'expo-av';
@@ -29,6 +31,8 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected }) => {
 
     // Animated values
     const animatedStepOpacity = useSharedValue(1);
+
+    const currentTime = useMusicCurrentTime().current;
 
     // Load sound effect
     useEffect(() => {
@@ -148,6 +152,7 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected }) => {
                 if (onStepDetected) {
                     onStepDetected(newCount, tempo);
                 }
+                console.log("currentime, stepdetectorissa: " + currentTime)
                 return newCount;
             });
 
