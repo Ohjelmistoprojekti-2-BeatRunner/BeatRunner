@@ -64,19 +64,19 @@ export default function SettingsScreen() {
       <TouchableOpacity style={globalStyles.smallButton} onPress={() => { /* TODO: Add functionality */ }}>
         <Text style={globalStyles.buttonText}>Apply</Text>
       </TouchableOpacity>
-      
+
       <Text style={globalStyles.sectionTitle}>Remove Account</Text>
-      <TextInput style={globalStyles.input} placeholder="Enter email" placeholderTextColor="#888" value={email} onChangeText={setEmail} 
+      <TextInput style={globalStyles.input} placeholder="Enter email" placeholderTextColor="#888" value={email} onChangeText={setEmail}
       />
 
-      <TextInput style={globalStyles.input} placeholder="Enter password" placeholderTextColor="#888" secureTextEntry value={password} onChangeText={setPassword} 
+      <TextInput style={globalStyles.input} placeholder="Enter password" placeholderTextColor="#888" secureTextEntry value={password} onChangeText={setPassword}
       />
 
-<TouchableOpacity style={globalStyles.smallButton} onPress={handleDeleteAccount}>
+      <TouchableOpacity style={globalStyles.smallButton} onPress={handleDeleteAccount}>
         <Text style={globalStyles.buttonText}>Delete Account</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={globalStyles.logoutButton} onPress={handleLogout}> 
+      <TouchableOpacity style={globalStyles.logoutButton} onPress={handleLogout}>
         <Text style={globalStyles.buttonText}>Logout</Text>
       </TouchableOpacity>
     </View>

@@ -1,26 +1,57 @@
 import { globalStyles } from '@/styles/globalStyles';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { database } from '@/firebaseConfig';
 import { ref, onValue, set } from "firebase/database"
-const dbRef = ref(database, 'Score'); // Replace 'your-data-path'
-function Highscore(point) {
-
-  //set(dbRef, { point: point })
-}
-
-Highscore(10)
-
-onValue(dbRef, (snapshot) => {
-
-  const data = snapshot.val();
-
-  console.log(data); // Handle the data received from the database
-
-});
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 
 export default function ScoreScreen() {
+
+  const [user, setUser] = useState<User | null>(null)
+  //console.log(user?.uid);
+
+  useEffect(() => {
+    let getAllKeys = async () => {
+      let keys: readonly string[] = []
+
+      let storedUser
+
+      try {
+        keys = await AsyncStorage.getAllKeys()
+      } catch (e) {
+        // read key error
+      }
+      try {
+        storedUser = await AsyncStorage.getItem(keys[0])
+        storedUser = storedUser != null ? JSON.parse(storedUser) : null
+        setUser(storedUser)
+
+      } catch (e) {
+        // read error
+      }
+
+    }
+    getAllKeys()
+  }, [])
+
+  const dbRef = ref(database, 'Score ' + user?.uid); // Replace 'your-data-path'
+
+  function Highscore(point: number) {
+
+    set(dbRef, { point: point })
+  }
+
+  //Highscore(15)
+
+  onValue(dbRef, (snapshot) => {
+
+    const data = snapshot.val();
+
+    console.log(data); // Handle the data received from the database
+
+  });
+
   return (
     <View style={globalStyles.container}>
       <Text style={globalStyles.title}>Welcome!</Text>
@@ -34,6 +65,7 @@ export default function ScoreScreen() {
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   scoreContainer: {
