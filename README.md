@@ -1,16 +1,44 @@
 # BeatRunner
 
-BeatRunner (työnimi) on ohjelma, joka haastaa käyttäjänsä pysymään lenkillä musiikin tahdissa.
+BeatRunner (Working title) is an app, that challenges users to stay in sync with their running pace to the beat of music.
 
-Ohjelma mittaa juoksijan askelrytmiä ja vertailee sitä käyttäjän valitseman musiikin tempoon, sekä tarvittaessa auttaa osumaan rytmiin. Ajatuksena tässä vaiheessa on, että käyttäjä voi soittaa musiikkia Spotifysta (tai ehkä muusta haluamastaan sovelluksesta). Tarkasti rytmissä pysymisestä palkitaan hyvillä pisteillä, joita voi vertailla tuloslistoilla itsensä ja muiden kanssa. Alustavasti ainakin Android-toteutus, mutta tutkittavaksi myös iPhone.
+The program measures the runner's step rhythm and compares it to the tempo of chosen music. The app comes with pre-installed songs that users can start running to. Staying on beat with the music is rewarded with high scores, which can be compared on leaderboards against others. Initially, the focus of this project is on an Android implementation, but an iPhone version will also be considered.
 
-## Teknologioita
+## Technologies
 
-Alustavasti suunniteltuja teknologioita, joita ohjelmassa tullaan tarvitsemaan
+Preliminary technologies planned for the project:
 
-- Expo kännykkän käyttöliittymä ja kommunikointi puhelimen sensorien kanssa
-- Firebase käyttäjätilien hallintaan ja mahdollisesti tietokantoihin
-- Spotify (Android) SDK musiikin hallintaan
+- Expo for the mobile UI and communication with phone sensors
+- Firebase for user account management, storing high scores etc.
+
+
+## Installation & Setup
+
+#### 1. Prerequisites:
+
+- Node.js installed
+- Expo CLI installed (npm install -g expo-cli)
+
+#### 2. Clone the repository:
+
+`git clone https://github.com/your-repo/beatrunner.git`
+`cd beatrunner`
+
+#### 3. Run the app:
+
+`expo start`
+
+## User Interface
+### User Interface Diagram
+
+![Käyttöliittymäkaavio](./Images/Kayttoliittymakaavio.png)
+
+## Usage
+
+1. Sign up / Log in inside the app
+2. Select a level
+3. Start running
+4. Earn points based on timing and compare scores with others
 
 ---
 
