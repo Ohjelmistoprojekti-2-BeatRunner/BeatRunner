@@ -1,5 +1,6 @@
 import { MusicProvider } from '@/contexts/MusicContext';
 import { StepDetectorProvider } from '@/contexts/StepDetectorContext';
+import { TimerProvider } from '@/contexts/TimerContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
@@ -30,18 +31,20 @@ export default function RootLayout() {
 
     return (
         <MusicProvider>
-            <StepDetectorProvider>
-            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                <Stack>
-                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                    <Stack.Screen name="+not-found" />
-                    <Stack.Screen name="level" options={{ 
-                        headerTitle: "Level" 
-                        }} /> 
-                </Stack>
-                <StatusBar style="auto" />
-            </ThemeProvider>
-            </StepDetectorProvider>
+            <TimerProvider>
+                <StepDetectorProvider>
+                    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                        <Stack>
+                            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                            <Stack.Screen name="+not-found" />
+                            <Stack.Screen name="level" options={{
+                                headerTitle: "Level"
+                            }} />
+                        </Stack>
+                        <StatusBar style="auto" />
+                    </ThemeProvider>
+                </StepDetectorProvider>
+            </TimerProvider>
         </MusicProvider>
     )
 };

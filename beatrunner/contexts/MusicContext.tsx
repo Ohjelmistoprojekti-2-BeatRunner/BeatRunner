@@ -50,8 +50,6 @@ export const MusicProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     useEffect(() => {
         if (player && songPlaying) {
             const interval = setInterval(() => {
-                const currentTime = player.currentTime;
-                setCurrentTime(currentTime); 
                 setCurrentTime(player.currentTime); 
             }, 100); // Update every 100ms
 

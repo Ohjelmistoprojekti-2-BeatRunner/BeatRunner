@@ -3,8 +3,12 @@ import React, { createContext, useContext, useMemo, useState } from 'react';
 interface StepDetectorContextType {
     isDetecting: boolean;
     threshold: number;
+    stepCount: number;
+    tempo: number;
     setIsDetecting: (value: boolean) => void;
     setThreshold: (value: number) => void;
+    setStepCount: (value: number) => void;
+    setTempo: (value: number) => void;
     toggleDetection: () => void;
 }
 
@@ -13,6 +17,8 @@ const StepDetectorContext = createContext<StepDetectorContextType | undefined>(u
 export const StepDetectorProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [isDetecting, setIsDetecting] = useState(false);
     const [threshold, setThreshold] = useState(1.2);
+        const [stepCount, setStepCount] = useState(0);
+        const [tempo, setTempo] = useState(0);
 
     const toggleDetection = () => {
         setIsDetecting(prevState => !prevState);
@@ -23,6 +29,10 @@ export const StepDetectorProvider: React.FC<{ children: React.ReactNode }> = ({ 
         setIsDetecting,
         threshold,
         setThreshold,
+        stepCount,
+        setStepCount,
+        tempo,
+        setTempo,
         toggleDetection
     }), [isDetecting, threshold]);
 

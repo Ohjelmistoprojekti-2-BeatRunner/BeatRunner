@@ -1,4 +1,3 @@
-import { useMusicContext } from '@/contexts/MusicContext';
 import { useStepDetector } from '@/contexts/StepDetectorContext';
 import { useMusicCurrentTime } from '@/hooks/useMusicCurrentTime';
 import { globalStyles } from '@/styles/globalStyles';
@@ -15,11 +14,9 @@ interface StepDetectorProps {
 
 const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected }) => {
     // StepDetectorContext variables
-    const { isDetecting, threshold, setThreshold } = useStepDetector();
+    const { isDetecting, threshold, setThreshold, tempo, setTempo, stepCount, setStepCount } = useStepDetector();
     // State variables 
 
-    const [stepCount, setStepCount] = useState(0);
-    const [tempo, setTempo] = useState(0);
     const [sound, setSound] = useState<Audio.Sound | null>(null);
 
     // References for step detection
@@ -67,8 +64,6 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected }) => {
 
     // Start detection
     const startDetection = async () => {
-        // Reset values
-        setStepCount(0);
         setTempo(0);
         stepTimesRef.current = [];
         lastStepTimeRef.current = 0;
@@ -147,7 +142,7 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected }) => {
             lastStepTimeRef.current = stepTime;
 
             // Update step count
-            setStepCount((prevCount: number) => { 
+            setStepCount((prevCount: number) => {  //some ts-problem. I think detector still works
                 const newCount = prevCount + 1;
                 if (onStepDetected) {
                     onStepDetected(newCount, tempo);

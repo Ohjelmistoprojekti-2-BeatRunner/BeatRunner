@@ -6,7 +6,7 @@ import { globalStyles } from '@/styles/globalStyles';
 import { useAudioPlayer } from 'expo-audio';
 
 export default function MusicPlayer() {
-    const { setCurrentTime, setPlayer, audioUri, songPlaying, currentSong } = useMusicContext();
+    const { setPlayer, audioUri, songPlaying, currentSong } = useMusicContext();
 
     const player = useAudioPlayer(audioUri);
 
