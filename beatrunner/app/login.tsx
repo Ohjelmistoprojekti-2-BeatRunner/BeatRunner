@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/firebaseConfig';
 import { globalStyles } from '@/styles/globalStyles';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -12,6 +13,7 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
+
     if (!email || !password) {
       Alert.alert('Error', 'Please enter both email and password');
       return;
@@ -24,6 +26,9 @@ export default function LoginScreen() {
     } catch (error: any) {
       Alert.alert('Login Failed', error.message);
     }
+
+    await AsyncStorage.setItem('userToken', 'yourToken');
+
     setLoading(false);
   };
 
@@ -49,7 +54,7 @@ export default function LoginScreen() {
         <Text style={globalStyles.buttonText}>{loading ? 'Logging in...' : 'Login'}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => router.push('./register')}>
+      <TouchableOpacity onPress={() => router.replace('./register')}>
         <Text style={globalStyles.link}>Don't have an account? Register here</Text>
       </TouchableOpacity>
     </View>

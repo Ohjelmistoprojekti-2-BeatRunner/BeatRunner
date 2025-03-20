@@ -34,7 +34,7 @@ export default function RegisterScreen() {
       <TouchableOpacity style={globalStyles.smallButton} onPress={handleRegister}>
         <Text style={globalStyles.buttonText}>Register</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => router.push('/login')}>
+      <TouchableOpacity onPress={() => router.replace('/login')}>
         <Text style={globalStyles.link}>Already have an account? Login here!</Text>
       </TouchableOpacity>
     </View>
