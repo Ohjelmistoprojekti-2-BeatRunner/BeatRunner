@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/firebaseConfig';
 import { globalStyles } from '@/styles/globalStyles';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -27,7 +27,7 @@ export default function LoginScreen() {
       Alert.alert('Login Failed', error.message);
     }
 
-    await AsyncStorage.setItem('userToken', 'yourToken');
+
 
     setLoading(false);
   };

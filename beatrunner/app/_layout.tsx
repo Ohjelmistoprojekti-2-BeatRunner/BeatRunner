@@ -15,68 +15,95 @@ import { useRouter } from 'expo-router';
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+    const colorScheme = useColorScheme();
+    const [loaded] = useFonts({
+        SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    });
 
-  const [loggedIn, setLoggedIn] = useState(false);
-  const router = useRouter();
 
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        const userToken = await AsyncStorage.getItem('userToken');
-        if (userToken) {
-          setLoggedIn(true);
-        } else {
-          setLoggedIn(false);
+    const router = useRouter();
+
+
+    useEffect(() => {
+        let loggedIn = false
+
+        const checkLoginStatus = async () => {
+            let keys: readonly string[] = []
+
+            try {
+                keys = await AsyncStorage.getAllKeys()
+
+            } catch (e) {
+                console.log(e + " error with keys");
+
+            }
+            try {
+                const userToken = await AsyncStorage.getItem(keys[0]);
+
+
+                if (userToken == "null") {
+                    loggedIn = false
+
+
+                } else if (userToken?.includes("uid")) {
+                    loggedIn = true
+
+                }
+                else {
+                    loggedIn = false
+
+                }
+            } catch (error) {
+                console.log("Error checking login status", error);
+                loggedIn = false
+
+            }
+
+
+            if (loaded && loggedIn == false) {
+
+                router.push("/login")
+
+            }
+        };
+
+        if (loaded) {
+            SplashScreen.hideAsync();
+            checkLoginStatus();
+
+
         }
-      } catch (error) {
-        console.log("Error checking login status", error);
-        setLoggedIn(false);
-      }
-    };
+    }, [loaded]);
 
-    if (loaded) {
-      SplashScreen.hideAsync();
-      checkLoginStatus();
+
+
+    if (!loaded) {
+        return null;
     }
-  }, [loaded]);
 
-  useEffect(() => {
-    if (loaded && !loggedIn) {
-      router.replace('/login');
-    }
-  }, [loggedIn, loaded, router]);
-
-  if (!loaded) {
-    return null;
-  }
-
-  return (
-    <MusicProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-          <Stack.Screen name="level" options={{ headerTitle: "Level" }} />
-          <Stack.Screen name="login" options={{ headerTitle: "Login" }} />
-          <Stack.Screen name="register" options={{ headerTitle: "Register" }} />
-        </Stack>
-        <MusicPlayerIf />
-        <StatusBar style="auto" />
-      </ThemeProvider>
-    </MusicProvider>
-  )
+    return (
+        <MusicProvider>
+            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                <Stack>
+                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                    <Stack.Screen name="+not-found" />
+                    <Stack.Screen name="level" options={{ headerTitle: "Level" }} />
+                    <Stack.Screen name="login" options={{ headerTitle: "Login" }} />
+                    <Stack.Screen name="register" options={{ headerTitle: "Register" }} />
+                </Stack>
+                <MusicPlayerIf />
+                <StatusBar style="auto" />
+            </ThemeProvider>
+        </MusicProvider>
+    )
 };
 
 
 const MusicPlayerIf = () => {
-  const { audioUri } = useMusicContext();
+    const { audioUri } = useMusicContext();
 
-  if (audioUri) {
-    return <MusicPlayerNew />;
-  }
-  return null;
+    if (audioUri) {
+        return <MusicPlayerNew />;
+    }
+    return null;
 }
