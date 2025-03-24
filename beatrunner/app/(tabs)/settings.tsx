@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { globalStyles } from '@/styles/globalStyles';
-import { getAuth, signOut, deleteUser, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
+import { getAuth, signOut, deleteUser, EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth';
 import { router } from 'expo-router';
 
 export default function SettingsScreen() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleLogout = async () => {
     try {
@@ -32,7 +34,6 @@ export default function SettingsScreen() {
       }
 
       const credential = EmailAuthProvider.credential(email, password);
-
       await reauthenticateWithCredential(user, credential);
       await deleteUser(user);
 
@@ -52,16 +53,51 @@ export default function SettingsScreen() {
     }
   };
 
+
+  const handleChangePassword = async () => {
+    try {
+      if (newPassword !== confirmPassword) {
+        Alert.alert('Error', 'New passwords do not match.');
+        return;
+      }
+
+      const auth = getAuth();
+      const user = auth.currentUser;
+
+      if (!user) {
+        Alert.alert('Error', 'No user is logged in.');
+        return;
+      }
+
+      const credential = EmailAuthProvider.credential(user.email!, password);
+      await reauthenticateWithCredential(user, credential);
+
+      await updatePassword(user, newPassword);
+      Alert.alert('Success', 'Password updated successfully.');
+    } catch (error: any) {
+      if (error.code === 'auth/invalid-credential') {
+        Alert.alert('Error', 'Incorrect current password.');
+      } else if (error.code === 'auth/weak-password') {
+        Alert.alert('Error', 'New password is too weak.');
+      } else if (error.code === 'auth/requires-recent-login') {
+        Alert.alert('Error', 'Please log in again before changing your password.');
+      } else {
+        Alert.alert('Error', 'Failed to update password. Please try again.');
+      }
+      console.error(error);
+    }
+  };
+
   return (
     <View style={globalStyles.container}>
       <Text style={globalStyles.title}>Settings</Text>
       <Text style={globalStyles.sectionTitle}>Change Password</Text>
 
-      <TextInput style={globalStyles.input} placeholder="Enter current password" placeholderTextColor="#888" />
-      <TextInput style={globalStyles.input} placeholder="Enter new password" placeholderTextColor="#888" />
-      <TextInput style={globalStyles.input} placeholder="Re-enter new password" placeholderTextColor="#888" />
+      <TextInput style={globalStyles.input} placeholder="Enter current password" placeholderTextColor="#888" secureTextEntry value={password} onChangeText={setPassword}/>
+      <TextInput style={globalStyles.input} placeholder="Enter new password" placeholderTextColor="#888" secureTextEntry value={newPassword} onChangeText={setNewPassword} />
+      <TextInput style={globalStyles.input} placeholder="Re-enter new password" placeholderTextColor="#888" secureTextEntry value={confirmPassword} onChangeText={setConfirmPassword} />
 
-      <TouchableOpacity style={globalStyles.smallButton} onPress={() => { /* TODO: Add functionality */ }}>
+      <TouchableOpacity style={globalStyles.smallButton} onPress={handleChangePassword}>
         <Text style={globalStyles.buttonText}>Apply</Text>
       </TouchableOpacity>
 
