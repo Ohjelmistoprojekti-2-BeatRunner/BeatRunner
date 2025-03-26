@@ -5,6 +5,7 @@ type TimerContextType = {
     startTimer: () => void;
     pauseTimer: () => void;
     resetTimer: () => void;
+    getCurrentTime: () => number;
 };
 
 const TimerContext = createContext<TimerContextType>({
@@ -12,6 +13,7 @@ const TimerContext = createContext<TimerContextType>({
     startTimer: () => {},
     pauseTimer: () => {},
     resetTimer: () => {},
+    getCurrentTime: () => 0,
 });
 
 type TimerProviderProps = {
@@ -23,6 +25,12 @@ export const TimerProvider: React.FC<TimerProviderProps> = ({ children }) => {
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
     const startTimeRef = useRef<number | null>(null);
     const elapsedTimeRef = useRef<number>(0); 
+
+    const getCurrentTime = () => {
+        if (!startTimeRef.current) return time;
+        
+        return Date.now() - startTimeRef.current;
+    };
 
     const startTimer = () => {
         if (!startTimeRef.current) {
@@ -60,6 +68,7 @@ export const TimerProvider: React.FC<TimerProviderProps> = ({ children }) => {
         startTimer,
         pauseTimer,
         resetTimer,
+        getCurrentTime,
     }), [time]);
 
     return (

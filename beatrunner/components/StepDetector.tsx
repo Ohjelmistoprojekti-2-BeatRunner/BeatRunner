@@ -1,26 +1,33 @@
 import { useStepDetector } from '@/contexts/StepDetectorContext';
-import { useMusicCurrentTime } from '@/hooks/useMusicCurrentTime';
+import { useMusicContext } from '@/contexts/MusicContext';
+import { useTimerContext } from '@/contexts/TimerContext'; // Import TimerContext
 import { globalStyles } from '@/styles/globalStyles';
 import Slider from '@react-native-community/slider';
 import { Audio } from 'expo-av';
 import { Accelerometer } from 'expo-sensors';
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Button } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 interface StepDetectorProps {
-    onStepDetected?: (stepCount: number, tempo: number) => void;
+    onStepDetected?: (stepCount: number, tempo: number, timestamp: number) => void;
+    autoStart?: boolean;
 }
 
-const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected }) => {
+const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart = false }) => {
     // StepDetectorContext variables
     const { isDetecting, threshold, setThreshold, tempo, setTempo, stepCount, setStepCount } = useStepDetector();
-    // State variables 
-
     const [sound, setSound] = useState<Audio.Sound | null>(null);
+    const [stepTimestamps, setStepTimestamps] = useState<number[]>([]);
+    const currentTempoRef = useRef<number>(0);
+
+    const localStepCountRef = useRef<number>(0);
+
+    // Get timer from TimerContext
+    const { time, getCurrentTime } = useTimerContext();
 
     // References for step detection
-    const accelerationRef = useRef({ x: 0, y: 0, z: 0 });
+    const accelerationRef = useRef({ x: 0, y: 0, z: 0 }); // Not in use
     const lastStepTimeRef = useRef<number>(0);
     const stepTimesRef = useRef<number[]>([]);
     const isInInactiveStateRef = useRef(false);
@@ -29,19 +36,16 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected }) => {
     // Animated values
     const animatedStepOpacity = useSharedValue(1);
 
-    const currentTime = useMusicCurrentTime().current;
-
     // Load sound effect
     useEffect(() => {
         async function loadSound() {
             try {
                 const { sound } = await Audio.Sound.createAsync(
-                    require('../assets/sounds/step.mp3'),
-                    { shouldPlay: false }
+                    require('@/assets/sounds/step.mp3')
                 );
                 setSound(sound);
             } catch (error) {
-                console.error("Failed to load sound", error);
+                console.error("Error loading sound:", error);
             }
         }
 
@@ -54,104 +58,127 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected }) => {
         };
     }, []);
 
-    useEffect(() => {
+    // Function to toggle step detection
+    const toggleDetection = () => {
         if (isDetecting) {
-            startDetection();
-        } else {
             stopDetection();
+        } else {
+            startDetection();
         }
-    }, [isDetecting]);
+    };
 
-    // Start detection
+    // Start step detection
     const startDetection = async () => {
+        setStepCount(0);
+        localStepCountRef.current = 0;
         setTempo(0);
+        currentTempoRef.current = 0;
         stepTimesRef.current = [];
-        lastStepTimeRef.current = 0;
+        setStepTimestamps([]);
 
-        // Set accelerometer update interval (faster updates)
-        Accelerometer.setUpdateInterval(20); // ~50Hz (20ms)
+        Accelerometer.setUpdateInterval(20); // ~50Hz
 
-        // Subscribe to accelerometer updates
         subscriptionRef.current = Accelerometer.addListener(data => {
-            accelerationRef.current = data;
             processAccelerometerData(data);
         });
     };
 
-    // Stop detection
+    // Stop step detection
     const stopDetection = () => {
         if (subscriptionRef.current) {
             subscriptionRef.current.remove();
+            subscriptionRef.current = null;
         }
     };
 
-    // Process accelerometer data to detect steps
-    const processAccelerometerData = (data: { x: number, y: number, z: number }) => {
-        // Calculate magnitude of acceleration vector
-        const magnitude = Math.sqrt(data.x * data.x + data.y * data.y + data.z * data.z);
+    useEffect(() => {
+        if (autoStart && !subscriptionRef.current) {
+            console.log("Starting step detection due to autoStart");
+            startDetection();
+        } 
+        else if (!autoStart && subscriptionRef.current) {
+            console.log("Stopping step detection due to autoStart becoming false");
+            stopDetection();
+        }
+        
+        return () => {
+            if (subscriptionRef.current) {
+                console.log("Cleaning up step detection on unmount");
+                stopDetection();
+            }
+        };
+    }, [autoStart]);
 
-        // Get current time
+    // Process accelerometer data for step detection
+    const processAccelerometerData = async (data: any) => {
+        const { x, y, z } = data;
+        const magnitude = Math.sqrt(x * x + y * y + z * z);
         const now = Date.now();
 
-        // Check if we're in the inactive state after a step
+        // Check if we're in an inactive state to avoid false positives
         if (isInInactiveStateRef.current) {
-            // Calculate appropriate inactive time based on current tempo
-            const inactiveTime = tempo > 0 ? (60000 / tempo) * 0.5 : 500;
-
-            // If enough time has passed, exit inactive state
-            if (now - lastStepTimeRef.current > inactiveTime) {
+            const inactiveTime = now - lastStepTimeRef.current;
+            const minimumStepInterval = tempo > 0 ? (60000 / tempo) * 0.5 : 200;
+            
+            if (inactiveTime > minimumStepInterval) {
                 isInInactiveStateRef.current = false;
+            } else {
+                return;
             }
-            return;
         }
 
-        // Check if magnitude exceeds threshold (step detected)
         if (magnitude > threshold) {
-            // Flash the step indicator
-            animatedStepOpacity.value = 0;
-            animatedStepOpacity.value = withTiming(1, { duration: 300 });
-
-            // Play sound for feedback
-            if (sound) {
-                sound.replayAsync();
-            }
-
-            // Record step time and calculate intervals
-            const stepTime = now;
-            if (lastStepTimeRef.current > 0) {
-                const interval = stepTime - lastStepTimeRef.current;
-
-                // Only consider reasonable intervals (200ms to 2000ms)
-                if (interval > 200 && interval < 2000) {
-                    stepTimesRef.current.push(interval);
-
-                    // Keep only the last 5 steps for tempo calculation
-                    if (stepTimesRef.current.length > 5) {
-                        stepTimesRef.current.shift();
-                    }
-
-                    // Calculate tempo in steps per minute
-                    if (stepTimesRef.current.length > 1) {
-                        const avgInterval = stepTimesRef.current.reduce((sum, val) => sum + val, 0) / stepTimesRef.current.length;
-                        const calculatedTempo = Math.round(60000 / avgInterval);
-                        setTempo(calculatedTempo);
-                    }
-                }
-            }
-
-            lastStepTimeRef.current = stepTime;
-
-            // Update step count
-            setStepCount((prevCount: number) => {  //some ts-problem. I think detector still works
-                const newCount = prevCount + 1;
-                if (onStepDetected) {
-                    onStepDetected(newCount, tempo);
-                }
-                console.log("currentime, stepdetectorissa: " + currentTime)
-                return newCount;
+            // Animate step indicator
+            animatedStepOpacity.value = withTiming(0.2, { duration: 100 }, () => {
+                animatedStepOpacity.value = withTiming(1, { duration: 100 });
             });
 
-            // Enter inactive state to prevent false positives
+            // Play sound if loaded
+            if (sound) {
+                try {
+                    await sound.replayAsync();
+                } catch (error) {
+                    console.warn("Could not play step sound", error);
+                }
+            }
+
+            // Record timestamp for this step with high precision
+            const preciseTimestamp = getCurrentTime();
+            const newStepTimestamps = [...stepTimestamps, preciseTimestamp];
+            setStepTimestamps(newStepTimestamps);
+
+            // Calculate step intervals and tempo
+            if (lastStepTimeRef.current > 0) {
+                const interval = now - lastStepTimeRef.current;
+                stepTimesRef.current.push(interval);
+
+                // Keep only the last 5 steps for a rolling average
+                if (stepTimesRef.current.length > 5) {
+                    stepTimesRef.current.shift();
+                }
+
+                // Calculate average tempo based on recent steps
+                if (stepTimesRef.current.length > 0) {
+                    const avgInterval = stepTimesRef.current.reduce((sum, val) => sum + val, 0) / stepTimesRef.current.length;
+                    const newTempo = Math.round(60000 / avgInterval);
+                    currentTempoRef.current = newTempo;
+                    setTempo(newTempo);
+                }
+            }
+
+            // Increment local step count reference
+            localStepCountRef.current += 1;
+
+            // Update global step count
+            setStepCount(localStepCountRef.current);
+
+            // Notify parent component if callback provided
+            if (onStepDetected) {
+                onStepDetected(localStepCountRef.current, currentTempoRef.current, preciseTimestamp);
+            }
+
+            // Set inactive state to avoid multiple steps being detected from a single step
+            lastStepTimeRef.current = now;
             isInInactiveStateRef.current = true;
         }
     };
@@ -159,16 +186,13 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected }) => {
     // Animated style for step indicator
     const stepIndicatorStyle = useAnimatedStyle(() => {
         return {
-            opacity: animatedStepOpacity.value,
+            opacity: animatedStepOpacity.value
         };
     });
 
     return (
-        <View >
+        <View>
             <Animated.View style={[styles.stepIndicator, stepIndicatorStyle]} />
-
-            <Text style={globalStyles.contentText}>Step Count: {stepCount}</Text>
-            <Text style={globalStyles.contentText}>Tempo: {tempo} SPM</Text>
 
             <View style={styles.controlsContainer}>
                 <Text style={globalStyles.contentText}>Sensitivity: {threshold.toFixed(2)}</Text>
@@ -188,28 +212,27 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected }) => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        width: '100%',
-        padding: 20,
-        borderRadius: 10,
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-        alignItems: 'center',
-    },
     stepIndicator: {
-        width: 30,
-        height: 30,
-        borderRadius: 15,
+        width: 20,
+        height: 20,
+        borderRadius: 10,
         backgroundColor: '#4CAF50',
-        marginBottom: 20,
+        marginBottom: 10,
+        alignSelf: 'center'
     },
     controlsContainer: {
+        marginTop: 20,
         width: '100%',
-        marginVertical: 20,
+        alignItems: 'center'
     },
     slider: {
-        width: '100%',
-        height: 40,
+        width: '80%',
+        height: 40
     },
+    timestampContainer: {
+        marginTop: 10,
+        alignItems: 'center'
+    }
 });
 
 export default StepDetector;
