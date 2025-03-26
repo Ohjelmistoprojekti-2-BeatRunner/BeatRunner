@@ -22,7 +22,7 @@ export default function LevelScreen() {
             <Text style={globalStyles.title}>{title}</Text>
             <Text style={globalStyles.contentText}>Difficulty: {difficulty}</Text>
             <Text style={globalStyles.contentText}>Calories: {calories}</Text>
-            <Player />
+            <Player bpm={Number(bpm)}/>
 
         </View >
     )

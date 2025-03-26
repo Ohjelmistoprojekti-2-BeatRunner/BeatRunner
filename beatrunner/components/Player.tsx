@@ -8,8 +8,9 @@ import MusicPlayer from './MusicPlayer';
 import StepDetector from './StepDetector';
 import { useMusicContext } from '@/contexts/MusicContext';
 import { useEndGame } from '@/hooks/useEndGame';
+import { useScores } from '@/hooks/useScores';
 
-const Player = () => {
+const Player = ( { bpm }: { bpm: number } ) => {
     const { time, startTimer, pauseTimer, resetTimer } = useTimerContext();
     const [isPlaying, setIsPlaying] = useState(false);
     const [stepTimestamps, setStepTimestamps] = useState<number[]>([]);
@@ -19,6 +20,7 @@ const Player = () => {
     const { songPlaying } = useMusicContext();
     const { startMusicDetector, stopMusicDetector } = useMusicDetector();
     const { endGame } = useEndGame();
+    const { score, calculateStepScore, endLevel } = useScores();
 
     useEffect(() => {
         if (isPlaying) {
@@ -46,6 +48,7 @@ const Player = () => {
 
     const handleStepDetected = (detectedStepCount: number, detectedTempo: number, timestamp: number) => {
         console.log(`Step Count: ${detectedStepCount}, Tempo: ${detectedTempo}, Time: ${(timestamp/1000).toFixed(3)}s`);
+        calculateStepScore(timestamp, bpm);
         setStepCount(detectedStepCount);
         setTempo(detectedTempo);
         setStepTimestamps(prev => [...prev, timestamp]);
@@ -63,6 +66,7 @@ const Player = () => {
                     onPress: () => {
                         stopMusicDetector();
                         pauseTimer();
+                        endLevel();
                         setTimeout(() => {
                             router.back();
                         }, 500);
@@ -91,6 +95,7 @@ const Player = () => {
 
             <Text style={globalStyles.contentText}>Step Count: {stepCount}</Text>
             <Text style={globalStyles.contentText}>Tempo: {tempo} SPM</Text>
+            <Text style={globalStyles.contentText}> Score: {score} points</Text>
 
             <MusicPlayer />
 

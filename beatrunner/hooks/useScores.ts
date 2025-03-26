@@ -5,9 +5,31 @@ export function useScores() {
 const [score, setScore] = useState<number>(0);
 const [lastScores, setLastscores] = useState<number[]>([]);
 
+// Calculate numeric value for how close step is to beat (0 = perfect step, 0.5 = missed step)
+const calculateStepScore = (timeStamp : number, bpm : number) => {
+
+    // How many times beat plays in second
+    const bps = 60 / bpm;
+
+    // Calculate multiplier to result
+    const multiplier = bpm / 60;
+
+    // Calculate how close step is to beat 
+    const result = ((timeStamp/1000) % bps) * multiplier;
+
+    // If result is under 0.5 call calculateScore 1-result
+    if (result < 0.5) {
+        calculateScore(1-result);
+    } else {
+        calculateScore(result);
+    };
+
+};
+
+// Calculate score from stepScore
 const calculateScore = (stepScore: number) => {
 
-    const points: number = stepScore * 100;
+    const points: number = Math.round(stepScore * 100);
 
     setLastscores(prevLastScores => {
         if (points === 100) {
@@ -30,14 +52,15 @@ const calculateScore = (stepScore: number) => {
         }
     });
 
-}
+};
 
+// Reset points 
 const endLevel = () => {
 
     setScore(0);
     setLastscores([]);
-}
+};
 
-return { score, calculateScore, endLevel }
+return { score, calculateStepScore, endLevel };
 
 }
