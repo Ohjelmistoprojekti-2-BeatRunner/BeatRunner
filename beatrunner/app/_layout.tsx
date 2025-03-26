@@ -1,3 +1,7 @@
+import { MusicProvider } from '@/contexts/MusicContext';
+import { StepDetectorProvider } from '@/contexts/StepDetectorContext';
+import { TimerProvider } from '@/contexts/TimerContext';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
@@ -5,9 +9,6 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { MusicProvider, useMusicContext } from '@/contexts/MusicContext';
-import MusicPlayerNew from '@/components/MusicPlayerNew';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -30,25 +31,24 @@ export default function RootLayout() {
 
     return (
         <MusicProvider>
-            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                <Stack>
-                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                    <Stack.Screen name="+not-found" />
-                    <Stack.Screen name="level" options={{ headerTitle: "Level" }} />
-                </Stack>
-                <MusicPlayerIf />
-                <StatusBar style="auto" />
-            </ThemeProvider>
+            <TimerProvider>
+                <StepDetectorProvider>
+                    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                        <Stack>
+                            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                            <Stack.Screen name="+not-found" />
+                            <Stack.Screen name="level" options={{
+                                headerTitle: "Level"
+                            }} />
+                        </Stack>
+                        <StatusBar style="auto" />
+                    </ThemeProvider>
+                </StepDetectorProvider>
+            </TimerProvider>
         </MusicProvider>
     )
 };
 
 
-const MusicPlayerIf = () => {
-    const { audioUri } = useMusicContext(); 
-   
-    if (audioUri) {
-        return <MusicPlayerNew />;
-    }
-    return null; 
-}
+//headerLeft is a way to change back-button in level
+

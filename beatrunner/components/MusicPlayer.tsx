@@ -1,109 +1,83 @@
-import { globalStyles } from "@/styles/globalStyles";
-import { Audio } from "expo-av";
-import React, { useEffect, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useRef } from 'react';
+import { setAudioModeAsync } from 'expo-audio';
+import { StyleSheet, Text, View } from 'react-native';
+import { useMusicContext } from '@/contexts/MusicContext';
+import { globalStyles } from '@/styles/globalStyles';
+import { useAudioPlayer } from 'expo-audio';
 
-type MusicPlayerProps = {
-    id: string;
-};
+export default function MusicPlayer() {
+    const { setPlayer, audioUri, songPlaying, currentSong } = useMusicContext();
 
-export default function MusicPlayer({ id }: MusicPlayerProps) {
+    const player = useAudioPlayer(audioUri);
 
-    const musicFiles: Record<string, any> = {
-        "1": require("../assets/musics/level1.mp3"),
-        "2": require("../assets/musics/level2.mp3"),
-        "3": require("../assets/musics/level3.mp3"),
-        "4": require("../assets/musics/level4.mp3")
-    };
-
-    console.log(id);
-
-    const [sound, setSound] = useState<Audio.Sound | null>(null);
-    const [isPlaying, setIsPlaying] = useState<boolean>(false);
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-
-
-    //handling multiple similar time loadings and problems with too late syncs. (with chatgpt):
+    // Setup audio mode when the component mounts
     useEffect(() => {
-        let isMounted = true;
-        const loadSound = async () => {
-            if (isLoading) return; 
-            setIsLoading(true);
+        async function setupAudioMode() {
+            await setAudioModeAsync({
+                allowsRecording: false,
+                playsInSilentMode: true,
+                shouldPlayInBackground: true,
+                shouldRouteThroughEarpiece: true,
+            });
+        }
+        setupAudioMode();
+    }, []);
 
-            if (sound) {
-                await sound.unloadAsync();
-                setSound(null);
-            }
-
-            const source = musicFiles[id];
-            if (!source) {
-                console.error(`File "${id}" not found`);
-                setIsLoading(false);
-                return;
-            }
-
-            try {
-                const { sound: newSound } = await Audio.Sound.createAsync(source);
-                if (isMounted) {
-                    setSound(newSound);
-                }
-            } catch (error) {
-                console.error(error);
-            } finally {
-                if (isMounted) {
-                    setIsLoading(false);
-                }
-            }
-        };
-
-        loadSound();
-
-        return () => {
-            isMounted = false;
-        };
-    }, [id]);
-
+    
     useEffect(() => {
-        return () => {
-            if (sound) {
-                sound.unloadAsync();
-            }
-        };
-    }, [sound]);
+        setPlayer(player); 
+    }, [player]);
 
-
-    const playPauseSound = async () => {
-        if (sound) {
-            const status = (await sound.getStatusAsync());
-            if (status.isLoaded) {
-                if (isPlaying) {
-                    await sound.pauseAsync();
-                } else {
-                    await sound.playAsync();
-                }
-                setIsPlaying(!isPlaying);
-            }
-        } else {
-            const source = musicFiles[id];
-            if (!source) {
-                console.error(`File with id ${id} not found`);
-                return;
-            }
-            const { sound } = await Audio.Sound.createAsync(
-                source,
-                { shouldPlay: true }
-            );
-            setSound(sound);
-            setIsPlaying(true);
+    const startMusic = async () => {
+        if (player) {
+            player.play();
         }
     };
 
+    const stopMusic = async () => {
+        if (player) {
+            player.pause();
+            player.remove();
+        }
+    };
+
+    useEffect(() => {
+        if (audioUri && songPlaying) {
+            startMusic();
+        } else {
+            stopMusic();
+        }
+    }, [audioUri, songPlaying]);
+
     return (
-        <View style={{ padding: 20 }}>
-            <TouchableOpacity style={globalStyles.button} onPress={playPauseSound}>
-                <Text style={globalStyles.buttonText}>{isPlaying ? "Pause" : "Start running"}</Text>
-            </TouchableOpacity>
+        <View style={globalStyles.contentContainer}>
+            <View style={styles.controls}>
+                <Text style={globalStyles.buttonText}>
+                    {songPlaying ? currentSong : ''}
+                </Text>
+                <Text style={globalStyles.buttonText}>
+                    {songPlaying ? 'Music playing' : 'Paused'}
+                </Text>
+            </View>
         </View>
     );
 }
 
+const styles = StyleSheet.create({
+    songDetails: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
+    },
+    songInfo: {
+        marginLeft: 10,
+    },
+    songTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#fff',
+    },
+    controls: {
+        paddingHorizontal: 10,
+    },
+});
