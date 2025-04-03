@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import { database } from '@/firebaseConfig';
-import { ref, onValue, set } from "firebase/database"
+import { ref, onValue, set, push } from "firebase/database"
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export function useScores() {
@@ -60,43 +60,29 @@ export function useScores() {
 
     // Getting user uid and storing points to db
     const [user, setUser] = useState<User | null>(null)
-    // Gets key from asyncstorage and stores user info
+    // Gets user info from auth
     useEffect(() => {
-        let getAllKeys = async () => {
-            let keys: readonly string[] = []
+        const auth = getAuth();
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+        });
 
-            let storedUser
+        return () => unsubscribe();
+    }, []);
 
-            try {
-                keys = await AsyncStorage.getAllKeys()
-            } catch (e) {
-                console.log("Some thing went wrong while getting keys " + e);
 
-            }
-            try {
-                storedUser = await AsyncStorage.getItem(keys[0])
-                storedUser = storedUser != null ? JSON.parse(storedUser) : null
-                setUser(storedUser)
+    const dbRef = ref(database, 'User ' + user?.uid);
 
-            } catch (e) {
-                console.log("Some thing went wrong while getting user info " + e);
-            }
 
-        }
-        getAllKeys()
-    }, [])
+    function Sendrunscore(point: number) {
 
-    const dbRef = ref(database, 'User ' + user?.uid); // Replace 'your-data-path'
-
-    function Runscore(point: number) {
-
-        set(dbRef, { point: point })
+        push(dbRef, { point: point })
     }
 
 
     // Reset points 
     const endLevel = () => {
-        Runscore(score)
+        Sendrunscore(score)
         setScore(0);
         setLastscores([]);
     };
