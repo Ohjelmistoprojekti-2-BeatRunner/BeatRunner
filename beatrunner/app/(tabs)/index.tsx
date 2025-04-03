@@ -35,7 +35,7 @@ export default function HomeScreen() {
 
     const Item = ({ id, title, bpm, difficulty, calories }: Level) => (
         <View style={{ margin: 10, width: 300 }}>
-            <TouchableOpacity style={globalStyles.button} onPress={() => router.navigate({  //if not in (tabs), need to be navigate instead of push
+            <TouchableOpacity style={globalStyles.button} onPress={() => router.replace({  //if not in (tabs), need to be navigate instead of push
                 pathname: "/level",
                 params: { id, title, bpm, difficulty, calories }
             })}>

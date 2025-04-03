@@ -10,12 +10,13 @@ import { useMusicContext } from '@/contexts/MusicContext';
 import { useEndGame } from '@/hooks/useEndGame';
 import { useScores } from '@/hooks/useScores';
 
-const Player = ( { bpm }: { bpm: number } ) => {
+const Player = ({ bpm }: { bpm: number }) => {
     const { time, startTimer, pauseTimer, resetTimer } = useTimerContext();
     const [isPlaying, setIsPlaying] = useState(false);
     const [stepTimestamps, setStepTimestamps] = useState<number[]>([]);
     const [stepCount, setStepCount] = useState(0);
     const [tempo, setTempo] = useState(0);
+    const [started, setStarted] = useState(false);
 
     const { songPlaying } = useMusicContext();
     const { startMusicDetector, stopMusicDetector } = useMusicDetector();
@@ -24,19 +25,23 @@ const Player = ( { bpm }: { bpm: number } ) => {
 
     useEffect(() => {
         if (isPlaying) {
-            startTimer(); 
+            startTimer();
         } else {
-            pauseTimer(); 
+            pauseTimer();
         }
 
         return () => {
-            pauseTimer(); 
+            pauseTimer();
         };
     }, [isPlaying, startTimer, pauseTimer]);
 
     const togglePlayPause = () => {
         setIsPlaying((prev) => !prev);
-    
+
+        if (started === false) {
+            setStarted(true);
+        }
+        
         InteractionManager.runAfterInteractions(() => {
             if (!isPlaying) {
                 startMusicDetector();
@@ -47,7 +52,7 @@ const Player = ( { bpm }: { bpm: number } ) => {
     };
 
     const handleStepDetected = (detectedStepCount: number, detectedTempo: number, timestamp: number) => {
-        console.log(`Step Count: ${detectedStepCount}, Tempo: ${detectedTempo}, Time: ${(timestamp/1000).toFixed(3)}s`);
+        console.log(`Step Count: ${detectedStepCount}, Tempo: ${detectedTempo}, Time: ${(timestamp / 1000).toFixed(3)}s`);
         calculateStepScore(timestamp, bpm);
         setStepCount(detectedStepCount);
         setTempo(detectedTempo);
@@ -65,10 +70,10 @@ const Player = ( { bpm }: { bpm: number } ) => {
                     text: "Exit",
                     onPress: () => {
                         stopMusicDetector();
-                        pauseTimer();
+                        resetTimer();
                         endLevel();
                         setTimeout(() => {
-                            router.back();
+                            router.replace({ pathname: "/(tabs)" })
                         }, 500);
                     }
                 }
@@ -105,11 +110,13 @@ const Player = ( { bpm }: { bpm: number } ) => {
                 color="#4CAF50"
             />
 
-            <Button
-                title={'End game'}
-                onPress={endGame}
-                color="#4CAF50"
-            />
+            {started && (
+                <Button
+                    title={'End game'}
+                    onPress={askBeforeExit}
+                    color="#4CAF50"
+                />
+            )}
 
             <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold', marginVertical: 10 }}>
                 Timer: {(time / 1000).toFixed(2)} s
@@ -120,14 +127,14 @@ const Player = ( { bpm }: { bpm: number } ) => {
                     {stepTimestamps.length > 0 ? (
                         stepTimestamps.slice(-5).map((timestamp, index) => (
                             <Text key={index} style={styles.timestampText}>
-                                Step {stepTimestamps.length - 5 + index + 1}: {(timestamp/1000).toFixed(3)}s
+                                Step {stepTimestamps.length - 5 + index + 1}: {(timestamp / 1000).toFixed(3)}s
                             </Text>
                         ))
                     ) : (
                         <Text style={styles.noTimestampsText}>No steps detected yet</Text>
                     )}
                 </ScrollView>
-            </View> 
+            </View>
         </View>
     );
 };

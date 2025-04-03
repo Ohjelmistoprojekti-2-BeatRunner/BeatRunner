@@ -105,11 +105,3 @@ export default function RootLayout() {
 };
 
 
-const MusicPlayerIf = () => {
-    const { audioUri } = useMusicContext();
-
-    if (audioUri) {
-        return <MusicPlayerNew />;
-    }
-    return null;
-}
