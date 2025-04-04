@@ -4,7 +4,6 @@ interface Song {
     id: number;
     name: string;
     bpm: number;
-    uri: string;
 }
 
 interface LevelContextType {
@@ -18,9 +17,9 @@ const LevelContext = createContext<LevelContextType | undefined>(undefined);
 export const LevelProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [currentLevel, setCurrentLevel] = useState<number>(1);
     const [levelSongs, setLevelSongs] = useState<Song[]>([
-        { id: 1, name: "Song One", bpm: 147, uri: "song1_uri" },
-        { id: 2, name: "Song Two", bpm: 150, uri: "song2_uri" },
-        { id: 3, name: "Song Three", bpm: 155, uri: "song3_uri" },
+        { id: 1, name: "Song One", bpm: 147 },
+        { id: 2, name: "Song Two", bpm: 150 },
+        { id: 3, name: "Song Three", bpm: 155 },
     ]);
 
     return (

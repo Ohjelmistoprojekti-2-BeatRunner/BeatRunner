@@ -4,14 +4,17 @@ import { globalStyles } from '@/styles/globalStyles';
 import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useScores } from '@/hooks/useScores';
 
 
 export default function MusicPlayer() {
     const { setPlayer, audioUri, songPlaying, currentSongId, setCurrentSongId, setSongBpm } = useMusicContext();
     const { levelSongs } = useLevelContext();
 
-    const player = useAudioPlayer(audioUri, 1000);
-    const status = useAudioPlayerStatus(player);
+    const player = useAudioPlayer(audioUri ? audioUri : '', 1000);
+    const status = useAudioPlayerStatus(player); 
+
+    const { endLevel } = useScores();
 
     // Setup audio mode when the component mounts
     useEffect(() => {
@@ -35,7 +38,7 @@ export default function MusicPlayer() {
 
     useEffect(() => {
         setPlayer(player);
-    }, [player]);
+    }, [audioUri]);
 
     const startMusic = async () => {
         if (player) {
@@ -43,36 +46,47 @@ export default function MusicPlayer() {
         }
     };
 
+    // checking if song finished
     useEffect(() => {
         if (status?.didJustFinish) {
             handleNextSong(); 
         }
     }, [status]);
 
-    const handleNextSong = () => {
+    // handling next song or end of playlist
+    const handleNextSong = async () => {
         if (!currentSongId) return;
-
-        const currentIndex = currentSongId;
-        const nextIndex = (currentIndex + 1) % levelSongs.length; // Loop back to the first song if at the end
+    
+        const currentIndex = levelSongs.findIndex(song => song.id === currentSongId);
+        const nextIndex = (currentIndex + 1) % levelSongs.length; 
         const nextSong = levelSongs[nextIndex];
+        await stopMusic(); 
+        setPlayer(null); // if it aint broke, dont fix it. 
 
-        setCurrentSongId(nextSong.id);
-        setSongBpm(nextSong.bpm);
+        if (nextIndex === 0) {
+            setTimeout(() => {
+                endLevel();  
+            }, 300);
+        } else {   
+            setTimeout(() => {
+                setCurrentSongId(nextSong.id);
+                setSongBpm(nextSong.bpm);
+            }, 300);
+        }
     };
 
     const stopMusic = async () => {
-        if (player) {
+        if (player && player.playing) {
             await player.pause();
-            await player.remove();
         }
     };
 
     useEffect(() => {
-        console.log("hgd")
-        if (audioUri && songPlaying) {
-            startMusic();
-        } else {
+        if (!audioUri || !songPlaying) {
             stopMusic();
+        } else {
+            console.log("Starting new song:", audioUri);
+            player.play(); 
         }
     }, [audioUri, songPlaying]);
 
