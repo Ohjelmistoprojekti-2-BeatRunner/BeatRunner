@@ -9,7 +9,7 @@ import MusicPlayer from './MusicPlayer';
 import StepDetector from './StepDetector';
 import { useMusicContext } from '@/contexts/MusicContext';
 
-const Player = () => {
+const Player = ({ songs }: { songs: string[] }) => {
     const { time, startTimer, pauseTimer, resetTimer } = useTimerContext();
     const [isPlaying, setIsPlaying] = useState(false);
     const [stepTimestamps, setStepTimestamps] = useState<number[]>([]);
@@ -17,7 +17,7 @@ const Player = () => {
     const [tempo, setTempo] = useState(0);
     const [started, setStarted] = useState(false);
 
-    const { songBpm } = useMusicContext();
+    const { songBpm, levelEnd, setLevelEnd } = useMusicContext();
 
     const { startMusicDetector, stopMusicDetector } = useMusicDetector();
     const { score, calculateStepScore, endLevel } = useScores();
@@ -40,7 +40,7 @@ const Player = () => {
         if (started === false) {
             setStarted(true);
         }
-        
+
         InteractionManager.runAfterInteractions(() => {
             if (!isPlaying) {
                 startMusicDetector();
@@ -80,8 +80,37 @@ const Player = () => {
         );
     };
 
+    const gameEnd = () => {
+        Alert.alert(
+            "Congratulations! Level passed.",
+            `Your score was: ${score}`,
+            [
+                {
+                    text: "Exit",
+                    onPress: () => {
+                        resetTimer();
+                        setLevelEnd(false);
+                        endLevel();
+                        setTimeout(() => {
+                            router.replace({ pathname: "/(tabs)" })
+                        }, 500);
+                    }
+                }
+            ]
+        );
+    };
+
+    useEffect(() => {
+        if (levelEnd) {
+            stopMusicDetector();
+            gameEnd();
+        }
+    }, [levelEnd]);
+
+
     useEffect(() => {
         const backAction = () => {
+            pauseTimer();
             askBeforeExit();
             return true;
         };
@@ -103,7 +132,7 @@ const Player = () => {
 
             <Text style={globalStyles.contentText}> Songs bpm: {songBpm} </Text>
 
-            <MusicPlayer />
+            <MusicPlayer songs={songs} />
 
             <Button
                 title={isPlaying ? 'Pause Both' : 'Play Both'}

@@ -8,7 +8,7 @@ import { Text, View } from 'react-native';
 
 export default function LevelScreen() {
 
-    const { id, title, levelSongs, difficulty, calories } = useLocalSearchParams();
+    const { id, title, difficulty, calories, songs } = useLocalSearchParams();
 
 
 
@@ -17,7 +17,7 @@ export default function LevelScreen() {
             <Text style={globalStyles.title}>{title}</Text>
             <Text style={globalStyles.contentText}>Difficulty: {difficulty}</Text>
             <Text style={globalStyles.contentText}>Calories: {calories}</Text>
-            <Player />
+            <Player songs={Array.isArray(songs) ? songs : [songs]}/>
 
         </View >
     )

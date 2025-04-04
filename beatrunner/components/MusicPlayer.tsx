@@ -2,19 +2,52 @@ import { useLevelContext } from '@/contexts/LevelContext';
 import { useMusicContext } from '@/contexts/MusicContext';
 import { globalStyles } from '@/styles/globalStyles';
 import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useScores } from '@/hooks/useScores';
+import { useDatabase } from '@/hooks/useDatabase';
+import { router } from 'expo-router';
 
+interface Song {
+    id: string;
+    name: string;
+    bpm: number;
+}
 
-export default function MusicPlayer() {
-    const { setPlayer, audioUri, songPlaying, currentSongId, setCurrentSongId, setSongBpm } = useMusicContext();
-    const { levelSongs } = useLevelContext();
+export default function MusicPlayer({ songs }: { songs: string[] }) {
+
+    const [levelSongs, setLevelSongs] = useState<Song[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const { setPlayer, audioUri, songPlaying, currentSongId, setCurrentSongId, setSongBpm, setLevelEnd, levelEnd } = useMusicContext();
 
     const player = useAudioPlayer(audioUri ? audioUri : '', 1000);
-    const status = useAudioPlayerStatus(player); 
+    const status = useAudioPlayerStatus(player);
 
-    const { endLevel } = useScores();
+    const { fetchSongs } = useDatabase();
+
+    useEffect(() => {
+        const fetchLevelSongs = async () => {
+            try {
+                const data = await fetchSongs(songs);
+                setLevelSongs(data);
+            } catch (error) {
+                console.error("Error loading songs: ", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchLevelSongs();
+    }, [songs]);
+
+    useEffect(() => {
+        console.log("Level Songs:", levelSongs);
+    }, [levelSongs]);
+    
+    useEffect(() => {
+        console.log("Current Song ID:", currentSongId);
+    }, [currentSongId]);
 
     // Setup audio mode when the component mounts
     useEffect(() => {
@@ -31,8 +64,8 @@ export default function MusicPlayer() {
 
     useEffect(() => {
         if (levelSongs.length > 0) {
-            setCurrentSongId(levelSongs[0].id);
-            setSongBpm(levelSongs[0].bpm); 
+            setCurrentSongId(Number(levelSongs[0].id));
+            setSongBpm(levelSongs[0].bpm);
         }
     }, [levelSongs]);
 
@@ -49,27 +82,29 @@ export default function MusicPlayer() {
     // checking if song finished
     useEffect(() => {
         if (status?.didJustFinish) {
-            handleNextSong(); 
+            handleNextSong();
         }
     }, [status]);
+
 
     // handling next song or end of playlist
     const handleNextSong = async () => {
         if (!currentSongId) return;
-    
-        const currentIndex = levelSongs.findIndex(song => song.id === currentSongId);
-        const nextIndex = (currentIndex + 1) % levelSongs.length; 
+
+        console.log(currentSongId);
+        const currentIndex = levelSongs.findIndex(song => Number(song.id) === currentSongId);
+        const nextIndex = (currentIndex + 1) % levelSongs.length;
         const nextSong = levelSongs[nextIndex];
-        await stopMusic(); 
+        await stopMusic();
         setPlayer(null); // if it aint broke, dont fix it. 
 
-        if (nextIndex === 0) {
+        if (nextIndex === 0 && !levelEnd) {
             setTimeout(() => {
-                endLevel();  
+                setLevelEnd(true);
             }, 300);
-        } else {   
+        } else {
             setTimeout(() => {
-                setCurrentSongId(nextSong.id);
+                setCurrentSongId(Number(nextSong.id));
                 setSongBpm(nextSong.bpm);
             }, 300);
         }
@@ -86,7 +121,7 @@ export default function MusicPlayer() {
             stopMusic();
         } else {
             console.log("Starting new song:", audioUri);
-            player.play(); 
+            player.play();
         }
     }, [audioUri, songPlaying]);
 

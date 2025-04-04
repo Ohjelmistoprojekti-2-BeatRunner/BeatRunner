@@ -4,12 +4,14 @@ import { musicFiles } from '@/assets/musics/MusicFiles';
 
 interface MusicContextType {
     player: AudioPlayer | null;
-    setPlayer: (player: AudioPlayer) => void;
+    setPlayer: (player: AudioPlayer | null) => void;
     currentTimeRef: React.MutableRefObject<number>;
     currentTime: number;
     setCurrentTime: (time: number) => void;
     songBpm: number;
     setSongBpm: (time: number) => void;
+    levelEnd: boolean;
+    setLevelEnd: (levelend: boolean) => void;
     currentSongId: number | null;
     setCurrentSongId: (songId: number) => void;
     audioUri: string | null;
@@ -25,6 +27,7 @@ export const MusicProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const [player, setPlayer] = useState<AudioPlayer | null>(null);
     const [currentTime, setCurrentTime] = useState<number>(0);
     const [songBpm, setSongBpm] = useState<number>(0);
+    const [levelEnd, setLevelEnd] = useState<boolean>(false);
     const [currentSongId, setCurrentSongId] = useState<number | null>(null);
     const [audioUri, setAudioUri] = useState<string | null>(null)
     const [songPlaying, setSongPlaying] = useState<boolean>(false);
@@ -70,11 +73,12 @@ export const MusicProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         setAudioUri,
         songBpm,
         setSongBpm,
+        levelEnd,
+        setLevelEnd,
         songPlaying,
         setSongPlaying,
         toggleMusic
-    }), [currentSongId, audioUri, songPlaying]);
-
+    }), [player, currentTime, currentSongId, audioUri, songBpm, levelEnd, songPlaying]);
     return (
         <MusicContext.Provider value={value}>
             {children}

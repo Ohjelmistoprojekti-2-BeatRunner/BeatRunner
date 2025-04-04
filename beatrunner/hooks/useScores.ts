@@ -1,15 +1,10 @@
-import { useTimerContext } from '@/contexts/TimerContext';
 import { database } from '@/firebaseConfig';
-import { router } from 'expo-router';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import { push, ref } from "firebase/database";
 import { useEffect, useState } from 'react';
-import { useMusicDetector } from './useMusicDetector';
+import { useMusicContext } from '@/contexts/MusicContext';
 
 export function useScores() {
-
-    const { time, startTimer, pauseTimer, resetTimer } = useTimerContext();
-    const { startMusicDetector, stopMusicDetector } = useMusicDetector();
 
     const [score, setScore] = useState<number>(0);
     const [lastScores, setLastscores] = useState<number[]>([]);
@@ -87,15 +82,9 @@ export function useScores() {
 
     // end level and Reset points 
     const endLevel = () => {
-        stopMusicDetector();
         Sendrunscore(score)
         setScore(0);
         setLastscores([]);
-        resetTimer();
-        setTimeout(() => {
-            router.replace({ pathname: "/(tabs)" })
-        }, 500);
-
     };
 
     return { score, calculateStepScore, endLevel };
