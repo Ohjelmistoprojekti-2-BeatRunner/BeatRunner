@@ -1,12 +1,6 @@
 import { AudioPlayer } from 'expo-audio';
 import React, { createContext, useContext, useState, ReactNode, useMemo, useEffect, useRef } from 'react';
-
-const musicFiles: Record<string, any> = {
-    "1": require("../assets/musics/level1.mp3"),
-    "2": require("../assets/musics/level2.mp3"),
-    "3": require("../assets/musics/level3.mp3"),
-    "4": require("../assets/musics/level4.mp3"),
-};
+import { musicFiles } from '@/assets/musics/MusicFiles';
 
 interface MusicContextType {
     player: AudioPlayer | null;
@@ -14,8 +8,10 @@ interface MusicContextType {
     currentTimeRef: React.MutableRefObject<number>;
     currentTime: number;
     setCurrentTime: (time: number) => void;
-    currentSong: string | null;
-    setCurrentSong: (songName: string) => void;
+    songBpm: number;
+    setSongBpm: (time: number) => void;
+    currentSongId: number | null;
+    setCurrentSongId: (songId: number) => void;
     audioUri: string | null;
     setAudioUri: (uri: string) => void;
     songPlaying: boolean;
@@ -28,19 +24,20 @@ const MusicContext = createContext<MusicContextType | undefined>(undefined);
 export const MusicProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [player, setPlayer] = useState<AudioPlayer | null>(null);
     const [currentTime, setCurrentTime] = useState<number>(0);
-    const [currentSong, setCurrentSong] = useState<string | null>(null);
+    const [songBpm, setSongBpm] = useState<number>(0);
+    const [currentSongId, setCurrentSongId] = useState<number | null>(null);
     const [audioUri, setAudioUri] = useState<string | null>(null)
     const [songPlaying, setSongPlaying] = useState<boolean>(false);
 
     const currentTimeRef = useRef<number>(0);
 
-    const updateAudioUri = (songName: string) => {
-        setAudioUri(musicFiles[songName]);
+    const updateAudioUri = (songId: number) => {
+        setAudioUri(musicFiles[songId]);
     };
 
-    const handleSongSelection = (songName: string) => {
-        setCurrentSong(songName);
-        updateAudioUri(songName);
+    const handleSongSelection = (songId: number) => {
+        setCurrentSongId(songId);
+        updateAudioUri(songId);
     };
 
     useEffect(() => {
@@ -67,14 +64,16 @@ export const MusicProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         currentTimeRef,
         currentTime,
         setCurrentTime,
-        currentSong,
-        setCurrentSong: handleSongSelection,
+        currentSongId,
+        setCurrentSongId: handleSongSelection,
         audioUri,
         setAudioUri,
+        songBpm,
+        setSongBpm,
         songPlaying,
         setSongPlaying,
         toggleMusic
-    }), [currentSong, audioUri, songPlaying]);
+    }), [currentSongId, audioUri, songPlaying]);
 
     return (
         <MusicContext.Provider value={value}>

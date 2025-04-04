@@ -1,14 +1,17 @@
-import React, { useEffect, useRef } from 'react';
-import { setAudioModeAsync } from 'expo-audio';
-import { StyleSheet, Text, View } from 'react-native';
+import { useLevelContext } from '@/contexts/LevelContext';
 import { useMusicContext } from '@/contexts/MusicContext';
 import { globalStyles } from '@/styles/globalStyles';
-import { useAudioPlayer } from 'expo-audio';
+import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+import React, { useEffect } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+
 
 export default function MusicPlayer() {
-    const { setPlayer, audioUri, songPlaying, currentSong } = useMusicContext();
+    const { setPlayer, audioUri, songPlaying, currentSongId, setCurrentSongId, setSongBpm } = useMusicContext();
+    const { levelSongs } = useLevelContext();
 
-    const player = useAudioPlayer(audioUri);
+    const player = useAudioPlayer(audioUri, 1000);
+    const status = useAudioPlayerStatus(player);
 
     // Setup audio mode when the component mounts
     useEffect(() => {
@@ -23,9 +26,15 @@ export default function MusicPlayer() {
         setupAudioMode();
     }, []);
 
-    
     useEffect(() => {
-        setPlayer(player); 
+        if (levelSongs.length > 0) {
+            setCurrentSongId(levelSongs[0].id);
+            setSongBpm(levelSongs[0].bpm); 
+        }
+    }, [levelSongs]);
+
+    useEffect(() => {
+        setPlayer(player);
     }, [player]);
 
     const startMusic = async () => {
@@ -34,14 +43,32 @@ export default function MusicPlayer() {
         }
     };
 
+    useEffect(() => {
+        if (status?.didJustFinish) {
+            handleNextSong(); 
+        }
+    }, [status]);
+
+    const handleNextSong = () => {
+        if (!currentSongId) return;
+
+        const currentIndex = currentSongId;
+        const nextIndex = (currentIndex + 1) % levelSongs.length; // Loop back to the first song if at the end
+        const nextSong = levelSongs[nextIndex];
+
+        setCurrentSongId(nextSong.id);
+        setSongBpm(nextSong.bpm);
+    };
+
     const stopMusic = async () => {
         if (player) {
-            player.pause();
-            player.remove();
+            await player.pause();
+            await player.remove();
         }
     };
 
     useEffect(() => {
+        console.log("hgd")
         if (audioUri && songPlaying) {
             startMusic();
         } else {
@@ -53,7 +80,7 @@ export default function MusicPlayer() {
         <View style={globalStyles.contentContainer}>
             <View style={styles.controls}>
                 <Text style={globalStyles.buttonText}>
-                    {songPlaying ? currentSong : ''}
+                    {songPlaying ? currentSongId : ''}
                 </Text>
                 <Text style={globalStyles.buttonText}>
                     {songPlaying ? 'Music playing' : 'Paused'}

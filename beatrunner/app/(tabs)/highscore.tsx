@@ -14,24 +14,30 @@ export default function ScoreScreen() {
   useEffect(() => {
     let getAllKeys = async () => {
       let keys: readonly string[] = []
-
       let storedUser
-
+  
       try {
         keys = await AsyncStorage.getAllKeys()
       } catch (e) {
-        // read key error
+        // Handle error reading keys
+        console.error('Error getting keys:', e)
       }
-      try {
-        storedUser = await AsyncStorage.getItem(keys[0])
-        storedUser = storedUser != null ? JSON.parse(storedUser) : null
-        setUser(storedUser)
-
-      } catch (e) {
-        // read error
+  
+      // Check if keys is not empty before proceeding
+      if (keys.length > 0) {
+        try {
+          storedUser = await AsyncStorage.getItem(keys[0])
+          storedUser = storedUser != null ? JSON.parse(storedUser) : null
+          setUser(storedUser)
+        } catch (e) {
+          // Handle error reading the stored user data
+          console.error('Error getting user data:', e)
+        }
+      } else {
+        console.warn('No keys found in AsyncStorage.')
       }
-
     }
+  
     getAllKeys()
   }, [])
 
