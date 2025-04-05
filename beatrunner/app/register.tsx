@@ -27,7 +27,17 @@ export default function RegisterScreen() {
       setUserId(user.uid);
       setModalVisible(true);
     } catch (error: any) {
-      Alert.alert('Registration Failed', error.message);
+      let errorMessage = 'An unexpected error occurred. Please try again.';
+  
+      if (error.code === 'auth/invalid-email') {
+        errorMessage = 'The email address you entered is not valid. Please check and try again.';
+      } else if (error.code === 'auth/email-already-in-use') {
+        errorMessage = 'This email is already registered. Please use a different email address.';
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = 'Your password is too weak. Please choose a stronger password.';
+      }
+  
+      Alert.alert('Registration Failed', errorMessage, [{ text: 'OK' }]);
     }
   };
   
