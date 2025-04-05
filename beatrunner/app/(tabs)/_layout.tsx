@@ -4,16 +4,28 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 import { Drawer } from 'expo-router/drawer';
 import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/firebaseConfig';
 import { globalStyles } from '@/styles/globalStyles';
 
 function DrawerTitleLogo(props: any) {
   const titleColor = useThemeColor({ light: 'black', dark: 'white' }, 'text');
   const [user, setUser] = useState<User | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
 
   useEffect(() => {
     const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+
+      if (currentUser) {
+        const userDocRef = doc(db, 'users', currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+          setUsername(userDoc.data()?.username || null);
+        }
+      }
     });
 
     return () => unsubscribe();
@@ -25,7 +37,9 @@ function DrawerTitleLogo(props: any) {
       {user ? (
         <View>
           <Text style={[globalStyles.contentText, { color: titleColor }]}>Logged in as:</Text>
-          <Text style={[globalStyles.contentText, { color: titleColor }]}>{user.email}</Text>
+          <Text style={[globalStyles.contentText, { color: titleColor }]}>
+            {username ? username : user.email} 
+          </Text>
         </View>
       ) : (
         <Text style={[globalStyles.contentText, { color: titleColor }]}>Not logged in</Text>
