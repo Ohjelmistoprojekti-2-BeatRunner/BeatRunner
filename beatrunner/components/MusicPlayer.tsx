@@ -1,12 +1,10 @@
-import { useLevelContext } from '@/contexts/LevelContext';
 import { useMusicContext } from '@/contexts/MusicContext';
 import { globalStyles } from '@/styles/globalStyles';
 import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { useScores } from '@/hooks/useScores';
 import { useDatabase } from '@/hooks/useDatabase';
-import { router } from 'expo-router';
+import { useTimerContext } from '@/contexts/TimerContext';
 
 interface Song {
     id: string;
@@ -20,6 +18,7 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
     const [loading, setLoading] = useState(true);
 
     const { setPlayer, audioUri, songPlaying, currentSongId, setCurrentSongId, setSongBpm, setLevelEnd, levelEnd } = useMusicContext();
+    const { resetTimer } = useTimerContext();
 
     const player = useAudioPlayer(audioUri ? audioUri : '', 1000);
     const status = useAudioPlayerStatus(player);
@@ -73,11 +72,6 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
         setPlayer(player);
     }, [audioUri]);
 
-    const startMusic = async () => {
-        if (player) {
-            player.play();
-        }
-    };
 
     // checking if song finished
     useEffect(() => {
@@ -97,6 +91,7 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
         const nextSong = levelSongs[nextIndex];
         await stopMusic();
         setPlayer(null); // if it aint broke, dont fix it. 
+        resetTimer();
 
         if (nextIndex === 0 && !levelEnd) {
             setTimeout(() => {
