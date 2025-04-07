@@ -42,16 +42,13 @@ export default function ScoreScreen() {
       //console.log(data); // Handle the data received from the database  
       //console.log(Object.values(data));
 
-      if (data) {
+      if (data != null) {
 
         setItems(Object.values(data));
-      } else {
-        setItems([]); // Handle the case when there are no item    
-      }
-
+      } else { return }
 
     });
-  }, []);
+  }, [user]);
 
 
 
