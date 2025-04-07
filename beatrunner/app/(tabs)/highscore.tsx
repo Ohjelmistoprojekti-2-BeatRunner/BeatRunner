@@ -1,67 +1,74 @@
 import { globalStyles } from '@/styles/globalStyles';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Button, StyleSheet, Text, View, FlatList, } from 'react-native';
 import { database } from '@/firebaseConfig';
-import { ref, onValue, set } from "firebase/database"
+import { ref, onValue, set, push, query, orderByChild, orderByValue, orderByKey, limitToLast } from "firebase/database"
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 
 export default function ScoreScreen() {
-
+  const [items, setItems] = useState<number[]>([]);
+  const [point, setPoint] = useState<number>(0);
   const [user, setUser] = useState<User | null>(null)
-  //console.log(user?.uid);
+  console.log(items.reverse());
+
 
   useEffect(() => {
-    let getAllKeys = async () => {
-      let keys: readonly string[] = []
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
 
-      let storedUser
+    return () => unsubscribe();
+  }, []);
 
-      try {
-        keys = await AsyncStorage.getAllKeys()
-      } catch (e) {
-        // read key error
-      }
-      try {
-        storedUser = await AsyncStorage.getItem(keys[0])
-        storedUser = storedUser != null ? JSON.parse(storedUser) : null
-        setUser(storedUser)
 
-      } catch (e) {
-        // read error
-      }
+  const dbRef = ref(database, 'User ' + user?.uid);
+  const highScoreRef = ref(database, "User " + user?.uid + "/points")
 
-    }
-    getAllKeys()
-  }, [])
+  const topUserScoreRef = query(ref(database, 'User ' + user?.uid + "/points"), limitToLast(5));
 
-  const dbRef = ref(database, 'Score ' + user?.uid); // Replace 'your-data-path'
+  function Highscore() {
+    push(highScoreRef, point)
 
-  function Highscore(point: number) {
-
-    set(dbRef, { point: point })
   }
 
-  //Highscore(15)
 
-  onValue(dbRef, (snapshot) => {
+  useEffect(() => {
 
-    const data = snapshot.val();
+    onValue(topUserScoreRef, (snapshot) => {
 
-    console.log(data); // Handle the data received from the database
+      const data: number = snapshot.val();
+      //console.log(data); // Handle the data received from the database  
+      //console.log(Object.values(data));
 
-  });
+      if (data) {
+
+        setItems(Object.values(data));
+      } else {
+        setItems([]); // Handle the case when there are no item    
+      }
+
+
+    });
+  }, []);
+
+
 
   return (
     <View style={globalStyles.container}>
-      <Text style={globalStyles.title}>Welcome!</Text>
-      <Text style={globalStyles.sectionTitle}>Top 3</Text>
 
-      <View style={styles.scoreContainer}>
-        <Text style={styles.scoreText}>1. 1000</Text>
-        <Text style={styles.scoreText}>2. 900</Text>
-        <Text style={styles.scoreText}>3. 800</Text>
-      </View>
+      <Text style={globalStyles.title}>Welcome!</Text>
+
+      <Text style={globalStyles.sectionTitle}>Last 5 runs</Text>
+      <FlatList
+        ListEmptyComponent={<Text>Empty</Text>}
+        style={styles.scoreContainer}
+        renderItem={({ item }) =>
+          <View>
+            <Text style={styles.scoreText}>{item}</Text>
+          </View>}
+        data={items} />
     </View>
   );
 }

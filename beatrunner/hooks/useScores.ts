@@ -9,6 +9,8 @@ export function useScores() {
     const [score, setScore] = useState<number>(0);
     const [lastScores, setLastscores] = useState<number[]>([]);
 
+
+
     // Calculate numeric value for how close step is to beat (0 = perfect step, 0.5 = missed step)
     const calculateStepScore = (timeStamp: number, bpm: number) => {
 
@@ -71,12 +73,12 @@ export function useScores() {
     }, []);
 
 
-    const dbRef = ref(database, 'User ' + user?.uid);
+    const dbRef = ref(database, 'User ' + user?.uid + "/points");
 
 
-    function Sendrunscore(point: number) {
+    function Sendrunscore(points: number) {
 
-        push(dbRef, { point: point })
+        push(dbRef, points)
     }
 
 
