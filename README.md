@@ -11,11 +11,6 @@ Preliminary technologies planned for the project:
 - Expo for the mobile UI and communication with phone sensors
 - Firebase for user account management, storing high scores etc.
 
-## Käyttöliittymä
-- Käyttöliittymäkaavio
-
-![Käyttöliittymäkaavio](./Images/Kayttoliittymakaavio.png)
-
 ## Installation & Setup
 
 #### 1. Prerequisites:
