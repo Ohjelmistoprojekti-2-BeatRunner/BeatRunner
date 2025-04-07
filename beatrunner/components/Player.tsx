@@ -1,16 +1,15 @@
 import { useTimerContext } from '@/contexts/TimerContext';
 import { useMusicDetector } from '@/hooks/useMusicDetector';
+import { useScores } from '@/hooks/useScores';
 import { globalStyles } from '@/styles/globalStyles';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Alert, BackHandler, Button, FlatList, InteractionManager, ScrollView, Text, View, StyleSheet } from 'react-native';
+import { Alert, BackHandler, Button, InteractionManager, ScrollView, StyleSheet, Text, View } from 'react-native';
 import MusicPlayer from './MusicPlayer';
 import StepDetector from './StepDetector';
 import { useMusicContext } from '@/contexts/MusicContext';
-import { useEndGame } from '@/hooks/useEndGame';
-import { useScores } from '@/hooks/useScores';
 
-const Player = ({ bpm }: { bpm: number }) => {
+const Player = ({ songs }: { songs: string[] }) => {
     const { time, startTimer, pauseTimer, resetTimer } = useTimerContext();
     const [isPlaying, setIsPlaying] = useState(false);
     const [stepTimestamps, setStepTimestamps] = useState<number[]>([]);
@@ -18,9 +17,9 @@ const Player = ({ bpm }: { bpm: number }) => {
     const [tempo, setTempo] = useState(0);
     const [started, setStarted] = useState(false);
 
-    const { songPlaying } = useMusicContext();
+    const { songBpm, levelEnd, setLevelEnd } = useMusicContext();
+
     const { startMusicDetector, stopMusicDetector } = useMusicDetector();
-    const { endGame } = useEndGame();
     const { score, calculateStepScore, endLevel } = useScores();
 
     useEffect(() => {
@@ -41,7 +40,7 @@ const Player = ({ bpm }: { bpm: number }) => {
         if (started === false) {
             setStarted(true);
         }
-        
+
         InteractionManager.runAfterInteractions(() => {
             if (!isPlaying) {
                 startMusicDetector();
@@ -53,7 +52,7 @@ const Player = ({ bpm }: { bpm: number }) => {
 
     const handleStepDetected = (detectedStepCount: number, detectedTempo: number, timestamp: number) => {
         console.log(`Step Count: ${detectedStepCount}, Tempo: ${detectedTempo}, Time: ${(timestamp / 1000).toFixed(3)}s`);
-        calculateStepScore(timestamp, bpm);
+        calculateStepScore(timestamp, songBpm);
         setStepCount(detectedStepCount);
         setTempo(detectedTempo);
         setStepTimestamps(prev => [...prev, timestamp]);
@@ -81,8 +80,37 @@ const Player = ({ bpm }: { bpm: number }) => {
         );
     };
 
+    const gameEnd = () => {
+        Alert.alert(
+            "Congratulations! Level passed.",
+            `Your score was: ${score}`,
+            [
+                {
+                    text: "Exit",
+                    onPress: () => {
+                        resetTimer();
+                        setLevelEnd(false);
+                        endLevel();
+                        setTimeout(() => {
+                            router.replace({ pathname: "/(tabs)" })
+                        }, 500);
+                    }
+                }
+            ]
+        );
+    };
+
+    useEffect(() => {
+        if (levelEnd) {
+            stopMusicDetector();
+            gameEnd();
+        }
+    }, [levelEnd]);
+
+
     useEffect(() => {
         const backAction = () => {
+            pauseTimer();
             askBeforeExit();
             return true;
         };
@@ -102,7 +130,9 @@ const Player = ({ bpm }: { bpm: number }) => {
             <Text style={globalStyles.contentText}>Tempo: {tempo} SPM</Text>
             <Text style={globalStyles.contentText}> Score: {score} points</Text>
 
-            <MusicPlayer />
+            <Text style={globalStyles.contentText}> Songs bpm: {songBpm} </Text>
+
+            <MusicPlayer songs={songs} />
 
             <Button
                 title={isPlaying ? 'Pause Both' : 'Play Both'}

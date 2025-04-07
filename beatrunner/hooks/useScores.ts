@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import { database } from '@/firebaseConfig';
-import { ref, onValue, set, push } from "firebase/database"
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
+import { push, ref } from "firebase/database";
+import { useEffect, useState } from 'react';
+import { useMusicContext } from '@/contexts/MusicContext';
 
 export function useScores() {
 
@@ -82,7 +82,7 @@ export function useScores() {
     }
 
 
-    // Reset points 
+    // end level and Reset points 
     const endLevel = () => {
         Sendrunscore(score)
         setScore(0);

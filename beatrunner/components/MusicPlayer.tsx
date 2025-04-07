@@ -1,14 +1,52 @@
-import React, { useEffect, useRef } from 'react';
-import { setAudioModeAsync } from 'expo-audio';
-import { StyleSheet, Text, View } from 'react-native';
 import { useMusicContext } from '@/contexts/MusicContext';
 import { globalStyles } from '@/styles/globalStyles';
-import { useAudioPlayer } from 'expo-audio';
+import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { useDatabase } from '@/hooks/useDatabase';
+import { useTimerContext } from '@/contexts/TimerContext';
 
-export default function MusicPlayer() {
-    const { setPlayer, audioUri, songPlaying, currentSong } = useMusicContext();
+interface Song {
+    id: string;
+    name: string;
+    bpm: number;
+}
 
-    const player = useAudioPlayer(audioUri);
+export default function MusicPlayer({ songs }: { songs: string[] }) {
+
+    const [levelSongs, setLevelSongs] = useState<Song[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const { setPlayer, audioUri, songPlaying, currentSongId, setCurrentSongId, setSongBpm, setLevelEnd, levelEnd } = useMusicContext();
+    const { resetTimer } = useTimerContext();
+
+    const player = useAudioPlayer(audioUri ? audioUri : '', 1000);
+    const status = useAudioPlayerStatus(player);
+
+    const { fetchSongs } = useDatabase();
+
+    useEffect(() => {
+        const fetchLevelSongs = async () => {
+            try {
+                const data = await fetchSongs(songs);
+                setLevelSongs(data);
+            } catch (error) {
+                console.error("Error loading songs: ", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchLevelSongs();
+    }, [songs]);
+
+    useEffect(() => {
+        console.log("Level Songs:", levelSongs);
+    }, [levelSongs]);
+    
+    useEffect(() => {
+        console.log("Current Song ID:", currentSongId);
+    }, [currentSongId]);
 
     // Setup audio mode when the component mounts
     useEffect(() => {
@@ -23,29 +61,62 @@ export default function MusicPlayer() {
         setupAudioMode();
     }, []);
 
-    
     useEffect(() => {
-        setPlayer(player); 
-    }, [player]);
+        if (levelSongs.length > 0) {
+            setCurrentSongId(Number(levelSongs[0].id));
+            setSongBpm(levelSongs[0].bpm);
+        }
+    }, [levelSongs]);
 
-    const startMusic = async () => {
-        if (player) {
-            player.play();
+    useEffect(() => {
+        setPlayer(player);
+    }, [audioUri]);
+
+
+    // checking if song finished
+    useEffect(() => {
+        if (status?.didJustFinish) {
+            handleNextSong();
+        }
+    }, [status]);
+
+
+    // handling next song or end of playlist
+    const handleNextSong = async () => {
+        if (!currentSongId) return;
+
+        console.log(currentSongId);
+        const currentIndex = levelSongs.findIndex(song => Number(song.id) === currentSongId);
+        const nextIndex = (currentIndex + 1) % levelSongs.length;
+        const nextSong = levelSongs[nextIndex];
+        await stopMusic();
+        setPlayer(null); // if it aint broke, dont fix it. 
+        resetTimer();
+
+        if (nextIndex === 0 && !levelEnd) {
+            setTimeout(() => {
+                setLevelEnd(true);
+            }, 300);
+        } else {
+            setTimeout(() => {
+                setCurrentSongId(Number(nextSong.id));
+                setSongBpm(nextSong.bpm);
+            }, 300);
         }
     };
 
     const stopMusic = async () => {
-        if (player) {
-            player.pause();
-            player.remove();
+        if (player && player.playing) {
+            await player.pause();
         }
     };
 
     useEffect(() => {
-        if (audioUri && songPlaying) {
-            startMusic();
-        } else {
+        if (!audioUri || !songPlaying) {
             stopMusic();
+        } else {
+            console.log("Starting new song:", audioUri);
+            player.play();
         }
     }, [audioUri, songPlaying]);
 
@@ -53,7 +124,7 @@ export default function MusicPlayer() {
         <View style={globalStyles.contentContainer}>
             <View style={styles.controls}>
                 <Text style={globalStyles.buttonText}>
-                    {songPlaying ? currentSong : ''}
+                    {songPlaying ? currentSongId : ''}
                 </Text>
                 <Text style={globalStyles.buttonText}>
                     {songPlaying ? 'Music playing' : 'Paused'}
