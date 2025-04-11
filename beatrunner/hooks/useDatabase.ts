@@ -1,4 +1,4 @@
-import { collection, getDocs, doc, getDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, addDoc, serverTimestamp, query, Timestamp, where } from 'firebase/firestore';
 import { db } from '@/firebaseConfig';
 import { getAuth } from 'firebase/auth';
 
@@ -9,6 +9,9 @@ interface Song {
 }
 
 export function useDatabase() {
+
+    const auth = getAuth();
+    const user = auth.currentUser;
 
     const fetchLevels = async () => {
 
@@ -32,6 +35,31 @@ export function useDatabase() {
 
         } catch (error) {
             console.error("Error fetching levels: ", error);
+            throw error;
+        }
+
+    }
+
+    const fetchUserResults = async () => {
+        try {
+            const userResultsQuery = query(collection(db, 'scores'), where('userId', '==', user?.uid));
+            const userResultsSnapshot = await getDocs(userResultsQuery);
+
+            const userResults = userResultsSnapshot.docs.map(doc => {
+                const data = doc.data();
+
+                return {
+                    id: doc.id,
+                    score: data.score,
+                    levelId: data.levelId,
+                    userId: data.userId,
+                    timestamp: data.timestamp,
+                };
+            });
+            return userResults;
+
+        } catch (error) {
+            console.error("Error fetching results: ", error);
             throw error;
         }
 
@@ -73,31 +101,28 @@ export function useDatabase() {
         return validSongs;
     };
 
-    async function submitRunScore(score: number, levelId: string, ) {
-        const auth = getAuth();
-        const user = auth.currentUser;
-
+    async function submitRunScore(score: number, levelId: string,) {
         const numericLevelId = parseInt(levelId, 10);
-      
+
         if (!user) {
-          console.error("User not found");
-          return;
+            console.error("User not found");
+            return;
         }
 
         try {
-          await addDoc(collection(db, "scores"), {
-            userId: user.uid,
-            score: score,
-            levelId: numericLevelId,
-            timestamp: serverTimestamp()
-          });
+            await addDoc(collection(db, "scores"), {
+                userId: user.uid,
+                score: score,
+                levelId: numericLevelId,
+                timestamp: serverTimestamp()
+            });
         } catch (error) {
-          console.error("Error submitting scores:", error);
+            console.error("Error submitting scores:", error);
         }
-      }
+    }
 
 
 
-    return { fetchLevels, fetchSongs, submitRunScore };
+    return { fetchLevels, fetchSongs, submitRunScore, fetchUserResults };
 
 }

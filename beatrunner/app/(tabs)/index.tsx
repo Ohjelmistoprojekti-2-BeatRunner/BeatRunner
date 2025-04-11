@@ -13,17 +13,29 @@ interface Level {
     songs: [];
 }
 
+interface UserResults {
+    levelId: number;
+    userId: number;
+    score: number;
+    timestamp: number;
+}
+
 export default function HomeScreen() {
 
     const [levels, setLevels] = useState<Level[]>([]);
+    const [userResults, setUserResults] = useState<UserResults[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const { fetchLevels } = useDatabase();
+    const { fetchLevels, fetchUserResults } = useDatabase();
 
     useEffect(() => {
         const getLevels = async () => {
             try {
-                const data = await fetchLevels();
-                setLevels(data);
+                const [levelsData, userResultsData] = await Promise.all([
+                    fetchLevels(),
+                    fetchUserResults(), 
+                ]);
+                setLevels(levelsData);
+                setUserResults(userResultsData);
             } catch (error) {
                 console.error("Error loading levels: ", error);
             } finally {
@@ -35,16 +47,25 @@ export default function HomeScreen() {
     }, []);
 
 
-    const Item = ({ id, title, difficulty, calories, songs }: Level) => (
+    const Item = ({ id, title, difficulty, calories, songs }: Level) => {
+        const result = userResults.find(result => result.levelId === parseInt(id));
+        return(
+
         <View style={{ margin: 10, width: 300 }}>
             <TouchableOpacity style={globalStyles.button} onPress={() => router.replace({
                 pathname: "/level",
                 params: { id, title, difficulty, calories, songs }
             })}>
                 <Text style={globalStyles.buttonText}>{title}</Text>
+                {result && (
+                    <Text style={{ color: 'white', marginTop: 5 }}>
+                        Score: {result.score} time: {result.timestamp}
+                    </Text>
+                )}
             </TouchableOpacity>
         </View>
-    );
+        );
+    };
 
 
     return (
@@ -59,13 +80,6 @@ export default function HomeScreen() {
                     data={levels}
                     renderItem={({ item }) => <Item id={item.id} title={item.title} difficulty={item.difficulty} calories={item.calories} songs={item.songs}/>}
                 />
-
-                <Text style={globalStyles.orText}>Custom level</Text>
-                <View style={{ margin: 10, width: 300 }}>
-                    <TouchableOpacity style={globalStyles.button} onPress={() => { /* TODO: Add functionality */ }}>
-                        <Text style={globalStyles.buttonText}>Pick a song</Text>
-                    </TouchableOpacity>
-                </View>
             </View>
         </View>
     );
