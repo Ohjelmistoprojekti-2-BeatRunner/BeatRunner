@@ -1,4 +1,3 @@
-import { LevelProvider } from '@/contexts/LevelContext';
 import { MusicProvider } from '@/contexts/MusicContext';
 import { StepDetectorProvider } from '@/contexts/StepDetectorContext';
 import { TimerProvider } from '@/contexts/TimerContext';
@@ -79,7 +78,6 @@ export default function RootLayout() {
         <MusicProvider>
             <TimerProvider>
                 <StepDetectorProvider>
-                    <LevelProvider>
                         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
                             <Stack>
                                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -92,7 +90,6 @@ export default function RootLayout() {
                             </Stack>
                             <StatusBar style="auto" />
                         </ThemeProvider>
-                    </LevelProvider>
                 </StepDetectorProvider>
             </TimerProvider>
         </MusicProvider>

@@ -3,12 +3,16 @@ import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import { push, ref } from "firebase/database";
 import { useEffect, useState } from 'react';
 import { useMusicContext } from '@/contexts/MusicContext';
+import { addDoc, collection, getFirestore, serverTimestamp } from 'firebase/firestore';
+import { useDatabase } from './useDatabase';
+
 
 export function useScores() {
 
     const [score, setScore] = useState<number>(0);
     const [lastScores, setLastscores] = useState<number[]>([]);
 
+    const { submitRunScore } = useDatabase();
 
 
     // Calculate numeric value for how close step is to beat (0 = perfect step, 0.5 = missed step)
@@ -60,31 +64,10 @@ export function useScores() {
 
     };
 
-    // Getting user uid and storing points to db
-    const [user, setUser] = useState<User | null>(null)
-    // Gets user info from auth
-    useEffect(() => {
-        const auth = getAuth();
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-            setUser(currentUser);
-        });
-
-        return () => unsubscribe();
-    }, []);
-
-
-    const dbRef = ref(database, 'User ' + user?.uid + "/points");
-
-
-    function Sendrunscore(points: number) {
-
-        push(dbRef, points)
-    }
-
 
     // end level and Reset points 
     const endLevel = () => {
-        Sendrunscore(score)
+        submitRunScore(score)
         setScore(0);
         setLastscores([]);
     };
