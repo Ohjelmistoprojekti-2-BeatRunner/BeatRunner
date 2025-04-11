@@ -10,6 +10,7 @@ export default function LevelScreen() {
 
     const { id, title, difficulty, calories, songs } = useLocalSearchParams();
 
+    const levelId = Array.isArray(id) ? id[0] : id;
 
 
     return (
@@ -17,7 +18,8 @@ export default function LevelScreen() {
             <Text style={globalStyles.title}>{title}</Text>
             <Text style={globalStyles.contentText}>Difficulty: {difficulty}</Text>
             <Text style={globalStyles.contentText}>Calories: {calories}</Text>
-            <Player songs={Array.isArray(songs) ? songs : [songs]}/>
+            <Player levelId={levelId} 
+                    songs={Array.isArray(songs) ? songs : [songs]}/>
 
         </View >
     )

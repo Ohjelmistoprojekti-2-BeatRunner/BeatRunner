@@ -73,19 +73,22 @@ export function useDatabase() {
         return validSongs;
     };
 
-    async function submitRunScore(score: number) {
+    async function submitRunScore(score: number, levelId: string, ) {
         const auth = getAuth();
         const user = auth.currentUser;
+
+        const numericLevelId = parseInt(levelId, 10);
       
         if (!user) {
           console.error("User not found");
           return;
         }
-      
+
         try {
           await addDoc(collection(db, "scores"), {
             userId: user.uid,
-            score,
+            score: score,
+            levelId: numericLevelId,
             timestamp: serverTimestamp()
           });
         } catch (error) {

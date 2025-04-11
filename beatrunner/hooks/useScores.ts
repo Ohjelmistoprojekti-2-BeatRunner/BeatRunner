@@ -1,9 +1,4 @@
-import { database } from '@/firebaseConfig';
-import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
-import { push, ref } from "firebase/database";
-import { useEffect, useState } from 'react';
-import { useMusicContext } from '@/contexts/MusicContext';
-import { addDoc, collection, getFirestore, serverTimestamp } from 'firebase/firestore';
+import { useState } from 'react';
 import { useDatabase } from './useDatabase';
 
 
@@ -66,8 +61,8 @@ export function useScores() {
 
 
     // end level and Reset points 
-    const endLevel = () => {
-        submitRunScore(score)
+    const endLevel = (levelId: string) => {
+        submitRunScore(score, levelId)
         setScore(0);
         setLastscores([]);
     };

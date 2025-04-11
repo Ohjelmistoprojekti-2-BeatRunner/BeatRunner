@@ -9,7 +9,12 @@ import MusicPlayer from './MusicPlayer';
 import StepDetector from './StepDetector';
 import { useMusicContext } from '@/contexts/MusicContext';
 
-const Player = ({ songs }: { songs: string[] }) => {
+type PlayerProps = {
+    levelId: string;
+    songs: string[];
+  };
+
+const Player = ({ levelId, songs }: PlayerProps) => {
     const { time, startTimer, pauseTimer, resetTimer } = useTimerContext();
     const [isPlaying, setIsPlaying] = useState(false);
     const [stepTimestamps, setStepTimestamps] = useState<number[]>([]);
@@ -70,7 +75,7 @@ const Player = ({ songs }: { songs: string[] }) => {
                     onPress: () => {
                         stopMusicDetector();
                         resetTimer();
-                        endLevel();
+                        endLevel(levelId);
                         setTimeout(() => {
                             router.replace({ pathname: "/(tabs)" })
                         }, 500);
@@ -90,7 +95,7 @@ const Player = ({ songs }: { songs: string[] }) => {
                     onPress: () => {
                         resetTimer();
                         setLevelEnd(false);
-                        endLevel();
+                        endLevel(levelId);
                         setTimeout(() => {
                             router.replace({ pathname: "/(tabs)" })
                         }, 500);
