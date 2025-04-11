@@ -10,7 +10,7 @@ export default function ScoreScreen() {
   const [items, setItems] = useState<number[]>([]);
   const [point, setPoint] = useState<number>(0);
   const [user, setUser] = useState<User | null>(null)
-  console.log(items.reverse());
+  //console.log(items);
 
 
   useEffect(() => {
@@ -26,7 +26,7 @@ export default function ScoreScreen() {
   const dbRef = ref(database, 'User ' + user?.uid);
   const highScoreRef = ref(database, "User " + user?.uid + "/points")
 
-  const topUserScoreRef = query(ref(database, 'User ' + user?.uid + "/points"), limitToLast(5));
+  const topUserScoreRef = query(ref(database, 'User ' + user?.uid + "/points"), orderByValue());
 
   function Highscore() {
     push(highScoreRef, point)
@@ -41,7 +41,6 @@ export default function ScoreScreen() {
       const data: number = snapshot.val();
       //console.log(data); // Handle the data received from the database  
       //console.log(Object.values(data));
-
       if (data != null) {
 
         setItems(Object.values(data));
@@ -50,14 +49,17 @@ export default function ScoreScreen() {
     });
   }, [user]);
 
-
+  function compareNumbers(a: number, b: number) {
+    return a - b;
+  }
+  console.log(items.sort(compareNumbers).reverse());
 
   return (
     <View style={globalStyles.container}>
 
       <Text style={globalStyles.title}>Welcome!</Text>
 
-      <Text style={globalStyles.sectionTitle}>Last 5 runs</Text>
+      <Text style={globalStyles.sectionTitle}>Your Highscores</Text>
       <FlatList
         ListEmptyComponent={<Text>Empty</Text>}
         style={styles.scoreContainer}
