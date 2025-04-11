@@ -24,11 +24,14 @@ export default function LoginScreen() {
       await signInWithEmailAndPassword(auth, email, password);
       router.replace('/');
     } catch (error: any) {
-      Alert.alert('Login Failed', error.message);
+      let errorMessage = 'An unexpected error occurred. Please try again.';
+      if (error.code === 'auth/invalid-email') {
+        errorMessage = 'The email address you entered is not valid. Please check and try again.';
+      } else if (error.code === 'auth/invalid-credential') {
+        errorMessage = 'Please ensure your email and password are correct.';
+      }
+      Alert.alert('Login Failed', errorMessage, [{ text: 'OK' }]);
     }
-
-
-
     setLoading(false);
   };
 
