@@ -43,7 +43,7 @@ export const StepDetectorProvider: React.FC<{ children: React.ReactNode }> = ({ 
     );
 };
 
-export const useStepDetector = () => {
+export const useStepDetectorContext = () => {
     const context = useContext(StepDetectorContext);
     if (!context) {
         throw new Error('useStepDetector must be used within a StepDetectorProvider');

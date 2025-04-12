@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import { useDatabase } from './useDatabase';
+import { submitRunScore } from '@/firebase/scoresService';
+import { updateUserTotalScore } from '@/firebase/usersService';
+import { useTimerContext } from '@/contexts/TimerContext';
+import { useStepDetectorContext } from '@/contexts/StepDetectorContext';
 
 
 export function useScores() {
@@ -7,7 +10,9 @@ export function useScores() {
     const [score, setScore] = useState<number>(0);
     const [lastScores, setLastscores] = useState<number[]>([]);
 
-    const { submitRunScore } = useDatabase();
+    const { time } = useTimerContext();
+    const { stepCount } = useStepDetectorContext();
+    const { getCurrentTime } = useTimerContext();
 
 
     // Calculate numeric value for how close step is to beat (0 = perfect step, 0.5 = missed step)
@@ -62,7 +67,10 @@ export function useScores() {
 
     // end level and Reset points 
     const endLevel = (levelId: string) => {
+        const time = getCurrentTime()
+        
         submitRunScore(score, levelId)
+        updateUserTotalScore(score, time, stepCount)
         setScore(0);
         setLastscores([]);
     };

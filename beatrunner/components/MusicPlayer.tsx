@@ -3,7 +3,7 @@ import { globalStyles } from '@/styles/globalStyles';
 import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { useDatabase } from '@/hooks/useDatabase';
+import { fetchSongs } from '@/firebase/songsService';
 import { useTimerContext } from '@/contexts/TimerContext';
 
 interface Song {
@@ -22,8 +22,6 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
 
     const player = useAudioPlayer(audioUri ? audioUri : '', 1000);
     const status = useAudioPlayerStatus(player);
-
-    const { fetchSongs } = useDatabase();
 
     useEffect(() => {
         const fetchLevelSongs = async () => {

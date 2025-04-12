@@ -1,10 +1,10 @@
-import { useDatabase } from '@/hooks/useDatabase';
 import { globalStyles } from '@/styles/globalStyles';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { FlatList, Text, TouchableOpacity, View } from 'react-native';
-import { formatDistanceToNow, format } from 'date-fns';
-
+import { formatTimestamp } from '@/utils/formatTimestamp';
+import { fetchLevels } from '@/firebase/levelsService';
+import { fetchUserResults } from '@/firebase/scoresService';
 
 interface Level {
     id: string;
@@ -26,7 +26,6 @@ export default function HomeScreen() {
     const [levels, setLevels] = useState<Level[]>([]);
     const [userResults, setUserResults] = useState<UserResults[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const { fetchLevels, fetchUserResults } = useDatabase();
 
     useEffect(() => {
         const getLevels = async () => {
@@ -37,7 +36,7 @@ export default function HomeScreen() {
                 const userResultsData = await fetchUserResults();
 
                 setLevels(levelsData);
-                setUserResults(userResultsData);
+                setUserResults(userResultsData || []);
             } catch (error) {
                 console.error("Error loading levels: ", error);
             } finally {
@@ -48,20 +47,6 @@ export default function HomeScreen() {
         getLevels();
     }, []);
 
-    //date-fns library to show timestamps readable way, like "10 minutes ago"
-    const formatTimestamp = (timestamp: any) => {
-        const date = timestamp.toDate();
-
-        // Check if the date is less than 2 days ago
-        const daysDifference = (Date.now() - date.getTime()) / (1000 * 3600 * 24);
-
-        if (daysDifference <= 2) {
-            return `${formatDistanceToNow(date)} ago`;
-        } else {
-            // if result is older than 2 days, show the exact date
-            return format(date, 'dd/MM/yyyt');
-        }
-    };
 
     const getUserResult = (levelId: string) => {
         if (!userResults || userResults.length === 0) {

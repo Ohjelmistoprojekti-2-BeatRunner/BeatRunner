@@ -1,12 +1,11 @@
-import { useStepDetector } from '@/contexts/StepDetectorContext';
-import { useMusicContext } from '@/contexts/MusicContext';
+import { useStepDetectorContext } from '@/contexts/StepDetectorContext';
 import { useTimerContext } from '@/contexts/TimerContext'; // Import TimerContext
 import { globalStyles } from '@/styles/globalStyles';
 import Slider from '@react-native-community/slider';
 import { Audio } from 'expo-av';
 import { Accelerometer } from 'expo-sensors';
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View, Button } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 interface StepDetectorProps {
@@ -16,7 +15,7 @@ interface StepDetectorProps {
 
 const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart = false }) => {
     // StepDetectorContext variables
-    const { isDetecting, threshold, setThreshold, tempo, setTempo, stepCount, setStepCount } = useStepDetector();
+    const { isDetecting, threshold, setThreshold, tempo, setTempo, stepCount, setStepCount } = useStepDetectorContext();
     const [sound, setSound] = useState<Audio.Sound | null>(null);
     const [stepTimestamps, setStepTimestamps] = useState<number[]>([]);
     const currentTempoRef = useRef<number>(0);
