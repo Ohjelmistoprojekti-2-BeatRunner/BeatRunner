@@ -7,8 +7,7 @@ const user = auth.currentUser;
 
 export async function submitRunScore(score: number, levelId: string,) {
     const numericLevelId = parseInt(levelId, 10);
-
-
+    
     try {
         await addDoc(collection(db, "scores"), {
             userId: user?.uid,

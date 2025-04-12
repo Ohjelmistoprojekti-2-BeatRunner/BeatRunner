@@ -2,7 +2,7 @@ import { globalStyles } from '@/styles/globalStyles';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { FlatList, Text, TouchableOpacity, View } from 'react-native';
-import { formatTimestamp } from '@/utils/formatTimestamp';
+import { formatTimestamp } from '@/scripts/formatTimestamp';
 import { fetchLevels } from '@/firebase/levelsService';
 import { fetchUserResults } from '@/firebase/scoresService';
 
