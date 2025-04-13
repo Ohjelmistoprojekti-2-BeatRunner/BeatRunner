@@ -1,55 +1,58 @@
 import { globalStyles } from '@/styles/globalStyles';
 import React, { useEffect, useState } from 'react';
 import { Button, StyleSheet, Text, View, FlatList, } from 'react-native';
-import { database } from '@/firebaseConfig';
-import { ref, onValue, set, push, query, orderByChild, orderByValue, orderByKey, limitToLast } from "firebase/database"
+import { ref, onValue, set, push, orderByChild, orderByValue, orderByKey, limitToLast } from "firebase/database"
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
+import { query, collection, doc, getDoc, getDocs } from 'firebase/firestore';
+import { db } from '@/firebaseConfig';
+import { fetchUserResults } from '@/firebase/scoresService';
+import { SegmentedButtons } from 'react-native-paper';
+
+interface UserResults {
+  levelId: number;
+  userId: number;
+  score: number;
+  timestamp: number;
+}
+
 
 export default function ScoreScreen() {
-  const [items, setItems] = useState<number[]>([]);
-  const [point, setPoint] = useState<number>(0);
-  const [user, setUser] = useState<User | null>(null)
-  console.log(items.reverse());
+
+
+  const [userResults, setUserResults] = useState<UserResults[]>([]);
+  const [value, setValue] = React.useState(1);
+  const [levelNames, setLevelNames] = useState<string[]>([])
 
 
   useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
+    const getUserdata = async () => {
+      const doc = await getDocs(collection(db, "levels"))
+      const userResultsData = await fetchUserResults();
+      if (levelNames.length == 0) {
+        doc.forEach((doc) => {
 
-    return () => unsubscribe();
-  }, []);
+          levelNames.push(doc.data().title);
 
+        });
+      }
+      setUserResults(userResultsData);
+    }
+    getUserdata()
 
-  const dbRef = ref(database, 'User ' + user?.uid);
-  const highScoreRef = ref(database, "User " + user?.uid + "/points")
-
-  const topUserScoreRef = query(ref(database, 'User ' + user?.uid + "/points"), limitToLast(5));
-
-  function Highscore() {
-    push(highScoreRef, point)
-
-  }
+  }, [])
 
 
-  useEffect(() => {
 
-    onValue(topUserScoreRef, (snapshot) => {
+  const getUserResult = (levelId: number) => {
+    if (!userResults || userResults.length === 0) {
+      return null;
+    }
 
-      const data: number = snapshot.val();
-      //console.log(data); // Handle the data received from the database  
-      //console.log(Object.values(data));
-
-      if (data != null) {
-
-        setItems(Object.values(data));
-      } else { return }
-
-    });
-  }, [user]);
-
+    return userResults.filter(result => result.levelId === levelId);
+  };
+  let stuff = getUserResult(value)
+  console.log(stuff?.sort((a, b) => b.score - a.score));
 
 
   return (
@@ -57,15 +60,27 @@ export default function ScoreScreen() {
 
       <Text style={globalStyles.title}>Welcome!</Text>
 
-      <Text style={globalStyles.sectionTitle}>Last 5 runs</Text>
+      <Text style={globalStyles.sectionTitle}>Your Highscores</Text>
+      <SegmentedButtons
+        value={value}
+        onValueChange={setValue}
+        buttons={[
+          {
+            value: 1,
+            label: levelNames[0],
+          },
+          {
+            value: 2,
+            label: levelNames[1],
+          },
+
+        ]}
+      />
       <FlatList
-        ListEmptyComponent={<Text>Empty</Text>}
-        style={styles.scoreContainer}
-        renderItem={({ item }) =>
-          <View>
-            <Text style={styles.scoreText}>{item}</Text>
-          </View>}
-        data={items} />
+        data={stuff}
+        renderItem={({ item }) => <View><Text style={styles.scoreText}>  Score: {item.score}</Text></View>}
+
+      />
     </View>
   );
 }
