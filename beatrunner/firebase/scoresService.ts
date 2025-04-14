@@ -22,6 +22,8 @@ export async function submitRunScore(score: number, levelId: string,) {
 
 
 export const fetchUserResults = async () => {
+    const auth = getAuth();
+    const user = auth.currentUser;
 
     try {
         const userResultsQuery = query(collection(db, 'scores'), where('userId', '==', user?.uid), orderBy("score", "desc"));

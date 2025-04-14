@@ -10,6 +10,7 @@ import { fetchUserResults, fetchAllUserResults } from '@/firebase/scoresService'
 import { fetchLevels } from '@/firebase/levelsService';
 import { fetchAllUsers } from '@/firebase/usersService';
 import { SegmentedButtons } from 'react-native-paper';
+import { formatTimestamp } from '@/scripts/formatTimestamp';
 
 interface UserResults {
   levelId: number;
@@ -87,7 +88,8 @@ export default function ScoreScreen() {
     if (!levels || levels.length == 0) {
       return null
     }
-    let levelName = levels.filter(result => parseInt(result.id) === levelId)
+    const levelIdInt = parseInt(levelId);
+    let levelName = levels.filter(result => parseInt(result.id) === levelIdInt)
 
     return levelName[0].title
   }
@@ -99,10 +101,14 @@ export default function ScoreScreen() {
       <Text style={globalStyles.title}>Welcome!</Text>
 
       <Text style={globalStyles.sectionTitle}>Global Highscores</Text>
-
+      <Text style={styles.scoreText}>User    Level     Points      Time</Text>
       <FlatList
         data={allUsersResults}
-        renderItem={({ item }) => <View><Text style={styles.scoreText}>{getUserName(item.userId)}  {getLevelName(item.levelId)} {item.score}</Text></View>}
+
+        renderItem={({ item }) =>
+          <View>
+            <Text style={styles.scoreText}>{getUserName(item.userId)}   {getLevelName(item.levelId)}  {item.score}    {formatTimestamp(item.timestamp)}</Text>
+          </View>}
 
       />
     </View>
