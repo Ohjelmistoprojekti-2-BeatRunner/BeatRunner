@@ -1,6 +1,7 @@
 import { db } from "@/firebaseConfig";
 import { getAuth } from "firebase/auth";
-import { doc, runTransaction, serverTimestamp } from "firebase/firestore";
+import { doc, runTransaction, serverTimestamp, collection, getDocs, } from "firebase/firestore";
+
 
 const auth = getAuth();
 const user = auth.currentUser;
@@ -38,4 +39,29 @@ export async function updateUserTotalScore(score: number, time: number, steps: n
     } catch (error) {
         console.error("Error updating user total scores:", error);
     }
+}
+
+export const fetchAllUsers = async () => {
+
+    try {
+        const allUsers = collection(db, 'users');
+        const allUsersSnapshot = await getDocs(allUsers);
+
+        const allUsersResults = allUsersSnapshot.docs.map(doc => {
+            const data = doc.data();
+
+            return {
+                id: doc.id,
+                createdAt: data.createdAt,
+                email: data.email,
+                username: data.username,
+            };
+        });
+        return allUsersResults;
+
+    } catch (error) {
+        console.error("Error fetching allUsers results: ", error);
+        return [];
+    }
+
 }

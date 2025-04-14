@@ -6,62 +6,110 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import { query, collection, doc, getDoc, getDocs } from 'firebase/firestore';
 import { db } from '@/firebaseConfig';
-import { fetchUserResults } from '@/firebase/scoresService';
+import { fetchUserResults, fetchAllUserResults } from '@/firebase/scoresService';
+import { fetchLevels } from '@/firebase/levelsService';
+import { fetchAllUsers } from '@/firebase/usersService';
 import { SegmentedButtons } from 'react-native-paper';
 
 interface UserResults {
   levelId: number;
-  userId: number;
+  userId: string;
   score: number;
   timestamp: number;
 }
-
+interface Users {
+  id: string;
+  createdAt: number;
+  email: string;
+  username: string;
+}
+interface Levels {
+  id: string;
+  title: string;
+  difficulty: any;
+  calories: any;
+  songs: any;
+}
 
 export default function ScoreScreen() {
 
+  const [allUsersResults, setAllUsersResults] = useState<UserResults[]>([]);
+  //const [userResults, setUserResults] = useState<UserResults[]>([]);
+  //const [value, setValue] = React.useState(1);
+  const [levels, setLevels] = useState<Levels[]>([])
+  const [allUsers, setAllUsers] = useState<Users[]>([])
 
-  const [userResults, setUserResults] = useState<UserResults[]>([]);
-  const [value, setValue] = React.useState(1);
-  const [levelNames, setLevelNames] = useState<string[]>([])
+
+  const getData = async () => {
+    const levelData = await fetchLevels();
+    const userData = await fetchAllUsers();
+    //const userResultsData = await fetchUserResults();
+    const allUsersResultsData = await fetchAllUserResults();
+
+    setLevels(levelData)
+    setAllUsers(userData)
+    //setUserResults(userResultsData);
+    setAllUsersResults(allUsersResultsData)
+  }
+  getData()
 
 
-  useEffect(() => {
-    const getUserdata = async () => {
-      const doc = await getDocs(collection(db, "levels"))
-      const userResultsData = await fetchUserResults();
-      if (levelNames.length == 0) {
-        doc.forEach((doc) => {
 
-          levelNames.push(doc.data().title);
 
-        });
+  /* 
+    const getUserResult = (levelId: number) => {
+      if (!userResults || userResults.length === 0) {
+        return null;
       }
-      setUserResults(userResultsData);
+  
+      return userResults.filter(result => result.levelId === levelId);
+    };
+    let stuff = getUserResult(value)
+    // console.log(stuff?.sort((a, b) => b.score - a.score));
+  */
+  const getUserName = (userId: string) => {
+    if (!allUsers || allUsers.length == 0) {
+      return null
     }
-    getUserdata()
+    let userName = allUsers.filter(result => result.id === userId)
 
-  }, [])
-
-
-
-  const getUserResult = (levelId: number) => {
-    if (!userResults || userResults.length === 0) {
-      return null;
+    if (userName == undefined) {
+      return ""
+    } else {
+      return userName[0].username
     }
 
-    return userResults.filter(result => result.levelId === levelId);
-  };
-  let stuff = getUserResult(value)
-  console.log(stuff?.sort((a, b) => b.score - a.score));
+  }
+  //allUsersResults.sort((a, b) => b.score - a.score)
 
+
+  const getLevelName = (levelId: string) => {
+    if (!levels || levels.length == 0) {
+      return null
+    }
+    let levelName = levels.filter(result => parseInt(result.id) === levelId)
+
+    return levelName[0].title
+  }
+  //console.log(levels);
 
   return (
     <View style={globalStyles.container}>
 
       <Text style={globalStyles.title}>Welcome!</Text>
 
-      <Text style={globalStyles.sectionTitle}>Your Highscores</Text>
-      <SegmentedButtons
+      <Text style={globalStyles.sectionTitle}>Global Highscores</Text>
+
+      <FlatList
+        data={allUsersResults}
+        renderItem={({ item }) => <View><Text style={styles.scoreText}>{getUserName(item.userId)}  {getLevelName(item.levelId)} {item.score}</Text></View>}
+
+      />
+    </View>
+  );
+}
+/*  varastossa
+    <SegmentedButtons
         value={value}
         onValueChange={setValue}
         buttons={[
@@ -75,16 +123,7 @@ export default function ScoreScreen() {
           },
 
         ]}
-      />
-      <FlatList
-        data={stuff}
-        renderItem={({ item }) => <View><Text style={styles.scoreText}>  Score: {item.score}</Text></View>}
-
-      />
-    </View>
-  );
-}
-
+      /> */
 
 const styles = StyleSheet.create({
   scoreContainer: {
