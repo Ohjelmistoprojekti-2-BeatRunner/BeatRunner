@@ -74,9 +74,10 @@ const Player = ({ levelId, songs }: PlayerProps) => {
                     text: "Exit",
                     onPress: () => {
                         stopMusicDetector();
-                        resetTimer();
+                        pauseTimer();
                         endLevel(levelId);
                         setTimeout(() => {
+                            resetTimer()
                             router.replace({ pathname: "/(tabs)" })
                         }, 500);
                     }
@@ -93,10 +94,11 @@ const Player = ({ levelId, songs }: PlayerProps) => {
                 {
                     text: "Exit",
                     onPress: () => {
-                        resetTimer();
+                        pauseTimer();
                         setLevelEnd(false);
                         endLevel(levelId);
                         setTimeout(() => {
+                            resetTimer()
                             router.replace({ pathname: "/(tabs)" })
                         }, 500);
                     }

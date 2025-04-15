@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { submitRunScore } from '@/firebase/scoresService';
-import { updateUserTotalScore } from '@/firebase/usersService';
+import { updateUserBestScores, updateUserTotalScore } from '@/firebase/usersService';
 import { useTimerContext } from '@/contexts/TimerContext';
 import { useStepDetectorContext } from '@/contexts/StepDetectorContext';
 
@@ -66,11 +66,16 @@ export function useScores() {
 
 
     // end level and Reset points 
-    const endLevel = (levelId: string) => {
+    const endLevel = async (levelId: string) => {
         const time = getCurrentTime()
-        
-        submitRunScore(score, levelId)
-        updateUserTotalScore(score, time, stepCount)
+
+        const scoreRef = await submitRunScore(score, levelId);
+        if (!scoreRef) {
+            console.error("Score submission failed");
+            return;
+        }
+        await updateUserTotalScore(score, time, stepCount)
+        await updateUserBestScores(score, levelId, scoreRef);
         setScore(0);
         setLastscores([]);
     };

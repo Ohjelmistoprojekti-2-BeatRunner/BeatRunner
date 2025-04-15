@@ -1,10 +1,10 @@
+import { fetchLevels } from '@/firebase/levelsService';
+import { fetchUserBestScores } from '@/firebase/usersService';
+import { formatTimestamp } from '@/scripts/formatTimestamp';
 import { globalStyles } from '@/styles/globalStyles';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { FlatList, Text, TouchableOpacity, View } from 'react-native';
-import { formatTimestamp } from '@/scripts/formatTimestamp';
-import { fetchLevels } from '@/firebase/levelsService';
-import { fetchUserResults } from '@/firebase/scoresService';
 
 interface Level {
     id: string;
@@ -13,28 +13,30 @@ interface Level {
     calories: number;
     songs: [];
 }
-
-interface UserResults {
-    levelId: number;
-    userId: number;
+interface ScoreData {
+    userId: string;
+    levelId: string;
     score: number;
     timestamp: number;
+}
+interface UserResult {
+    levelId: string;
+    scoreData: ScoreData | null;
 }
 
 export default function HomeScreen() {
 
     const [levels, setLevels] = useState<Level[]>([]);
-    const [userResults, setUserResults] = useState<UserResults[]>([]);
+    const [userResults, setUserResults] = useState<UserResult[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         const getLevels = async () => {
             try {
                 setLoading(true);
-
                 const levelsData = await fetchLevels();
-                const userResultsData = await fetchUserResults();
-
+                const userResultsData = await fetchUserBestScores();
+                console.log(userResultsData);
                 setLevels(levelsData);
                 setUserResults(userResultsData || []);
             } catch (error) {
@@ -48,28 +50,13 @@ export default function HomeScreen() {
     }, []);
 
 
-    const getUserResult = (levelId: string) => {
-        if (!userResults || userResults.length === 0) {
-            return null;
-        }
-
-        const levelIdInt = parseInt(levelId);
-        return userResults.find(result => result.levelId === levelIdInt);
+    const getUserResult = (levelId: string): UserResult | undefined => {
+        return userResults.find((r) => r.levelId === levelId);
     };
 
-    // get best result from userresults.
-    const getUserBestResult = (levelId: string) => {
-        const resultsForLevel = userResults.filter(result => result.levelId === parseInt(levelId));
-
-        if (resultsForLevel.length === 0) return null;
-
-        return resultsForLevel.reduce((best, current) => {
-            return current.score > best.score ? current : best;
-        });
-    };
 
     const Item = ({ id, title, difficulty, calories, songs }: Level) => {
-        const bestUserResult = getUserBestResult(id); 
+        const userResult = getUserResult(id);
         return (
             <View style={{ margin: 10, width: 300 }}>
                 <TouchableOpacity style={globalStyles.button} onPress={() => router.replace({
@@ -77,9 +64,9 @@ export default function HomeScreen() {
                     params: { id, title, difficulty, calories, songs }
                 })}>
                     <Text style={globalStyles.buttonText}>{title}</Text>
-                    {bestUserResult && (
+                    {userResult && (
                         <Text style={{ color: 'white', marginTop: 5 }}>
-                            Best Score: {bestUserResult.score}  {formatTimestamp(bestUserResult.timestamp)}
+                            Best Score: {userResult.scoreData?.score}  {formatTimestamp(userResult.scoreData?.timestamp)}
                         </Text>
                     )}
                 </TouchableOpacity>
