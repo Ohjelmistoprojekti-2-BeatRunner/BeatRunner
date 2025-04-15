@@ -4,7 +4,7 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 import { Drawer } from 'expo-router/drawer';
 import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/firebaseConfig';
 import { globalStyles } from '@/styles/globalStyles';
 
@@ -15,21 +15,28 @@ function DrawerTitleLogo(props: any) {
 
   useEffect(() => {
     const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
 
       if (currentUser) {
         const userDocRef = doc(db, 'users', currentUser.uid);
-        const userDoc = await getDoc(userDocRef);
+        const unsubscribeUserDoc = onSnapshot(userDocRef, (docSnap) => {
+          if (docSnap.exists()) {
+            setUsername(docSnap.data()?.username || null);
+          }
+        });
 
-        if (userDoc.exists()) {
-          setUsername(userDoc.data()?.username || null);
-        }
+        return () => {
+          unsubscribeUserDoc();
+        };
+      } else {
+        setUsername(null);
       }
     });
 
-    return () => unsubscribe();
+    return unsubscribeAuth;
   }, []);
+
 
   return (
     <DrawerContentScrollView {...props}>
