@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 
-export const slideStyles = StyleSheet.create({
+export const helpStyles = StyleSheet.create({
     slide: {
         padding: 20,
       },
@@ -11,8 +11,8 @@ export const slideStyles = StyleSheet.create({
         marginTop: 15
       },
       slideIcon: {
-        width: 75,
-        height: 75,
+        width: 55,
+        height: 55,
         marginRight: 10,
         marginTop: 10,
         resizeMode: 'contain',
