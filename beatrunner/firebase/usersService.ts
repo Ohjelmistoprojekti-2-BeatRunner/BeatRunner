@@ -33,9 +33,8 @@ export async function updateUserTotalScore(score: number, time: number, steps: n
         console.error("Error updating user total scores:", error);
     }
 }
-
-// users/<uid>/bestScores/<levelId>/ contains updating ref to user's best result for that level. 
-// the goal is to minimize firestore document reads, while keeping data consistency.
+// users/<uid>/bestScores/<levelId>/ contains the best score for that level,
+// along with a reference to the corresponding run in the scores collection
 export async function updateUserBestScores(
     score: number,
     levelId: string,
@@ -68,7 +67,7 @@ export async function updateUserBestScores(
     }
 }
 
-//not in use anymore
+//not in use anymore, handled in UserContext with snapshot.
 export const fetchUserBestScores = async () => {
     const user = auth.currentUser;
     if (!user) {
@@ -129,26 +128,24 @@ export const fetchAllUsers = async () => {
     }
 }
 
-export async function updateUserThreshold(threshold: number) {
-    const user = auth.currentUser;
 
+export const updateUserThreshold = async (threshold: number) => {
+    const user = auth.currentUser;
+    
     if (!user) {
         console.error("User not found");
         return;
     }
-    const userRef = doc(db, "users", user.uid);
 
+    const userRef = doc(db, "users", user.uid);
+    console.log(threshold)
     try {
         await runTransaction(db, async (transaction) => {
-            const userDoc = await transaction.get(userRef);
-            if (!userDoc.exists()) {
-                throw new Error("User not found");
-            }
-            transaction.update(userRef, {
-                threshold: threshold,
-            });
+            const snap = await transaction.get(userRef);
+            if (!snap.exists()) throw new Error("User doc missing");
+            transaction.update(userRef, { threshold: threshold });
         });
     } catch (error) {
-        console.error("Error updating user threshold:", error);
+        console.error("Transaction failed:", error);
     }
-}
+};

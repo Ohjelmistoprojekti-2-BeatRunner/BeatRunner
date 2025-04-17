@@ -24,18 +24,20 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        // Unsubscribe from snapshots first to prevent issues during userAuth unsubscription
         let unsubscribeUserDoc: (() => void) | null = null;
         let unsubscribeBestScores: (() => void) | null = null;
 
         const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
             if (firebaseUser) {
                 setUser(firebaseUser);
+                // subsbribe to real-time updates on user's doc
                 const userRef = doc(db, "users", firebaseUser.uid);
                 unsubscribeUserDoc = onSnapshot(userRef, (docSnap) => {
                     setUserData(docSnap.exists() ? docSnap.data() : null);
                     setLoading(false);
                 });
-
+                // subsbribe to real-time updates on user's bestScores-collections docs
                 const bestScoresRef = collection(db, "users", firebaseUser.uid, "bestScores");
                 unsubscribeBestScores = onSnapshot(query(bestScoresRef), (snapshot) => {
                     const scores: Record<string, any> = {};
@@ -45,6 +47,8 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
                     setBestScores(scores);
                 });
             } else {
+
+                // handle logout
                 if (unsubscribeUserDoc) unsubscribeUserDoc();
                 if (unsubscribeBestScores) unsubscribeBestScores();
                 setUserData(null);

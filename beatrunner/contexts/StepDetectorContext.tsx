@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { useUserContext } from './UserContext';
 
 interface StepDetectorContextType {
     isDetecting: boolean;
@@ -16,9 +17,10 @@ const StepDetectorContext = createContext<StepDetectorContextType | undefined>(u
 
 export const StepDetectorProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [isDetecting, setIsDetecting] = useState(false);
+    const { user, userData, loading } = useUserContext();
     const [threshold, setThreshold] = useState(1.2);
-        const [stepCount, setStepCount] = useState(0);
-        const [tempo, setTempo] = useState(0);
+    const [stepCount, setStepCount] = useState(0);
+    const [tempo, setTempo] = useState(0);
 
     const toggleDetection = () => {
         setIsDetecting(prevState => !prevState);
@@ -35,6 +37,13 @@ export const StepDetectorProvider: React.FC<{ children: React.ReactNode }> = ({ 
         setTempo,
         toggleDetection
     }), [isDetecting, threshold]);
+
+    useEffect(() => {
+        if (!loading && userData?.threshold) {
+            setThreshold(userData.threshold);
+        }
+    }, [userData, loading]);
+
 
     return (
         <StepDetectorContext.Provider value={value}>

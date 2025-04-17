@@ -1,5 +1,6 @@
 import { useStepDetectorContext } from '@/contexts/StepDetectorContext';
 import { useTimerContext } from '@/contexts/TimerContext'; // Import TimerContext
+import { updateUserThreshold } from '@/firebase/usersService';
 import { globalStyles } from '@/styles/globalStyles';
 import Slider from '@react-native-community/slider';
 import { Audio } from 'expo-av';
@@ -7,6 +8,7 @@ import { Accelerometer } from 'expo-sensors';
 import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { useUserContext } from '@/contexts/UserContext';
 
 interface StepDetectorProps {
     onStepDetected?: (stepCount: number, tempo: number, timestamp: number) => void;
@@ -19,6 +21,9 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
     const [sound, setSound] = useState<Audio.Sound | null>(null);
     const [stepTimestamps, setStepTimestamps] = useState<number[]>([]);
     const currentTempoRef = useRef<number>(0);
+    const [localThreshold, setLocalThreshold] = useState(threshold); // For threshold-slider ui
+
+    const { user } = useUserContext();
 
     const localStepCountRef = useRef<number>(0);
 
@@ -94,12 +99,12 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
         if (autoStart && !subscriptionRef.current) {
             console.log("Starting step detection due to autoStart");
             startDetection();
-        } 
+        }
         else if (!autoStart && subscriptionRef.current) {
             console.log("Stopping step detection due to autoStart becoming false");
             stopDetection();
         }
-        
+
         return () => {
             if (subscriptionRef.current) {
                 console.log("Cleaning up step detection on unmount");
@@ -118,7 +123,7 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
         if (isInInactiveStateRef.current) {
             const inactiveTime = now - lastStepTimeRef.current;
             const minimumStepInterval = tempo > 0 ? (60000 / tempo) * 0.5 : 200;
-            
+
             if (inactiveTime > minimumStepInterval) {
                 isInInactiveStateRef.current = false;
             } else {
@@ -189,6 +194,17 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
         };
     });
 
+    const handleValueChange = (value: number) => {
+        setLocalThreshold(value);
+    };
+
+    const handleSlidingComplete = (value: number) => {
+        if (user) updateUserThreshold(value);
+        setThreshold(value);
+        setLocalThreshold(value);
+    };
+
+
     return (
         <View>
             <Animated.View style={[styles.stepIndicator, stepIndicatorStyle]} />
@@ -200,8 +216,9 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
                     minimumValue={0.5}
                     maximumValue={2.0}
                     step={0.1}
-                    value={threshold}
-                    onValueChange={setThreshold}
+                    value={localThreshold}
+                    onValueChange={handleValueChange}
+                    onSlidingComplete={handleSlidingComplete}
                     minimumTrackTintColor="#4CAF50"
                     maximumTrackTintColor="#000000"
                 />
