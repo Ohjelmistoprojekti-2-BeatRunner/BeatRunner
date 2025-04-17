@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { auth, db } from '@/firebaseConfig';
 import { globalStyles } from '@/styles/globalStyles';
-import { getAuth, signOut, deleteUser, EmailAuthProvider, reauthenticateWithCredential, updatePassword, updateProfile } from 'firebase/auth';
 import { router } from 'expo-router';
+import { deleteUser, EmailAuthProvider, reauthenticateWithCredential, signOut, updatePassword, updateProfile } from 'firebase/auth';
 import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '@/firebaseConfig';
+import React, { useState } from 'react';
+import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function SettingsScreen() {
 
@@ -16,7 +16,7 @@ export default function SettingsScreen() {
 
   const handleLogout = async () => {
     try {
-      const auth = getAuth();
+
       await signOut(auth);
       Alert.alert('Logged out', 'You have been successfully logged out.');
       router.replace('/login');
@@ -28,7 +28,6 @@ export default function SettingsScreen() {
 
   const handleDeleteAccount = async () => {
     try {
-      const auth = getAuth();
       const user = auth.currentUser;
 
       if (!user) {
@@ -64,7 +63,6 @@ export default function SettingsScreen() {
     }
 
     try {
-      const auth = getAuth();
       const user = auth.currentUser;
 
       if (!user) {
@@ -97,7 +95,6 @@ export default function SettingsScreen() {
         return;
       }
 
-      const auth = getAuth();
       const user = auth.currentUser;
 
       if (!user) {

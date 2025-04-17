@@ -1,10 +1,8 @@
-import { db } from "@/firebaseConfig";
-import { getAuth } from "firebase/auth";
-import { addDoc, collection, getDocs, query, serverTimestamp, where, limit, orderBy, DocumentReference } from "firebase/firestore";
+import { auth, db } from "@/firebaseConfig";
+import { addDoc, collection, DocumentReference, getDocs, orderBy, query, serverTimestamp, where } from "firebase/firestore";
 
 
 export async function submitRunScore(score: number, levelId: string): Promise<DocumentReference | undefined> {
-    const auth = getAuth();
     const user = auth.currentUser;
     const numericLevelId = parseInt(levelId, 10);
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { submitRunScore } from '@/firebase/scoresService';
-import { updateUserBestScores, updateUserTotalScore } from '@/firebase/usersService';
+import { fetchUserBestScores, updateUserBestScores, updateUserTotalScore } from '@/firebase/usersService';
 import { useTimerContext } from '@/contexts/TimerContext';
 import { useStepDetectorContext } from '@/contexts/StepDetectorContext';
 
@@ -78,6 +78,9 @@ export function useScores() {
         await updateUserBestScores(score, levelId, scoreRef);
         setScore(0);
         setLastscores([]);
+        const updatedBestScores = await fetchUserBestScores();
+        return updatedBestScores;
+
     };
 
     return { score, calculateStepScore, endLevel };

@@ -36,7 +36,6 @@ export default function HomeScreen() {
                 setLoading(true);
                 const levelsData = await fetchLevels();
                 const userResultsData = await fetchUserBestScores();
-                console.log(userResultsData);
                 setLevels(levelsData);
                 setUserResults(userResultsData || []);
             } catch (error) {

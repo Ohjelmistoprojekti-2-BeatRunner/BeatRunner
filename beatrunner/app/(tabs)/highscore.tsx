@@ -36,7 +36,7 @@ export default function ScoreScreen() {
 
   const [allUsersResults, setAllUsersResults] = useState<UserResults[]>([]);
   //const [userResults, setUserResults] = useState<UserResults[]>([]);
-  //const [value, setValue] = React.useState(1);
+  const [value, setValue] = React.useState<number>(1);
   const [levels, setLevels] = useState<Levels[]>([])
   const [allUsers, setAllUsers] = useState<Users[]>([])
 
@@ -55,19 +55,6 @@ export default function ScoreScreen() {
   getData()
 
 
-
-
-  /* 
-    const getUserResult = (levelId: number) => {
-      if (!userResults || userResults.length === 0) {
-        return null;
-      }
-  
-      return userResults.filter(result => result.levelId === levelId);
-    };
-    let stuff = getUserResult(value)
-    // console.log(stuff?.sort((a, b) => b.score - a.score));
-  */
   const getUserName = (userId: string) => {
     if (!allUsers || allUsers.length == 0) {
       return null
@@ -84,14 +71,16 @@ export default function ScoreScreen() {
   //allUsersResults.sort((a, b) => b.score - a.score)
 
 
-  const getLevelName = (levelId: string) => {
-    if (!levels || levels.length == 0) {
+  const getLevel = (levelId: string) => {
+    if (!allUsersResults || allUsersResults.length == 0) {
       return null
     }
     const levelIdInt = parseInt(levelId);
-    let levelName = levels.filter(result => parseInt(result.id) === levelIdInt)
+    let level = allUsersResults.filter(result => parseInt(result.levelId) === levelIdInt)
 
-    return levelName[0].title
+
+
+    return level
   }
   //console.log(levels);
 
@@ -100,14 +89,29 @@ export default function ScoreScreen() {
 
       <Text style={globalStyles.title}>Welcome!</Text>
 
-      <Text style={globalStyles.sectionTitle}>Global Highscores</Text>
-      <Text style={styles.scoreText}>User    Level     Points      Time</Text>
+      <Text style={globalStyles.sectionTitle}>Highscores</Text>
+      <SegmentedButtons
+        value={value}
+        onValueChange={setValue}
+        buttons={[
+          {
+            value: 1,
+            label: levels[0].title
+          },
+          {
+            value: 2,
+            label: levels[1].title
+          },
+
+        ]}
+      />
+      <Text style={styles.scoreText}>User     Points      Time</Text>
       <FlatList
-        data={allUsersResults}
+        data={getLevel(value)}
 
         renderItem={({ item }) =>
           <View>
-            <Text style={styles.scoreText}>{getUserName(item.userId)}   {getLevelName(item.levelId)}  {item.score}    {formatTimestamp(item.timestamp)}</Text>
+            <Text style={styles.scoreText}>{getUserName(item.userId)}   {item.score}    {formatTimestamp(item.timestamp)}</Text>
           </View>}
 
       />
@@ -115,21 +119,7 @@ export default function ScoreScreen() {
   );
 }
 /*  varastossa
-    <SegmentedButtons
-        value={value}
-        onValueChange={setValue}
-        buttons={[
-          {
-            value: 1,
-            label: levelNames[0],
-          },
-          {
-            value: 2,
-            label: levelNames[1],
-          },
-
-        ]}
-      /> */
+ */
 
 const styles = StyleSheet.create({
   scoreContainer: {

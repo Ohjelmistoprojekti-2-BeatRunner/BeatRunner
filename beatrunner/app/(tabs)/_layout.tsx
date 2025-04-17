@@ -18,7 +18,6 @@ function DrawerTitleLogo(props: any) {
       setUser(currentUser);
 
       if (currentUser) {
-        console.log("currentuser: ", currentUser)
         const userDocRef = doc(db, 'users', currentUser.uid);
         const unsubscribeUserDoc = onSnapshot(userDocRef, (docSnap) => {
           if (docSnap.exists()) {
