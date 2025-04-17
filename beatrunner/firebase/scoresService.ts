@@ -6,6 +6,8 @@ const auth = getAuth();
 const user = auth.currentUser;
 
 export async function submitRunScore(score: number, levelId: string,) {
+    const auth = getAuth();
+    const user = auth.currentUser;
     const numericLevelId = parseInt(levelId, 10);
 
     try {

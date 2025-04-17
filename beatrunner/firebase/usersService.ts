@@ -7,7 +7,8 @@ const auth = getAuth();
 const user = auth.currentUser;
 
 export async function updateUserTotalScore(score: number, time: number, steps: number) {
-
+    const auth = getAuth();
+    const user = auth.currentUser;
     if (!user) {
         console.error("User not found");
         return;
