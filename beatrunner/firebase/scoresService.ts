@@ -21,9 +21,8 @@ export async function submitRunScore(score: number, levelId: string): Promise<Do
 
 }
 
-
 export const fetchUserResults = async () => {
-    const auth = getAuth();
+
     const user = auth.currentUser;
 
     try {
