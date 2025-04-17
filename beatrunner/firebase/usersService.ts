@@ -1,10 +1,8 @@
-import { db } from "@/firebaseConfig";
-import { getAuth } from "firebase/auth";
-import { doc, runTransaction, serverTimestamp, collection, getDocs, getDoc, setDoc, DocumentReference, DocumentData, orderBy, query, Timestamp, } from "firebase/firestore";
+import { auth, db } from "@/firebaseConfig";
+import { collection, doc, DocumentData, DocumentReference, getDoc, getDocs, runTransaction, serverTimestamp } from "firebase/firestore";
 
 export async function updateUserTotalScore(score: number, time: number, steps: number) {
 
-    const auth = getAuth();
     const user = auth.currentUser;
 
     if (!user) {
@@ -44,7 +42,6 @@ export async function updateUserBestScores(
     levelId: string,
     scoreRef: DocumentReference<DocumentData>
 ) {
-    const auth = getAuth();
     const user = auth.currentUser;
 
     if (!user) {
@@ -73,7 +70,6 @@ export async function updateUserBestScores(
 }
 
 export const fetchUserBestScores = async () => {
-    const auth = getAuth();
     const user = auth.currentUser;
     if (!user) {
         throw new Error("User not found");

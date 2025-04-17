@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Button, StyleSheet, Text, View, FlatList, } from 'react-native';
 import { ref, onValue, set, push, orderByChild, orderByValue, orderByKey, limitToLast } from "firebase/database"
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
+import { onAuthStateChanged, User } from 'firebase/auth';
 import { query, collection, doc, getDoc, getDocs } from 'firebase/firestore';
 import { db } from '@/firebaseConfig';
 import { fetchUserResults, fetchAllUserResults } from '@/firebase/scoresService';

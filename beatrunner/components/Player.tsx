@@ -75,7 +75,6 @@ const Player = ({ levelId, songs }: PlayerProps) => {
                     onPress: () => {
                         stopMusicDetector();
                         pauseTimer();
-                        endLevel(levelId);
                         setTimeout(() => {
                             resetTimer()
                             router.replace({ pathname: "/(tabs)" })

@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { Text, StyleSheet, View } from 'react-native';
+import { auth, db } from '@/firebaseConfig';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { Drawer } from 'expo-router/drawer';
-import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
-import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
-import { doc, onSnapshot } from 'firebase/firestore';
-import { db } from '@/firebaseConfig';
 import { globalStyles } from '@/styles/globalStyles';
+import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
+import { Drawer } from 'expo-router/drawer';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { doc, onSnapshot } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
 function DrawerTitleLogo(props: any) {
   const titleColor = useThemeColor({ light: 'black', dark: 'white' }, 'text');
@@ -14,11 +14,11 @@ function DrawerTitleLogo(props: any) {
   const [username, setUsername] = useState<string | null>(null);
 
   useEffect(() => {
-    const auth = getAuth();
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
 
       if (currentUser) {
+        console.log("currentuser: ", currentUser)
         const userDocRef = doc(db, 'users', currentUser.uid);
         const unsubscribeUserDoc = onSnapshot(userDocRef, (docSnap) => {
           if (docSnap.exists()) {
