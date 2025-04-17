@@ -2,7 +2,6 @@ import { auth, db } from "@/firebaseConfig";
 import { collection, doc, DocumentData, DocumentReference, getDoc, getDocs, runTransaction, serverTimestamp } from "firebase/firestore";
 
 export async function updateUserTotalScore(score: number, time: number, steps: number) {
-
     const user = auth.currentUser;
 
     if (!user) {
@@ -69,6 +68,7 @@ export async function updateUserBestScores(
     }
 }
 
+//not in use anymore
 export const fetchUserBestScores = async () => {
     const user = auth.currentUser;
     if (!user) {
@@ -127,5 +127,28 @@ export const fetchAllUsers = async () => {
         console.error("Error fetching allUsers results: ", error);
         return [];
     }
+}
 
+export async function updateUserThreshold(threshold: number) {
+    const user = auth.currentUser;
+
+    if (!user) {
+        console.error("User not found");
+        return;
+    }
+    const userRef = doc(db, "users", user.uid);
+
+    try {
+        await runTransaction(db, async (transaction) => {
+            const userDoc = await transaction.get(userRef);
+            if (!userDoc.exists()) {
+                throw new Error("User not found");
+            }
+            transaction.update(userRef, {
+                threshold: threshold,
+            });
+        });
+    } catch (error) {
+        console.error("Error updating user threshold:", error);
+    }
 }

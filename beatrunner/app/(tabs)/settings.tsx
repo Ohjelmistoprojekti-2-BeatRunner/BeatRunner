@@ -18,8 +18,10 @@ export default function SettingsScreen() {
     try {
 
       await signOut(auth);
-      Alert.alert('Logged out', 'You have been successfully logged out.');
-      router.replace('/login');
+      setTimeout(() => {
+        Alert.alert('Logged out', 'You have been successfully logged out.');
+        router.replace('/login');
+    }, 300);
     } catch (error) {
       Alert.alert('Error', 'Failed to log out. Please try again.');
       console.error(error);

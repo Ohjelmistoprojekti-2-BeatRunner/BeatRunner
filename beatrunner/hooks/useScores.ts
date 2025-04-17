@@ -78,9 +78,6 @@ export function useScores() {
         await updateUserBestScores(score, levelId, scoreRef);
         setScore(0);
         setLastscores([]);
-        const updatedBestScores = await fetchUserBestScores();
-        return updatedBestScores;
-
     };
 
     return { score, calculateStepScore, endLevel };

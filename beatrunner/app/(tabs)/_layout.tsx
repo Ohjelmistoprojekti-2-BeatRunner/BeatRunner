@@ -1,42 +1,21 @@
-import { auth, db } from '@/firebaseConfig';
+import { useUserContext } from '@/contexts/UserContext';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { globalStyles } from '@/styles/globalStyles';
 import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { Drawer } from 'expo-router/drawer';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { doc, onSnapshot } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 function DrawerTitleLogo(props: any) {
   const titleColor = useThemeColor({ light: 'black', dark: 'white' }, 'text');
-  const [user, setUser] = useState<User | null>(null);
-  const [username, setUsername] = useState<string | null>(null);
+  const { user, userData, loading } = useUserContext();
 
-  useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+  
+  if (loading) {
+    return null;
+  }
 
-      if (currentUser) {
-        const userDocRef = doc(db, 'users', currentUser.uid);
-        const unsubscribeUserDoc = onSnapshot(userDocRef, (docSnap) => {
-          if (docSnap.exists()) {
-            setUsername(docSnap.data()?.username || null);
-          }
-        });
-
-        return () => {
-          unsubscribeUserDoc();
-        };
-      } else {
-        setUsername(null);
-      }
-    });
-
-    return unsubscribeAuth;
-  }, []);
-
-
+ 
   return (
     <DrawerContentScrollView {...props}>
       <Text style={[styles.title, { color: titleColor }]}>BeatRunner</Text>
@@ -44,7 +23,7 @@ function DrawerTitleLogo(props: any) {
         <View>
           <Text style={[globalStyles.contentText, { color: titleColor }]}>Logged in as:</Text>
           <Text style={[globalStyles.contentText, { color: titleColor }]}>
-            {username ? username : user.email} 
+            {userData?.username || user.email} 
           </Text>
         </View>
       ) : (

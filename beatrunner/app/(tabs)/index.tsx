@@ -1,5 +1,5 @@
+import { useUserContext } from '@/contexts/UserContext';
 import { fetchLevels } from '@/firebase/levelsService';
-import { fetchUserBestScores } from '@/firebase/usersService';
 import { formatTimestamp } from '@/scripts/formatTimestamp';
 import { globalStyles } from '@/styles/globalStyles';
 import { router } from 'expo-router';
@@ -13,31 +13,20 @@ interface Level {
     calories: number;
     songs: [];
 }
-interface ScoreData {
-    userId: string;
-    levelId: string;
-    score: number;
-    timestamp: number;
-}
-interface UserResult {
-    levelId: string;
-    scoreData: ScoreData | null;
-}
 
 export default function HomeScreen() {
 
+    const { bestScores, loading: userLoading } = useUserContext();
     const [levels, setLevels] = useState<Level[]>([]);
-    const [userResults, setUserResults] = useState<UserResult[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const { user, userData, loading: authLoading } = useUserContext();
 
     useEffect(() => {
         const getLevels = async () => {
             try {
                 setLoading(true);
                 const levelsData = await fetchLevels();
-                const userResultsData = await fetchUserBestScores();
                 setLevels(levelsData);
-                setUserResults(userResultsData || []);
             } catch (error) {
                 console.error("Error loading levels: ", error);
             } finally {
@@ -49,23 +38,20 @@ export default function HomeScreen() {
     }, []);
 
 
-    const getUserResult = (levelId: string): UserResult | undefined => {
-        return userResults.find((r) => r.levelId === levelId);
-    };
-
-
     const Item = ({ id, title, difficulty, calories, songs }: Level) => {
-        const userResult = getUserResult(id);
+        const scoreData = bestScores?.[id];
+
+        const buttonStyle = scoreData ? globalStyles.buttonCompleted : globalStyles.button;
         return (
             <View style={{ margin: 10, width: 300 }}>
-                <TouchableOpacity style={globalStyles.button} onPress={() => router.replace({
+                <TouchableOpacity style={buttonStyle} onPress={() => router.replace({
                     pathname: "/level",
                     params: { id, title, difficulty, calories, songs }
                 })}>
                     <Text style={globalStyles.buttonText}>{title}</Text>
-                    {userResult && (
+                    {scoreData && (
                         <Text style={{ color: 'white', marginTop: 5 }}>
-                            Best Score: {userResult.scoreData?.score}  {formatTimestamp(userResult.scoreData?.timestamp)}
+                            Best Score: {scoreData.score}  {formatTimestamp(scoreData.timestamp)}
                         </Text>
                     )}
                 </TouchableOpacity>
@@ -73,7 +59,7 @@ export default function HomeScreen() {
         );
     };
 
-    if (loading) {
+    if (userLoading || loading) {
         return <View style={globalStyles.container}>
             <View style={globalStyles.topContainer}>
                 <Text style={globalStyles.title}>loading...</Text>
@@ -84,6 +70,12 @@ export default function HomeScreen() {
 
     return (
         <View style={globalStyles.container}>
+            <View style={globalStyles.contentContainer}>
+                <Text>{userData?.username}'s stats</Text>
+                <Text>Total steps: {userData?.totalSteps}</Text>
+                <Text>Total time: {userData?.totalTime}</Text>
+                <Text>Total score: {userData?.totalScore}</Text>
+            </View>
             <View style={globalStyles.topContainer}>
                 <Text style={globalStyles.title}>Welcome!</Text>
             </View>

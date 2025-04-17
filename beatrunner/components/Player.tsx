@@ -8,11 +8,12 @@ import { Alert, BackHandler, Button, InteractionManager, ScrollView, StyleSheet,
 import MusicPlayer from './MusicPlayer';
 import StepDetector from './StepDetector';
 import { useMusicContext } from '@/contexts/MusicContext';
+import { useUserContext } from '@/contexts/UserContext';
 
 type PlayerProps = {
     levelId: string;
     songs: string[];
-  };
+};
 
 const Player = ({ levelId, songs }: PlayerProps) => {
     const { time, startTimer, pauseTimer, resetTimer } = useTimerContext();
@@ -23,6 +24,8 @@ const Player = ({ levelId, songs }: PlayerProps) => {
     const [started, setStarted] = useState(false);
 
     const { songBpm, levelEnd, setLevelEnd } = useMusicContext();
+
+    const { bestScores, loading: userLoading, user } = useUserContext();
 
     const { startMusicDetector, stopMusicDetector } = useMusicDetector();
     const { score, calculateStepScore, endLevel } = useScores();
@@ -75,6 +78,7 @@ const Player = ({ levelId, songs }: PlayerProps) => {
                     onPress: () => {
                         stopMusicDetector();
                         pauseTimer();
+                        endLevel(levelId);
                         setTimeout(() => {
                             resetTimer()
                             router.replace({ pathname: "/(tabs)" })
@@ -87,92 +91,95 @@ const Player = ({ levelId, songs }: PlayerProps) => {
 
     const gameEnd = () => {
         Alert.alert(
-            "Congratulations! Level passed.",
-            `Your score was: ${score}`,
-            [
-                {
-                    text: "Exit",
-                    onPress: () => {
-                        pauseTimer();
-                        setLevelEnd(false);
-                        endLevel(levelId);
-                        setTimeout(() => {
-                            resetTimer()
-                            router.replace({ pathname: "/(tabs)" })
-                        }, 500);
-                    }
+            "Level passed.",
+            `${bestScores[levelId]?.score && score > bestScores[levelId]?.score ?
+                `New highscore! ${score}` :
+                `Your score was: ${score}`
+            }`,
+        [
+            {
+                text: "Exit",
+                onPress: () => {
+                    pauseTimer();
+                    setLevelEnd(false);
+                    endLevel(levelId);
+                    setTimeout(() => {
+                        resetTimer()
+                        router.replace({ pathname: "/(tabs)" })
+                    }, 500);
                 }
+}
             ]
         );
     };
 
-    useEffect(() => {
-        if (levelEnd) {
-            stopMusicDetector();
-            gameEnd();
-        }
-    }, [levelEnd]);
+useEffect(() => {
+    if (levelEnd) {
+        stopMusicDetector();
+        gameEnd();
+    }
+}, [levelEnd]);
 
 
-    useEffect(() => {
-        const backAction = () => {
-            pauseTimer();
-            askBeforeExit();
-            return true;
-        };
+useEffect(() => {
+    const backAction = () => {
+        pauseTimer();
+        askBeforeExit();
+        return true;
+    };
 
-        const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
 
-        return () => {
-            backHandler.remove();
-        };
-    }, []);
+    return () => {
+        backHandler.remove();
+    };
+}, []);
 
-    return (
-        <View style={globalStyles.container}>
-            <StepDetector onStepDetected={handleStepDetected} autoStart={isPlaying} />
+return (
+    <View style={globalStyles.container}>
+        <StepDetector onStepDetected={handleStepDetected} autoStart={isPlaying} />
 
-            <Text style={globalStyles.contentText}>Step Count: {stepCount}</Text>
-            <Text style={globalStyles.contentText}>Tempo: {tempo} SPM</Text>
-            <Text style={globalStyles.contentText}> Score: {score} points</Text>
+        <Text style={globalStyles.contentText}>Step Count: {stepCount}</Text>
+        <Text style={globalStyles.contentText}>Tempo: {tempo} SPM</Text>
+        <Text style={globalStyles.contentText}> Score: {score} points</Text>
 
-            <Text style={globalStyles.contentText}> Songs bpm: {songBpm} </Text>
+        <Text style={globalStyles.contentText}> Songs bpm: {songBpm} </Text>
 
-            <MusicPlayer songs={songs} />
+        <MusicPlayer songs={songs} />
 
+        <Button
+            title={isPlaying ? 'Pause Both' : 'Play Both'}
+            onPress={togglePlayPause}
+            color="#4CAF50"
+        />
+
+        {started && (
             <Button
-                title={isPlaying ? 'Pause Both' : 'Play Both'}
-                onPress={togglePlayPause}
+                title={'End game'}
+                onPress={askBeforeExit}
                 color="#4CAF50"
             />
+        )}
 
-            {started && (
-                <Button
-                    title={'End game'}
-                    onPress={askBeforeExit}
-                    color="#4CAF50"
-                />
-            )}
+        <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold', marginVertical: 10 }}>
+            Timer: {(time / 1000).toFixed(2)} s
+        </Text>
 
-            <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold', marginVertical: 10 }}>
-                Timer: {(time / 1000).toFixed(2)} s
-            </Text>
-
-            <View style={styles.timestampContainer}>
-                <ScrollView style={styles.timestampScroll}>
-                    {stepTimestamps.length > 0 ? (
-                        stepTimestamps.slice(-5).map((timestamp, index) => (
-                            <Text key={index} style={styles.timestampText}>
-                                Step {stepTimestamps.length - 5 + index + 1}: {(timestamp / 1000).toFixed(3)}s
-                            </Text>
-                        ))
-                    ) : (
-                        <Text style={styles.noTimestampsText}>No steps detected yet</Text>
-                    )}
-                </ScrollView>
-            </View>
+        <View style={styles.timestampContainer}>
+            <ScrollView style={styles.timestampScroll}>
+                {stepTimestamps.length > 0 ? (
+                    stepTimestamps.slice(-5).map((timestamp, index) => (
+                        <Text key={index} style={styles.timestampText}>
+                            Step {stepTimestamps.length - 5 + index + 1}: {(timestamp / 1000).toFixed(3)}s
+                        </Text>
+                    ))
+                ) : (
+                    <Text style={styles.noTimestampsText}>No steps detected yet</Text>
+                )}
+            </ScrollView>
         </View>
-    );
+    </View>
+);
 };
 
 const styles = StyleSheet.create({ //for testing the timestamps only
