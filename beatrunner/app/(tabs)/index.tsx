@@ -75,6 +75,7 @@ export default function HomeScreen() {
                 <Text>Total steps: {userData?.totalSteps}</Text>
                 <Text>Total time: {userData?.totalTime}</Text>
                 <Text>Total score: {userData?.totalScore}</Text>
+                <Text>Levels completed: {Object.keys(bestScores).length}</Text>
             </View>
             <View style={globalStyles.topContainer}>
                 <Text style={globalStyles.title}>Welcome!</Text>

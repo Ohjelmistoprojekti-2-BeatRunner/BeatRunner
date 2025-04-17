@@ -60,11 +60,13 @@ export default function RegisterScreen() {
       return;
     }
 
+    const nameLowercase = trimmedUsername.toLowerCase()
+
     try {
       // Tarkistetaan, onko käyttäjänimi jo käytössä
       const usernameQuery = query(
         collection(db, 'users'),
-        where('username', '==', trimmedUsername)
+        where('usernameLowercase', '==', nameLowercase) // firestore is case-sensitive: usernameLowercase for username comparisons.
       );
       const existing = await getDocs(usernameQuery);
 
@@ -76,6 +78,7 @@ export default function RegisterScreen() {
       // Päivitetään username olemassa olevaan dokumenttiin
       await updateDoc(doc(db, 'users', userId), {
         username: trimmedUsername,
+        usernameLowercase: nameLowercase,
       });
 
       Alert.alert('Success', 'Account created!');

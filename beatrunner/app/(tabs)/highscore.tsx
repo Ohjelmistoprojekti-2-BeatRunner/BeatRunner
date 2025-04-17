@@ -1,6 +1,6 @@
 import { globalStyles } from '@/styles/globalStyles';
 import React, { useEffect, useState } from 'react';
-import { Button, StyleSheet, Text, View, FlatList, } from 'react-native';
+import { Button, StyleSheet, Text, View, FlatList, TextInput, TouchableOpacity, } from 'react-native';
 import { ref, onValue, set, push, orderByChild, orderByValue, orderByKey, limitToLast } from "firebase/database"
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { onAuthStateChanged, User } from 'firebase/auth';
@@ -8,10 +8,11 @@ import { query, collection, doc, getDoc, getDocs } from 'firebase/firestore';
 import { db } from '@/firebaseConfig';
 import { fetchUserResults, fetchAllUserResults } from '@/firebase/scoresService';
 import { fetchLevels } from '@/firebase/levelsService';
-import { fetchAllUsers } from '@/firebase/usersService';
+import { fetchAllUsers, fetchUserByName, getUserIdByName } from '@/firebase/usersService';
 import { SegmentedButtons } from 'react-native-paper';
 import { formatTimestamp } from '@/scripts/formatTimestamp';
 import { useUserContext } from '@/contexts/UserContext';
+import { router } from 'expo-router';
 
 interface UserResults {
     levelId: number;
@@ -40,6 +41,8 @@ export default function ScoreScreen() {
     const [value, setValue] = React.useState<number>(1);
     const [levels, setLevels] = useState<Levels[]>([])
     const [allUsers, setAllUsers] = useState<Users[]>([])
+    const [searchTerm, setSearchTerm] = useState('');
+
     const { user, userData, loading } = useUserContext();
 
     useEffect(() => {
@@ -87,19 +90,56 @@ export default function ScoreScreen() {
     }
     //console.log(levels);
 
+    const handleRouteToProfile = async () => {
+        if (!searchTerm.trim()) return;
+
+        const userId = await getUserIdByName(searchTerm)
+        if (!userId) {
+            console.log("User not found")
+            return;
+        };
+        console.log("UserId", userId);
+        router.replace({
+            pathname: "/profile",
+            params: { userId }
+        });
+    };
+
 
     if (loading) {
         return null;
     }
 
     return (
+
         <View style={globalStyles.container}>
-            <Text style={globalStyles.sectionTitle}>Highscores</Text>
-            <View style={globalStyles.contentContainer}>
-                <Text style={styles.scoreText}>{userData?.username}'s stats</Text>
-                <Text style={styles.scoreText}>Total steps: {userData?.totalSteps}</Text>
-                <Text style={styles.scoreText}>Total time: {userData?.totalTime}</Text>
-                <Text style={styles.scoreText}>Total score: {userData?.totalScore}</Text>
+            <View style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: '#000000dd'
+            }}>
+                <View style={{
+                    width: '85%',
+                    backgroundColor: 'black',
+                    borderRadius: 10,
+                    padding: 20
+                }}>
+                    <Text style={[globalStyles.title, { paddingBottom: 10 }]}>Find user</Text>
+                    <TextInput
+                        style={globalStyles.input}
+                        placeholder="Username"
+                        placeholderTextColor="#888"
+                        onChangeText={setSearchTerm}
+                    />
+                    <TouchableOpacity style={[
+                        globalStyles.smallButton,
+                        { marginTop: 10 }
+                    ]}
+                        onPress={handleRouteToProfile}>
+                        <Text style={globalStyles.buttonText}>Search user</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
 
             {levels.length >= 2 && (

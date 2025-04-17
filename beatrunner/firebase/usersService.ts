@@ -1,5 +1,5 @@
 import { auth, db } from "@/firebaseConfig";
-import { collection, doc, DocumentData, DocumentReference, getDoc, getDocs, runTransaction, serverTimestamp } from "firebase/firestore";
+import { collection, doc, DocumentData, DocumentReference, getDoc, getDocs, query, runTransaction, serverTimestamp, where } from "firebase/firestore";
 
 export async function updateUserTotalScore(score: number, time: number, steps: number) {
     const user = auth.currentUser;
@@ -104,6 +104,68 @@ export const fetchUserBestScores = async () => {
     return userBestScores;
 }
 
+export const fetchUserByName = async (userName: string) => {
+    try {
+        const usernameQuery = query(
+            collection(db, 'users'),
+            where('usernameLowercase', '==', userName.trim().toLowerCase()) // firestore is case-sensitive: usernameLowercase for username comparisons.
+        );
+        const querySnapshot = await getDocs(usernameQuery);
+
+        if (!querySnapshot.empty) {
+            return {
+                id: querySnapshot.docs[0].id,
+                ...querySnapshot.docs[0].data(),
+            };
+        } else {
+            console.warn("User not found");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error fetching user by name: ", error);
+        return null;
+    }
+};
+
+export const getUserIdByName = async (userName: string): Promise<string | null> => {
+    try {
+        const usernameQuery = query(
+            collection(db, 'users'),
+            where('usernameLowercase', '==', userName.trim().toLowerCase()) 
+        );
+        const querySnapshot = await getDocs(usernameQuery);
+
+        if (!querySnapshot.empty) {
+            const doc = querySnapshot.docs[0];
+            return doc.id;
+        } else {
+            console.warn("User not found");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error fetching user by name: ", error);
+        return null;
+    }
+
+};
+
+export const fetchUserById = async (userId: string) => {
+    const userRef = doc(db, "users", userId);
+    try {
+        const docSnap = await getDoc(userRef);
+
+        if (docSnap.exists()) {
+            return docSnap.data();
+        } else {
+            console.warn("User not found");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error fetching user by id: ", error);
+        return null;
+    }
+};
+
 export const fetchAllUsers = async () => {
 
     try {
@@ -131,7 +193,7 @@ export const fetchAllUsers = async () => {
 
 export const updateUserThreshold = async (threshold: number) => {
     const user = auth.currentUser;
-    
+
     if (!user) {
         console.error("User not found");
         return;
