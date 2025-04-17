@@ -11,7 +11,7 @@ import { fetchLevels } from '@/firebase/levelsService';
 import { fetchAllUsers } from '@/firebase/usersService';
 import { SegmentedButtons } from 'react-native-paper';
 import { formatTimestamp } from '@/scripts/formatTimestamp';
-import { useUser } from '@/contexts/UserContext';
+import { useUserContext } from '@/contexts/UserContext';
 
 interface UserResults {
     levelId: number;
@@ -40,7 +40,7 @@ export default function ScoreScreen() {
     const [value, setValue] = React.useState<number>(1);
     const [levels, setLevels] = useState<Levels[]>([])
     const [allUsers, setAllUsers] = useState<Users[]>([])
-    const { user, userData, loading } = useUser();
+    const { user, userData, loading } = useUserContext();
 
     useEffect(() => {
         getData();
