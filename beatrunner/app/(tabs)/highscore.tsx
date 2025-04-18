@@ -1,12 +1,7 @@
 import { globalStyles } from '@/styles/globalStyles';
 import React, { useEffect, useState } from 'react';
 import { Button, StyleSheet, Text, View, FlatList, } from 'react-native';
-import { ref, onValue, set, push, orderByChild, orderByValue, orderByKey, limitToLast } from "firebase/database"
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
-import { query, collection, doc, getDoc, getDocs } from 'firebase/firestore';
-import { db } from '@/firebaseConfig';
-import { fetchUserResults, fetchAllUserResults } from '@/firebase/scoresService';
+import { fetchAllUserResults } from '@/firebase/scoresService';
 import { fetchLevels } from '@/firebase/levelsService';
 import { fetchAllUsers } from '@/firebase/usersService';
 import { SegmentedButtons } from 'react-native-paper';
@@ -35,7 +30,6 @@ interface Levels {
 export default function ScoreScreen() {
 
   const [allUsersResults, setAllUsersResults] = useState<UserResults[]>([]);
-  //const [userResults, setUserResults] = useState<UserResults[]>([]);
   const [value, setValue] = React.useState<number>(1);
   const [levels, setLevels] = useState<Levels[]>([])
   const [allUsers, setAllUsers] = useState<Users[]>([])
@@ -44,15 +38,14 @@ export default function ScoreScreen() {
   const getData = async () => {
     const levelData = await fetchLevels();
     const userData = await fetchAllUsers();
-    //const userResultsData = await fetchUserResults();
     const allUsersResultsData = await fetchAllUserResults();
 
     setLevels(levelData)
     setAllUsers(userData)
-    //setUserResults(userResultsData);
     setAllUsersResults(allUsersResultsData)
   }
-  getData()
+  useEffect(() => { getData() }, [])
+  //getData()
 
 
   const getUserName = (userId: string) => {
@@ -96,11 +89,11 @@ export default function ScoreScreen() {
         buttons={[
           {
             value: 1,
-            label: levels[0].title
+            label: levels.length != 0 ? levels[0].title : "Level name 1"
           },
           {
             value: 2,
-            label: levels[1].title
+            label: levels.length != 0 ? levels[1].title : "Level name 2"
           },
 
         ]}
@@ -110,8 +103,10 @@ export default function ScoreScreen() {
         data={getLevel(value)}
 
         renderItem={({ item }) =>
-          <View>
-            <Text style={styles.scoreText}>{getUserName(item.userId)}   {item.score}    {formatTimestamp(item.timestamp)}</Text>
+          <View style={styles.scoreList}>
+            <Text style={styles.scoreText}>{getUserName(item.userId)}</Text>
+            <Text style={styles.scoreText}>{item.score}</Text>
+            <Text style={styles.scoreText}>{formatTimestamp(item.timestamp)}</Text>
           </View>}
 
       />
@@ -132,5 +127,11 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     marginVertical: 5,
+
+
+  },
+  scoreList: {
+    backgroundColor: "gray",
+    flexDirection: "row",
   },
 });
