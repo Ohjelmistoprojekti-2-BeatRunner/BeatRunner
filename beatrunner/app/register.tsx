@@ -26,7 +26,6 @@ export default function RegisterScreen() {
 
       // Alusta käyttäjädokumentti ilman usernamea
       await setDoc(doc(db, 'users', user.uid), {
-        email: user.email,
         createdAt: serverTimestamp(),
         username: null,
       });

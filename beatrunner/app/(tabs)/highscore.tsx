@@ -13,7 +13,7 @@ import { SegmentedButtons } from 'react-native-paper';
 import { formatTimestamp } from '@/scripts/formatTimestamp';
 import { useUserContext } from '@/contexts/UserContext';
 import { router } from 'expo-router';
-import ProfileModal from '@/components/ProfileModal';
+import ProfileScoresModal from '@/components/ProfileScoresModal';
 
 interface UserResults {
     levelId: number;
@@ -105,17 +105,13 @@ export default function ScoreScreen() {
         <View style={globalStyles.container}>
             <View style={{
                 flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
                 backgroundColor: '#000000dd'
             }}>
                 <View style={{
                     width: '85%',
                     backgroundColor: 'black',
                     borderRadius: 10,
-                    padding: 20
                 }}>
-                    <Text style={[globalStyles.title, { paddingBottom: 10 }]}>Find user</Text>
                     <TextInput
                         style={globalStyles.input}
                         placeholder="Username"
@@ -123,8 +119,7 @@ export default function ScoreScreen() {
                         onChangeText={setSearchTerm}
                     />
                     <TouchableOpacity style={[
-                        globalStyles.smallButton,
-                        { marginTop: 10 }
+                        globalStyles.button
                     ]}
                         onPress={handleProfileModal}>
                         <Text style={globalStyles.buttonText}>Search user</Text>
@@ -159,10 +154,11 @@ export default function ScoreScreen() {
                     </View>}
             />
             {selectedUserId && (
-                <ProfileModal
+                <ProfileScoresModal
                     visible={modalVisible}
                     userId={selectedUserId}
                     onClose={() => setModalVisible(false)}
+                    mode='profile'
                 />
             )}
         </View>
