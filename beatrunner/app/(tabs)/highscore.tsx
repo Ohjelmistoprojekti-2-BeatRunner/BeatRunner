@@ -7,12 +7,13 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { query, collection, doc, getDoc, getDocs } from 'firebase/firestore';
 import { db } from '@/firebaseConfig';
 import { fetchUserResults, fetchAllUserResults } from '@/firebase/scoresService';
-import { fetchLevels } from '@/firebase/levelsService';
-import { fetchAllUsers, fetchUserByName, getUserIdByName } from '@/firebase/usersService';
+import { fetchLevels, Level } from '@/firebase/levelsService';
+import { fetchAllUsers, fetchUserByName, getUserIdByName, UserProfile } from '@/firebase/usersService';
 import { SegmentedButtons } from 'react-native-paper';
 import { formatTimestamp } from '@/scripts/formatTimestamp';
 import { useUserContext } from '@/contexts/UserContext';
 import { router } from 'expo-router';
+import ProfileModal from '@/components/ProfileModal';
 
 interface UserResults {
     levelId: number;
@@ -20,28 +21,19 @@ interface UserResults {
     score: number;
     timestamp: number;
 }
-interface Users {
-    id: string;
-    createdAt: number;
-    email: string;
-    username: string;
-}
-interface Levels {
-    id: string;
-    title: string;
-    difficulty: any;
-    calories: any;
-    songs: any;
-}
+
 
 export default function ScoreScreen() {
 
     const [allUsersResults, setAllUsersResults] = useState<UserResults[]>([]);
     //const [userResults, setUserResults] = useState<UserResults[]>([]);
     const [value, setValue] = React.useState<number>(1);
-    const [levels, setLevels] = useState<Levels[]>([])
-    const [allUsers, setAllUsers] = useState<Users[]>([])
+    const [levels, setLevels] = useState<Level[]>([])
+    const [allUsers, setAllUsers] = useState<UserProfile[]>([])
+
     const [searchTerm, setSearchTerm] = useState('');
+    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
     const { user, userData, loading } = useUserContext();
 
@@ -90,19 +82,17 @@ export default function ScoreScreen() {
     }
     //console.log(levels);
 
-    const handleRouteToProfile = async () => {
+    const handleProfileModal = async () => {
         if (!searchTerm.trim()) return;
 
         const userId = await getUserIdByName(searchTerm)
-        if (!userId) {
-            console.log("User not found")
-            return;
-        };
-        console.log("UserId", userId);
-        router.replace({
-            pathname: "/profile",
-            params: { userId }
-        });
+        if (userId) {
+            setSelectedUserId(userId);
+            setModalVisible(true)
+        } else {
+            alert("User not found")
+        }
+
     };
 
 
@@ -136,7 +126,7 @@ export default function ScoreScreen() {
                         globalStyles.smallButton,
                         { marginTop: 10 }
                     ]}
-                        onPress={handleRouteToProfile}>
+                        onPress={handleProfileModal}>
                         <Text style={globalStyles.buttonText}>Search user</Text>
                     </TouchableOpacity>
                 </View>
@@ -167,8 +157,14 @@ export default function ScoreScreen() {
                     <View>
                         <Text style={styles.scoreText}>{getUserName(item.userId)}   {item.score}    {formatTimestamp(item.timestamp)}</Text>
                     </View>}
-
             />
+            {selectedUserId && (
+                <ProfileModal
+                    visible={modalVisible}
+                    userId={selectedUserId}
+                    onClose={() => setModalVisible(false)}
+                />
+            )}
         </View>
     );
 }

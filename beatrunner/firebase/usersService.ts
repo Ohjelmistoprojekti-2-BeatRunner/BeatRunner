@@ -1,6 +1,24 @@
 import { auth, db } from "@/firebaseConfig";
 import { collection, doc, DocumentData, DocumentReference, getDoc, getDocs, query, runTransaction, serverTimestamp, where } from "firebase/firestore";
 
+interface BestScore {
+    score: number;
+    timestamp: number;
+  }
+  
+  export interface UserProfile {
+    id: string;
+    username: string;
+    email?: string;
+    totalRuns?: number;
+    totalSteps?: number;
+    totalTime?: number;
+    totalScore?: number;
+    lastRun?: number;
+    createdAt?: number;
+    bestScores?: Record<string, BestScore>;
+  }
+
 export async function updateUserTotalScore(score: number, time: number, steps: number) {
     const user = auth.currentUser;
 
@@ -149,22 +167,43 @@ export const getUserIdByName = async (userName: string): Promise<string | null> 
 
 };
 
-export const fetchUserById = async (userId: string) => {
-    const userRef = doc(db, "users", userId);
+export const fetchUserById = async (userId: string): Promise<UserProfile | null> => {
     try {
-        const docSnap = await getDoc(userRef);
-
-        if (docSnap.exists()) {
-            return docSnap.data();
-        } else {
-            console.warn("User not found");
-            return null;
-        }
-    } catch (error) {
-        console.error("Error fetching user by id: ", error);
+      const userRef = doc(db, "users", userId);
+      const userSnap = await getDoc(userRef);
+  
+      if (!userSnap.exists()) {
+        console.warn("User not found");
         return null;
+      }
+  
+      const userData = userSnap.data();
+  
+      const bestScoresRef = collection(db, "users", userId, "bestScores");
+      const bestScoresSnap = await getDocs(bestScoresRef);
+      const bestScores: Record<string, BestScore> = {};
+  
+      bestScoresSnap.forEach((doc) => {
+        bestScores[doc.id] = doc.data() as BestScore;
+      });
+  
+      return {
+        id: userId,
+        username: userData.username ?? "Unknown",
+        email: userData.email,
+        totalRuns: userData.totalRuns,
+        totalSteps: userData.totalSteps,
+        totalTime: userData.totalTime,
+        totalScore: userData.totalScore,
+        lastRun: userData.lastRun,
+        createdAt: userData.createdAt,
+        bestScores,
+      };
+    } catch (error) {
+      console.error("Error fetching user by ID:", error);
+      return null;
     }
-};
+  };
 
 export const fetchAllUsers = async () => {
 

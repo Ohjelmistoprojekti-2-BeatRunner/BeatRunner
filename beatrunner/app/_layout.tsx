@@ -87,9 +87,6 @@ export default function RootLayout() {
                                 <Stack.Screen name="level" options={{
                                     headerTitle: "Level"
                                 }} />
-                                <Stack.Screen name="profile" options={{
-                                    headerTitle: "Profile"
-                                }} />
                                 <Stack.Screen name="login" options={{
                                     headerTitle: "Login",
                                     headerBackVisible: false,

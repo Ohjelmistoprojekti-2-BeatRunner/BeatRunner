@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Alert, Modal } from 'react-nat
 import { useRouter } from 'expo-router';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '@/firebaseConfig';
-import { doc, setDoc, updateDoc, getDocs, collection, query, where } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, getDocs, collection, query, where, serverTimestamp } from 'firebase/firestore';
 import { globalStyles } from '@/styles/globalStyles';
 
 export default function RegisterScreen() {
@@ -27,7 +27,7 @@ export default function RegisterScreen() {
       // Alusta käyttäjädokumentti ilman usernamea
       await setDoc(doc(db, 'users', user.uid), {
         email: user.email,
-        createdAt: new Date().toISOString(),
+        createdAt: serverTimestamp(),
         username: null,
       });
 

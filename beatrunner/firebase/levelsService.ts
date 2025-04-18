@@ -1,6 +1,15 @@
 import { db } from '@/firebaseConfig';
 import { collection, getDocs } from 'firebase/firestore';
 
+interface Level {
+    id: string;
+    title: string;
+    difficulty: string;
+    calories: number;
+    songs: [];
+}
+
+
 export const fetchLevels = async () => {
 
     try {

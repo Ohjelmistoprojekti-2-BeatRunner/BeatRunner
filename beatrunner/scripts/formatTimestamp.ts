@@ -2,6 +2,8 @@ import { formatDistanceToNow, format } from 'date-fns';
 
 //date-fns library to show timestamps in a readable way, like "10 minutes ago"
 export const formatTimestamp = (timestamp: any) => {
+    if(!timestamp) return "No date"
+
     const date = timestamp.toDate();
 
     // Check if the date is less than 2 days ago
