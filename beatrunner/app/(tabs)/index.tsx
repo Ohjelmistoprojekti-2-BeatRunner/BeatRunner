@@ -1,18 +1,11 @@
 import { useUserContext } from '@/contexts/UserContext';
-import { fetchLevels } from '@/firebase/levelsService';
+import { fetchLevels, Level } from '@/firebase/levelsService';
 import { formatTimestamp } from '@/scripts/formatTimestamp';
 import { globalStyles } from '@/styles/globalStyles';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 
-interface Level {
-    id: string;
-    title: string;
-    difficulty: string;
-    calories: number;
-    songs: [];
-}
 
 export default function HomeScreen() {
 

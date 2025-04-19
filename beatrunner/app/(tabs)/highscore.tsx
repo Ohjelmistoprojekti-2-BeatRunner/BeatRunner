@@ -1,25 +1,12 @@
+import ProfileScoresModal from '@/components/ProfileScoresModal';
+import { useUserContext } from '@/contexts/UserContext';
+import { fetchLevels, Level } from '@/firebase/levelsService';
+import { fetchUserIdByName, fetchUsersOrderByTotalRuns, fetchUsersOrderByTotalScore, UserProfile } from '@/firebase/usersService';
 import { globalStyles } from '@/styles/globalStyles';
 import React, { useEffect, useState } from 'react';
-import { Button, StyleSheet, Text, View, FlatList, TextInput, TouchableOpacity, } from 'react-native';
-<<<<<<< HEAD
-import { ref, onValue, set, push, orderByChild, orderByValue, orderByKey, limitToLast } from "firebase/database"
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { query, collection, doc, getDoc, getDocs } from 'firebase/firestore';
-import { db } from '@/firebaseConfig';
-import { fetchUserResults, fetchAllUserResults } from '@/firebase/scoresService';
-import { fetchLevels, Level } from '@/firebase/levelsService';
-import { fetchAllUsers, fetchUserByName, getUserIdByName, UserProfile } from '@/firebase/usersService';
-=======
-import { fetchAllUserResults } from '@/firebase/scoresService';
-import { fetchLevels } from '@/firebase/levelsService';
-import { fetchAllUsers, fetchUserByName, getUserIdByName } from '@/firebase/usersService';
->>>>>>> 766ba43943fe8aa079bea16468a26d1944cb5ce8
+import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SegmentedButtons } from 'react-native-paper';
-import { formatTimestamp } from '@/scripts/formatTimestamp';
-import { useUserContext } from '@/contexts/UserContext';
-import { router } from 'expo-router';
-import ProfileScoresModal from '@/components/ProfileScoresModal';
+import DropDownPicker from 'react-native-dropdown-picker';
 
 interface UserResults {
     levelId: number;
@@ -28,19 +15,33 @@ interface UserResults {
     timestamp: number;
 }
 
+type PickerLevel = {
+    label: string;
+    value: string;
+};
+
 
 export default function ScoreScreen() {
 
-    const [allUsersResults, setAllUsersResults] = useState<UserResults[]>([]);
-    const [value, setValue] = React.useState<number>(1);
+    const [totalScoreUsers, setTotalScoreUsers] = useState<UserProfile[]>([]);
+    const [totalRunsUsers, setTotalRunsUsers] = useState<UserProfile[]>([]);
+    const [statCategory, setStatCategory] = useState<"totalScore" | "totalRuns">("totalScore");
     const [levels, setLevels] = useState<Level[]>([])
     const [allUsers, setAllUsers] = useState<UserProfile[]>([])
 
     const [searchTerm, setSearchTerm] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
-    const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+    const [selectedUserId, setSelectedUserId] = useState<string | undefined>(undefined);
+    const [selectedLevelId, setSelectedLevelId] = useState<string | undefined>(undefined);
+    const [selectedMode, setSelectedMode] = useState<'profile' | 'levelScores'>('profile');
+
+    const [isLevelPickerOpen, setIsLevelPickerOpen] = useState(false);
+    const [levelPickerValue, setLevelPickerValue] = useState(null);
+    const [pickerLevelOptions, setPickerLevelOptions] = useState<PickerLevel[]>([]);;
 
     const { user, userData, loading } = useUserContext();
+
+    const dataToRender = statCategory === "totalScore" ? totalScoreUsers : totalRunsUsers;
 
     useEffect(() => {
         getData();
@@ -48,54 +49,40 @@ export default function ScoreScreen() {
 
     const getData = async () => {
         const levelData = await fetchLevels();
-        const userData = await fetchAllUsers();
-        const allUsersResultsData = await fetchAllUserResults();
-
-        setLevels(levelData)
-        setAllUsers(userData)
-        setAllUsersResults(allUsersResultsData)
+        const topTotalScoreUsers = await fetchUsersOrderByTotalScore();
+        const topTotalRunsUsers = await fetchUsersOrderByTotalRuns();
+        setTotalScoreUsers(topTotalScoreUsers);
+        setTotalRunsUsers(topTotalRunsUsers);
+        setLevels(levelData);
+        const pickerItems = levelData.map((item) => ({
+            label: item.title,
+            value: item.id
+        }));
+        setPickerLevelOptions(pickerItems);
     }
 
-    const getUserName = (userId: string) => {
-        if (!allUsers || allUsers.length == 0) {
-            return null
-        }
-        let userName = allUsers.filter(result => result.id === userId)
-
-        if (userName.length === 0 || !userName[0]) {
-            return ""
-        } else {
-            return userName[0].username
-        }
-
-    }
-    //allUsersResults.sort((a, b) => b.score - a.score)
-
-
-    const getLevelResults = (levelId: string) => {
-        if (!allUsersResults || allUsersResults.length == 0) {
-            return null
-        }
-        const levelIdInt = parseInt(levelId);
-        let level = allUsersResults.filter(result => result.levelId === levelIdInt)
-
-
-
-        return level
-    }
-    //console.log(levels);
 
     const handleProfileModal = async () => {
         if (!searchTerm.trim()) return;
 
-        const userId = await getUserIdByName(searchTerm)
+        const userId = await fetchUserIdByName(searchTerm)
         if (userId) {
             setSelectedUserId(userId);
+            setSelectedLevelId(undefined);
+            setSelectedMode('profile')
             setModalVisible(true)
         } else {
             alert("User not found")
         }
 
+    };
+
+    const handleLevelModal = async (levelId: string) => {
+        console.log("here", levelId)
+        setSelectedUserId(undefined);
+        setSelectedLevelId(levelId);
+        setSelectedMode('levelScores');
+        setModalVisible(true);
     };
 
 
@@ -107,13 +94,13 @@ export default function ScoreScreen() {
 
         <View style={globalStyles.container}>
             <View style={{
-                flex: 1,
                 backgroundColor: '#000000dd'
             }}>
                 <View style={{
                     width: '85%',
                     backgroundColor: 'black',
                     borderRadius: 10,
+                    padding: 10
                 }}>
                     <TextInput
                         style={globalStyles.input}
@@ -129,45 +116,69 @@ export default function ScoreScreen() {
                     </TouchableOpacity>
                 </View>
             </View>
+            <View>
+                <DropDownPicker
+                    open={isLevelPickerOpen}
+                    value={levelPickerValue}
+                    items={pickerLevelOptions}
+                    setOpen={setIsLevelPickerOpen}
+                    setValue={setLevelPickerValue}
+                    setItems={setPickerLevelOptions}
+                    onChangeValue={(val) => {
+                        if (val) {
+                            handleLevelModal(val);
+                        }
+                    }}
 
-            {levels.length >= 2 && (
+                />
+            </View>
+            <View>
                 <SegmentedButtons
-                    value={value}
-                    onValueChange={setValue}
+                    value={statCategory}
+                    multiSelect={false}
+                    onValueChange={(val) => {
+                        if (val === "totalScore" || val === "totalRuns") {
+                            setStatCategory(val);
+                        }
+                    }}
                     buttons={[
                         {
-                            value: 1,
-                            label: levels[0].title
+                            value: "totalScore",
+                            label: "Total Score"
                         },
                         {
-                            value: 2,
-                            label: levels[1].title
+                            value: "totalRuns",
+                            label: "Total Runs"
                         },
-                        {
-                            value: 3,
-                            label: levels[2].title
-                        }
 
                     ]}
                 />
-            )}
-            <Text style={styles.scoreText}>User     Points      Time</Text>
-            <FlatList
-                data={getLevelResults(value)}
+                <Text style={styles.scoreText}>
+                    {statCategory === 'totalScore' ?
+                        "Leaderboard: Total Score" :
+                        "Leaderboard: Total Runs"
+                    }
+                </Text>
+                <FlatList
+                    data={dataToRender}
 
-                renderItem={({ item }) =>
-                    <View style={styles.listitems}>
-                        <Text style={styles.scoreText}>{getUserName(item.userId)}</Text>
-                        <Text style={styles.scoreText}>{item.score}</Text>
-                        <Text style={styles.scoreText}>{formatTimestamp(item.timestamp)}</Text>
-                    </View>}
-            />
-            {selectedUserId && (
+                    renderItem={({ item }) =>
+                        <View style={styles.listitems}>
+                            <Text style={styles.scoreText}>{item.username}</Text>
+                            <Text style={styles.scoreText}>
+                                {statCategory === 'totalScore' ? item.totalScore : item.totalRuns}
+                            </Text>
+                        </View>}
+
+                />
+            </View>
+            {modalVisible && (
                 <ProfileScoresModal
                     visible={modalVisible}
                     userId={selectedUserId}
+                    levelId={selectedLevelId}
                     onClose={() => setModalVisible(false)}
-                    mode='profile'
+                    mode={selectedMode}
                 />
             )}
         </View>

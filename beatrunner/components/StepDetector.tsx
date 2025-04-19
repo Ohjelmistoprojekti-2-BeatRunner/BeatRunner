@@ -194,10 +194,12 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
         };
     });
 
+    // Handling slider UI
     const handleValueChange = (value: number) => {
         setLocalThreshold(value);
     };
 
+    // After sliding is complete, change threshold-value and save to db
     const handleSlidingComplete = (value: number) => {
         if (user) updateUserThreshold(value);
         setThreshold(value);

@@ -1,12 +1,13 @@
 import { auth, db } from "@/firebaseConfig";
-import { collection, doc, DocumentData, DocumentReference, getDoc, getDocs, query, runTransaction, serverTimestamp, where } from "firebase/firestore";
+import { collection, doc, DocumentData, DocumentReference, getDoc, getDocs, orderBy, limit, query, runTransaction, serverTimestamp, where } from "firebase/firestore";
 
 interface BestScore {
     score: number;
     timestamp: number;
-  }
-  
-  export interface UserProfile {
+    title: string;
+}
+
+export interface UserProfile {
     id: string;
     username: string;
     totalRuns?: number;
@@ -16,7 +17,165 @@ interface BestScore {
     lastRun?: number;
     createdAt?: number;
     bestScores?: Record<string, BestScore>;
-  }
+}
+
+export const fetchUserIdByName = async (userName: string): Promise<string | null> => {
+    try {
+        const usernameQuery = query(
+            collection(db, 'users'),
+            where('usernameLowercase', '==', userName.trim().toLowerCase())
+        );
+        const querySnapshot = await getDocs(usernameQuery);
+
+        if (!querySnapshot.empty) {
+            const doc = querySnapshot.docs[0];
+            return doc.id;
+        } else {
+            console.warn("User not found");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error fetching user by name: ", error);
+        return null;
+    }
+
+};
+
+export const fetchUserById = async (userId: string): Promise<UserProfile | null> => {
+    try {
+        const userRef = doc(db, "users", userId);
+        const userSnap = await getDoc(userRef);
+
+        if (!userSnap.exists()) {
+            console.warn("User not found");
+            return null;
+        }
+
+        const userData = userSnap.data();
+
+        const bestScoresRef = collection(db, "users", userId, "bestScores");
+        const bestScoresSnap = await getDocs(bestScoresRef);
+        const bestScores: Record<string, BestScore> = {};
+
+        for (const scoreDoc of bestScoresSnap.docs) {
+            const scoreId = scoreDoc.id;
+            const data = scoreDoc.data() as BestScore;
+
+            // fetch level titles 
+            const levelRef = doc(db, "levels", scoreId);
+            const levelSnap = await getDoc(levelRef);
+            const title = levelSnap.exists() ? levelSnap.data().title : "Unknown";
+
+            bestScores[scoreId] = {
+                ...data,
+                title,
+            };
+        }
+
+        return {
+            id: userId,
+            username: userData.username ?? "Unknown",
+            totalRuns: userData.totalRuns,
+            totalSteps: userData.totalSteps,
+            totalTime: userData.totalTime,
+            totalScore: userData.totalScore,
+            lastRun: userData.lastRun,
+            createdAt: userData.createdAt,
+            bestScores,
+        };
+    } catch (error) {
+        console.error("Error fetching user by ID:", error);
+        return null;
+    }
+};
+
+export const fetchAllUsers = async () => {
+
+    try {
+        const allUsers = collection(db, 'users');
+        const allUsersSnapshot = await getDocs(allUsers);
+
+        const allUsersResults = allUsersSnapshot.docs.map(doc => {
+            const data = doc.data();
+
+            return {
+                id: doc.id,
+                createdAt: data.createdAt,
+                username: data.username,
+            };
+        });
+        return allUsersResults;
+
+    } catch (error) {
+        console.error("Error fetching allUsers results: ", error);
+        return [];
+    }
+}
+
+export const fetchUsersOrderByTotalScore = async () => {
+    try {
+        const allUsersRef = collection(db, 'users');
+        const userTotalScoreQuery = query(allUsersRef, orderBy('totalScore', 'desc'), limit(20));
+
+        const querySnapshot = await getDocs(userTotalScoreQuery);
+
+        if (!querySnapshot.empty) {
+            const topScoreUsersResults = querySnapshot.docs.map(doc => {
+                const userData = doc.data();
+                return {
+                    id: doc.id,
+                    username: userData.username ?? "Unknown",
+                    totalRuns: userData.totalRuns,
+                    totalSteps: userData.totalSteps,
+                    totalTime: userData.totalTime,
+                    totalScore: userData.totalScore,
+                    lastRun: userData.lastRun,
+                    createdAt: userData.createdAt,
+                };
+            });
+            return topScoreUsersResults;
+        } else {
+            console.warn("No results found");
+            return [];
+        };
+    } catch (error) {
+        console.error("Error fetching users: ", error);
+        return [];
+    }
+}
+
+export const fetchUsersOrderByTotalRuns = async () => {
+    try {
+        const allUsersRef = collection(db, 'users');
+        const userTotalRunsQuery = query(allUsersRef, orderBy('totalRuns', 'desc'), limit(20));
+
+        const querySnapshot = await getDocs(userTotalRunsQuery);
+
+        if (!querySnapshot.empty) {
+            const topRunsUsersResults = querySnapshot.docs.map(doc => {
+                const userData = doc.data();
+                return {
+                    id: doc.id,
+                    username: userData.username ?? "Unknown",
+                    totalRuns: userData.totalRuns,
+                    totalSteps: userData.totalSteps,
+                    totalTime: userData.totalTime,
+                    totalScore: userData.totalScore,
+                    lastRun: userData.lastRun,
+                    createdAt: userData.createdAt,
+                };
+            });
+            return topRunsUsersResults;
+        } else {
+            console.warn("No results found");
+            return [];
+        };
+    } catch (error) {
+        console.error("Error fetching users: ", error);
+        return [];
+    }
+}
+
 
 export async function updateUserTotalScore(score: number, time: number, steps: number) {
     const user = auth.currentUser;
@@ -50,6 +209,7 @@ export async function updateUserTotalScore(score: number, time: number, steps: n
         console.error("Error updating user total scores:", error);
     }
 }
+
 // users/<uid>/bestScores/<levelId>/ contains the best score for that level,
 // along with a reference to the corresponding run in the scores collection
 export async function updateUserBestScores(
@@ -83,6 +243,29 @@ export async function updateUserBestScores(
         console.error("Error updating user best scores:", error);
     }
 }
+
+export const updateUserThreshold = async (threshold: number) => {
+    const user = auth.currentUser;
+
+    if (!user) {
+        console.error("User not found");
+        return;
+    }
+
+    const userRef = doc(db, "users", user.uid);
+    console.log(threshold)
+    try {
+        await runTransaction(db, async (transaction) => {
+            const snap = await transaction.get(userRef);
+            if (!snap.exists()) throw new Error("User doc missing");
+            transaction.update(userRef, { threshold: threshold });
+        });
+    } catch (error) {
+        console.error("Transaction failed:", error);
+    }
+};
+
+
 
 //not in use anymore, handled in UserContext with snapshot.
 export const fetchUserBestScores = async () => {
@@ -121,6 +304,7 @@ export const fetchUserBestScores = async () => {
     return userBestScores;
 }
 
+// not in use
 export const fetchUserByName = async (userName: string) => {
     try {
         const usernameQuery = query(
@@ -141,109 +325,5 @@ export const fetchUserByName = async (userName: string) => {
     } catch (error) {
         console.error("Error fetching user by name: ", error);
         return null;
-    }
-};
-
-export const getUserIdByName = async (userName: string): Promise<string | null> => {
-    try {
-        const usernameQuery = query(
-            collection(db, 'users'),
-            where('usernameLowercase', '==', userName.trim().toLowerCase()) 
-        );
-        const querySnapshot = await getDocs(usernameQuery);
-
-        if (!querySnapshot.empty) {
-            const doc = querySnapshot.docs[0];
-            return doc.id;
-        } else {
-            console.warn("User not found");
-            return null;
-        }
-    } catch (error) {
-        console.error("Error fetching user by name: ", error);
-        return null;
-    }
-
-};
-
-export const fetchUserById = async (userId: string): Promise<UserProfile | null> => {
-    try {
-      const userRef = doc(db, "users", userId);
-      const userSnap = await getDoc(userRef);
-  
-      if (!userSnap.exists()) {
-        console.warn("User not found");
-        return null;
-      }
-  
-      const userData = userSnap.data();
-  
-      const bestScoresRef = collection(db, "users", userId, "bestScores");
-      const bestScoresSnap = await getDocs(bestScoresRef);
-      const bestScores: Record<string, BestScore> = {};
-  
-      bestScoresSnap.forEach((doc) => {
-        bestScores[doc.id] = doc.data() as BestScore;
-      });
-  
-      return {
-        id: userId,
-        username: userData.username ?? "Unknown",
-        totalRuns: userData.totalRuns,
-        totalSteps: userData.totalSteps,
-        totalTime: userData.totalTime,
-        totalScore: userData.totalScore,
-        lastRun: userData.lastRun,
-        createdAt: userData.createdAt,
-        bestScores,
-      };
-    } catch (error) {
-      console.error("Error fetching user by ID:", error);
-      return null;
-    }
-  };
-
-export const fetchAllUsers = async () => {
-
-    try {
-        const allUsers = collection(db, 'users');
-        const allUsersSnapshot = await getDocs(allUsers);
-
-        const allUsersResults = allUsersSnapshot.docs.map(doc => {
-            const data = doc.data();
-
-            return {
-                id: doc.id,
-                createdAt: data.createdAt,
-                username: data.username,
-            };
-        });
-        return allUsersResults;
-
-    } catch (error) {
-        console.error("Error fetching allUsers results: ", error);
-        return [];
-    }
-}
-
-
-export const updateUserThreshold = async (threshold: number) => {
-    const user = auth.currentUser;
-
-    if (!user) {
-        console.error("User not found");
-        return;
-    }
-
-    const userRef = doc(db, "users", user.uid);
-    console.log(threshold)
-    try {
-        await runTransaction(db, async (transaction) => {
-            const snap = await transaction.get(userRef);
-            if (!snap.exists()) throw new Error("User doc missing");
-            transaction.update(userRef, { threshold: threshold });
-        });
-    } catch (error) {
-        console.error("Transaction failed:", error);
     }
 };

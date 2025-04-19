@@ -30,58 +30,66 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
 
     useEffect(() => {
         if (!visible) return;
-
-        // Resetoi tilat kun modal avataan uudestaan
         setCurrentUserId(userId);
         setCurrentLevelId(levelId);
-        setSelectedMode(userId ? "profile" : "levelScores");
+        setSelectedMode(mode);
     }, []);
 
-    // Hakee käyttäjäprofiilin jos currentUserId vaihtuu
+    // Fetch user profile for profile view mode
     useEffect(() => {
         const fetchProfile = async () => {
-            if (!currentUserId) return;
-            console.log("[FETCH] Haetaan profiili:", currentUserId);
+            console.log("fetch started in profile")
+            if (!currentUserId || selectedMode !== 'profile') return;
+            console.log("fetch profile", currentUserId)
+            // check if data for user already fetched:
+            if (currentUserId === previousUserId && profileData) return;
+            console.log("fetch new profile")
             setLoading(true);
             try {
                 const data = await fetchUserById(currentUserId);
+                console.log("fetch", data)
                 setProfileData(data);
                 setPreviousUserId(currentUserId);
-            } catch (err) {
-                console.error("[ERROR] Profiilin haku epäonnistui:", err);
+            } catch (error) {
+                console.error("Error fetching profile: ", error);
             } finally {
                 setLoading(false);
             }
         };
 
-        if (visible && currentUserId !== previousUserId) {
+        if (visible) {
             fetchProfile();
         }
-    }, [currentUserId, visible]);
+    }, [currentUserId, visible, selectedMode]);
 
-    // Hakee levelin tiedot ja tulokset
+    // Fetch levels scores for level scores view mode
     useEffect(() => {
         const fetchLevel = async () => {
-            if (!currentLevelId) return;
-            console.log("[FETCH] Haetaan leveli:", currentLevelId);
+            console.log("fetch started in level")
+            if (!currentLevelId || selectedMode !== 'levelScores') return;
+            console.log("fetch level", currentLevelId)
+            // check if data for level already fetched:
+            if (currentLevelId === previousLevelId && levelData) return;
+            console.log("fetch new level")
             setLoading(true);
             try {
                 const data = getLevelResults(currentLevelId);
+                console.log("fetch", data)
                 setLevelData(data);
                 const level = await fetchLevelById(currentLevelId);
                 setLevelTitle(level?.title ?? "Unknown");
                 setPreviousLevelId(currentLevelId);
-            } catch (err) {
-                console.error("[ERROR] Levelin haku epäonnistui:", err);
+            } catch (error) {
+                console.error("Error fetching levelr results: ", error);
             } finally {
                 setLoading(false);
             }
         };
 
-        if (visible && currentLevelId !== previousLevelId) {
+        if (visible) {
             fetchLevel();
         }
-    }, [currentLevelId, visible]);
+    }, [currentLevelId, visible, selectedMode]);
 
     const handleLevelClick = (levelId: string) => {
         setCurrentLevelId(levelId);
@@ -89,7 +97,7 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
     }
 
     const handleUserClick = (userId: string) => {
-        setCurrentLevelId(userId);
+        setCurrentUserId(userId);
         setSelectedMode('profile')
     }
 
@@ -155,7 +163,7 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
                                         <View style={gs.contentContainer}>
                                             <TouchableOpacity onPress={() => handleLevelClick(level)}>
                                                 <Text style={gs.contentText}>
-                                                    Level {level}
+                                                    {scoreData.title}
                                                 </Text>
                                             </TouchableOpacity>
                                             <Text style={gs.contentText}>
@@ -181,12 +189,11 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
                                 data={levelData}
 
                                 renderItem={({ item }) =>
-                                    <View>
-
+                                    <View style={styles.listitems}>
                                         <TouchableOpacity onPress={() => handleUserClick(item.userId)}>
-                                            <Text style={styles.scoreText}>{getUserName(item.userId)}  </Text>
+                                            <Text style={styles.scoreText}>{getUserName(item.userId)}</Text>
                                         </TouchableOpacity>
-                                        <Text style={styles.scoreText}>{item.score}   </Text>
+                                        <Text style={styles.scoreText}>{item.score}</Text>
                                         <Text style={styles.scoreText}>{formatTimestamp(item.timestamp)}</Text>
                                     </View>}
                             />
@@ -214,4 +221,8 @@ const styles = StyleSheet.create({
         fontSize: 18,
         marginVertical: 5,
     },
+    listitems: {
+        flexDirection: "row",
+
+    }
 });

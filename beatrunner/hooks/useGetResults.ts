@@ -24,19 +24,25 @@ export const useGetResults = () => {
         getData();
     }, []);
 
-
     const getData = async () => {
         const userData = await fetchAllUsers();
-        //const userResultsData = await fetchUserResults();
         const allUsersResultsData = await fetchAllUserResults();
 
         setAllUsers(userData)
-        //setUserResults(userResultsData);
         setAllUsersResults(allUsersResultsData)
     }
 
     const getUserName = (userId: string) => {
-        return allUsers.find(user => user.id === userId)?.username ?? "";
+        if (!allUsers || allUsers.length == 0) {
+            return null
+        }
+        let userName = allUsers.filter(result => result.id === userId)
+
+        if (userName.length === 0 || !userName[0]) {
+            return ""
+        } else {
+            return userName[0].username
+        }
 
     }
     //allUsersResults.sort((a, b) => b.score - a.score)
@@ -53,7 +59,6 @@ export const useGetResults = () => {
 
         return level
     }
-    //console.log(levels);
 
     return { getUserName, getLevelResults }
 }
