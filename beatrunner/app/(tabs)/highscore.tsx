@@ -1,6 +1,7 @@
 import { globalStyles } from '@/styles/globalStyles';
 import React, { useEffect, useState } from 'react';
 import { Button, StyleSheet, Text, View, FlatList, TextInput, TouchableOpacity, } from 'react-native';
+<<<<<<< HEAD
 import { ref, onValue, set, push, orderByChild, orderByValue, orderByKey, limitToLast } from "firebase/database"
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { onAuthStateChanged, User } from 'firebase/auth';
@@ -9,6 +10,11 @@ import { db } from '@/firebaseConfig';
 import { fetchUserResults, fetchAllUserResults } from '@/firebase/scoresService';
 import { fetchLevels, Level } from '@/firebase/levelsService';
 import { fetchAllUsers, fetchUserByName, getUserIdByName, UserProfile } from '@/firebase/usersService';
+=======
+import { fetchAllUserResults } from '@/firebase/scoresService';
+import { fetchLevels } from '@/firebase/levelsService';
+import { fetchAllUsers, fetchUserByName, getUserIdByName } from '@/firebase/usersService';
+>>>>>>> 766ba43943fe8aa079bea16468a26d1944cb5ce8
 import { SegmentedButtons } from 'react-native-paper';
 import { formatTimestamp } from '@/scripts/formatTimestamp';
 import { useUserContext } from '@/contexts/UserContext';
@@ -26,7 +32,6 @@ interface UserResults {
 export default function ScoreScreen() {
 
     const [allUsersResults, setAllUsersResults] = useState<UserResults[]>([]);
-    //const [userResults, setUserResults] = useState<UserResults[]>([]);
     const [value, setValue] = React.useState<number>(1);
     const [levels, setLevels] = useState<Level[]>([])
     const [allUsers, setAllUsers] = useState<UserProfile[]>([])
@@ -44,12 +49,10 @@ export default function ScoreScreen() {
     const getData = async () => {
         const levelData = await fetchLevels();
         const userData = await fetchAllUsers();
-        //const userResultsData = await fetchUserResults();
         const allUsersResultsData = await fetchAllUserResults();
 
         setLevels(levelData)
         setAllUsers(userData)
-        //setUserResults(userResultsData);
         setAllUsersResults(allUsersResultsData)
     }
 
@@ -140,6 +143,10 @@ export default function ScoreScreen() {
                             value: 2,
                             label: levels[1].title
                         },
+                        {
+                            value: 3,
+                            label: levels[2].title
+                        }
 
                     ]}
                 />
@@ -149,8 +156,10 @@ export default function ScoreScreen() {
                 data={getLevelResults(value)}
 
                 renderItem={({ item }) =>
-                    <View>
-                        <Text style={styles.scoreText}>{getUserName(item.userId)}   {item.score}    {formatTimestamp(item.timestamp)}</Text>
+                    <View style={styles.listitems}>
+                        <Text style={styles.scoreText}>{getUserName(item.userId)}</Text>
+                        <Text style={styles.scoreText}>{item.score}</Text>
+                        <Text style={styles.scoreText}>{formatTimestamp(item.timestamp)}</Text>
                     </View>}
             />
             {selectedUserId && (
@@ -164,8 +173,7 @@ export default function ScoreScreen() {
         </View>
     );
 }
-/*  varastossa
- */
+
 
 const styles = StyleSheet.create({
     scoreContainer: {
@@ -178,5 +186,10 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 18,
         marginVertical: 5,
+        marginLeft: 5
     },
+    listitems: {
+        flexDirection: "row",
+
+    }
 });
