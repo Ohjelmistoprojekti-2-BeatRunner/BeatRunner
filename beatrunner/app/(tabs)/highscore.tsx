@@ -136,26 +136,35 @@ export default function ScoreScreen() {
 
             {levels.length >= 2 && (
                 <SegmentedButtons
+                    theme={{ roundness: 2 }}
+                    style={styles.selector}
                     value={value}
                     onValueChange={setValue}
                     buttons={[
                         {
                             value: 1,
-                            label: levels[0].title
+                            label: levels[0].title,
+                            uncheckedColor: "white"
                         },
                         {
                             value: 2,
-                            label: levels[1].title
+                            label: levels[1].title,
+                            uncheckedColor: "white"
                         },
                         {
                             value: 3,
-                            label: levels[2].title
+                            label: levels[2].title,
+                            uncheckedColor: "white"
                         }
 
                     ]}
                 />
             )}
-            <Text style={styles.scoreText}>User     Points      Time</Text>
+            <View style={styles.listitems}>
+                <Text style={styles.scoreText}>User</Text>
+                <Text style={styles.scoreText}>Points</Text>
+                <Text style={styles.scoreText}>Time</Text>
+            </View>
             <FlatList
                 data={getLevelResults(value)}
 
@@ -183,10 +192,13 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 18,
         marginVertical: 5,
-        marginLeft: 5
     },
     listitems: {
         flexDirection: "row",
+        justifyContent: "space-between",
+
+    },
+    selector: {
 
     }
 });
