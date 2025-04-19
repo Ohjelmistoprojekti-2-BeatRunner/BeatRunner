@@ -1,10 +1,10 @@
+import { useUserContext } from '@/contexts/UserContext';
+import { fetchLevels } from '@/firebase/levelsService';
+import { formatTimestamp } from '@/scripts/formatTimestamp';
 import { globalStyles } from '@/styles/globalStyles';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { FlatList, Text, TouchableOpacity, View } from 'react-native';
-import { formatTimestamp } from '@/scripts/formatTimestamp';
-import { fetchLevels } from '@/firebase/levelsService';
-import { fetchUserResults } from '@/firebase/scoresService';
 
 interface Level {
     id: string;
@@ -14,29 +14,19 @@ interface Level {
     songs: [];
 }
 
-interface UserResults {
-    levelId: number;
-    userId: number;
-    score: number;
-    timestamp: number;
-}
-
 export default function HomeScreen() {
 
+    const { bestScores, loading: userLoading } = useUserContext();
     const [levels, setLevels] = useState<Level[]>([]);
-    const [userResults, setUserResults] = useState<UserResults[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const { user, userData, loading: authLoading } = useUserContext();
 
     useEffect(() => {
         const getLevels = async () => {
             try {
                 setLoading(true);
-
                 const levelsData = await fetchLevels();
-                const userResultsData = await fetchUserResults();
-
                 setLevels(levelsData);
-                setUserResults(userResultsData || []);
             } catch (error) {
                 console.error("Error loading levels: ", error);
             } finally {
@@ -48,38 +38,20 @@ export default function HomeScreen() {
     }, []);
 
 
-    const getUserResult = (levelId: string) => {
-        if (!userResults || userResults.length === 0) {
-            return null;
-        }
-
-        const levelIdInt = parseInt(levelId);
-        return userResults.find(result => result.levelId === levelIdInt);
-    };
-
-    // get best result from userresults.
-    const getUserBestResult = (levelId: string) => {
-        const resultsForLevel = userResults.filter(result => result.levelId === parseInt(levelId));
-
-        if (resultsForLevel.length === 0) return null;
-
-        return resultsForLevel.reduce((best, current) => {
-            return current.score > best.score ? current : best;
-        });
-    };
-
     const Item = ({ id, title, difficulty, calories, songs }: Level) => {
-        const bestUserResult = getUserBestResult(id); 
+        const scoreData = bestScores?.[id];
+
+        const buttonStyle = scoreData ? globalStyles.buttonCompleted : globalStyles.button;
         return (
             <View style={{ margin: 10, width: 300 }}>
-                <TouchableOpacity style={globalStyles.button} onPress={() => router.replace({
+                <TouchableOpacity style={buttonStyle} onPress={() => router.replace({
                     pathname: "/level",
                     params: { id, title, difficulty, calories, songs }
                 })}>
                     <Text style={globalStyles.buttonText}>{title}</Text>
-                    {bestUserResult && (
+                    {scoreData && (
                         <Text style={{ color: 'white', marginTop: 5 }}>
-                            Best Score: {bestUserResult.score}  {formatTimestamp(bestUserResult.timestamp)}
+                            Best Score: {scoreData.score}  {formatTimestamp(scoreData.timestamp)}
                         </Text>
                     )}
                 </TouchableOpacity>
@@ -87,7 +59,7 @@ export default function HomeScreen() {
         );
     };
 
-    if (loading) {
+    if (userLoading || loading) {
         return <View style={globalStyles.container}>
             <View style={globalStyles.topContainer}>
                 <Text style={globalStyles.title}>loading...</Text>
@@ -98,6 +70,13 @@ export default function HomeScreen() {
 
     return (
         <View style={globalStyles.container}>
+            <View style={globalStyles.contentContainer}>
+                <Text>{userData?.username}'s stats</Text>
+                <Text>Total steps: {userData?.totalSteps}</Text>
+                <Text>Total time: {userData?.totalTime}</Text>
+                <Text>Total score: {userData?.totalScore}</Text>
+                <Text>Levels completed: {Object.keys(bestScores).length}</Text>
+            </View>
             <View style={globalStyles.topContainer}>
                 <Text style={globalStyles.title}>Welcome!</Text>
             </View>

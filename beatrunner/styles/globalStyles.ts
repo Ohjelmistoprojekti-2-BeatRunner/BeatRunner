@@ -35,6 +35,15 @@ export const globalStyles = StyleSheet.create({
         borderRadius: 15,
         backgroundColor: 'rgba(255, 255, 255, 0.1)',
     },
+    buttonCompleted: {
+        marginTop: 0,
+        paddingVertical: 15,
+        paddingHorizontal: 30,
+        borderWidth: 2,
+        borderColor: 'green',
+        borderRadius: 15,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    },
     smallButton: {
         marginTop: 20,
         backgroundColor: '#555',

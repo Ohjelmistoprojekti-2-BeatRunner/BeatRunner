@@ -1,137 +1,190 @@
 import { globalStyles } from '@/styles/globalStyles';
 import React, { useEffect, useState } from 'react';
-import { Button, StyleSheet, Text, View, FlatList, } from 'react-native';
-import { fetchAllUserResults } from '@/firebase/scoresService';
+import { Button, StyleSheet, Text, View, FlatList, TextInput, TouchableOpacity, } from 'react-native';
+import { ref, onValue, set, push, orderByChild, orderByValue, orderByKey, limitToLast } from "firebase/database"
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { query, collection, doc, getDoc, getDocs } from 'firebase/firestore';
+import { db } from '@/firebaseConfig';
+import { fetchUserResults, fetchAllUserResults } from '@/firebase/scoresService';
 import { fetchLevels } from '@/firebase/levelsService';
-import { fetchAllUsers } from '@/firebase/usersService';
+import { fetchAllUsers, fetchUserByName, getUserIdByName } from '@/firebase/usersService';
 import { SegmentedButtons } from 'react-native-paper';
 import { formatTimestamp } from '@/scripts/formatTimestamp';
+import { useUserContext } from '@/contexts/UserContext';
+import { router } from 'expo-router';
 
 interface UserResults {
-  levelId: number;
-  userId: string;
-  score: number;
-  timestamp: number;
+    levelId: number;
+    userId: string;
+    score: number;
+    timestamp: number;
 }
 interface Users {
-  id: string;
-  createdAt: number;
-  email: string;
-  username: string;
+    id: string;
+    createdAt: number;
+    email: string;
+    username: string;
 }
 interface Levels {
-  id: string;
-  title: string;
-  difficulty: any;
-  calories: any;
-  songs: any;
+    id: string;
+    title: string;
+    difficulty: any;
+    calories: any;
+    songs: any;
 }
 
 export default function ScoreScreen() {
 
-  const [allUsersResults, setAllUsersResults] = useState<UserResults[]>([]);
-  const [value, setValue] = React.useState<number>(1);
-  const [levels, setLevels] = useState<Levels[]>([])
-  const [allUsers, setAllUsers] = useState<Users[]>([])
+    const [allUsersResults, setAllUsersResults] = useState<UserResults[]>([]);
+    //const [userResults, setUserResults] = useState<UserResults[]>([]);
+    const [value, setValue] = React.useState<number>(1);
+    const [levels, setLevels] = useState<Levels[]>([])
+    const [allUsers, setAllUsers] = useState<Users[]>([])
+    const [searchTerm, setSearchTerm] = useState('');
 
+    const { user, userData, loading } = useUserContext();
 
-  const getData = async () => {
-    const levelData = await fetchLevels();
-    const userData = await fetchAllUsers();
-    const allUsersResultsData = await fetchAllUserResults();
+    useEffect(() => {
+        getData();
+    }, []);
 
-    setLevels(levelData)
-    setAllUsers(userData)
-    setAllUsersResults(allUsersResultsData)
-  }
-  useEffect(() => { getData() }, [])
-  //getData()
+    const getData = async () => {
+        const levelData = await fetchLevels();
+        const userData = await fetchAllUsers();
+        //const userResultsData = await fetchUserResults();
+        const allUsersResultsData = await fetchAllUserResults();
 
-
-  const getUserName = (userId: string) => {
-    if (!allUsers || allUsers.length == 0) {
-      return null
-    }
-    let userName = allUsers.filter(result => result.id === userId)
-
-    if (userName == undefined) {
-      return ""
-    } else {
-      return userName[0].username
+        setLevels(levelData)
+        setAllUsers(userData)
+        //setUserResults(userResultsData);
+        setAllUsersResults(allUsersResultsData)
     }
 
-  }
-  //allUsersResults.sort((a, b) => b.score - a.score)
+    const getUserName = (userId: string) => {
+        if (!allUsers || allUsers.length == 0) {
+            return null
+        }
+        let userName = allUsers.filter(result => result.id === userId)
 
+        if (userName.length === 0 || !userName[0]) {
+            return ""
+        } else {
+            return userName[0].username
+        }
 
-  const getLevel = (levelId: string) => {
-    if (!allUsersResults || allUsersResults.length == 0) {
-      return null
     }
-    const levelIdInt = parseInt(levelId);
-    let level = allUsersResults.filter(result => parseInt(result.levelId) === levelIdInt)
+    //allUsersResults.sort((a, b) => b.score - a.score)
+
+
+    const getLevelResults = (levelId: string) => {
+        if (!allUsersResults || allUsersResults.length == 0) {
+            return null
+        }
+        const levelIdInt = parseInt(levelId);
+        let level = allUsersResults.filter(result => result.levelId === levelIdInt)
 
 
 
-    return level
-  }
-  //console.log(levels);
+        return level
+    }
+    //console.log(levels);
 
-  return (
-    <View style={globalStyles.container}>
+    const handleRouteToProfile = async () => {
+        if (!searchTerm.trim()) return;
 
-      <Text style={globalStyles.title}>Welcome!</Text>
+        const userId = await getUserIdByName(searchTerm)
+        if (!userId) {
+            console.log("User not found")
+            return;
+        };
+        console.log("UserId", userId);
+        router.replace({
+            pathname: "/profile",
+            params: { userId }
+        });
+    };
 
-      <Text style={globalStyles.sectionTitle}>Highscores</Text>
-      <SegmentedButtons
-        value={value}
-        onValueChange={setValue}
-        buttons={[
-          {
-            value: 1,
-            label: levels.length != 0 ? levels[0].title : "Level name 1"
-          },
-          {
-            value: 2,
-            label: levels.length != 0 ? levels[1].title : "Level name 2"
-          },
 
-        ]}
-      />
-      <Text style={styles.scoreText}>User     Points      Time</Text>
-      <FlatList
-        data={getLevel(value)}
+    if (loading) {
+        return null;
+    }
 
-        renderItem={({ item }) =>
-          <View style={styles.scoreList}>
-            <Text style={styles.scoreText}>{getUserName(item.userId)}</Text>
-            <Text style={styles.scoreText}>{item.score}</Text>
-            <Text style={styles.scoreText}>{formatTimestamp(item.timestamp)}</Text>
-          </View>}
+    return (
 
-      />
-    </View>
-  );
+        <View style={globalStyles.container}>
+            <View style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: '#000000dd'
+            }}>
+                <View style={{
+                    width: '85%',
+                    backgroundColor: 'black',
+                    borderRadius: 10,
+                    padding: 20
+                }}>
+                    <Text style={[globalStyles.title, { paddingBottom: 10 }]}>Find user</Text>
+                    <TextInput
+                        style={globalStyles.input}
+                        placeholder="Username"
+                        placeholderTextColor="#888"
+                        onChangeText={setSearchTerm}
+                    />
+                    <TouchableOpacity style={[
+                        globalStyles.smallButton,
+                        { marginTop: 10 }
+                    ]}
+                        onPress={handleRouteToProfile}>
+                        <Text style={globalStyles.buttonText}>Search user</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+
+            {levels.length >= 2 && (
+                <SegmentedButtons
+                    value={value}
+                    onValueChange={setValue}
+                    buttons={[
+                        {
+                            value: 1,
+                            label: levels[0].title
+                        },
+                        {
+                            value: 2,
+                            label: levels[1].title
+                        },
+
+                    ]}
+                />
+            )}
+            <Text style={styles.scoreText}>User     Points      Time</Text>
+            <FlatList
+                data={getLevelResults(value)}
+
+                renderItem={({ item }) =>
+                    <View>
+                        <Text style={styles.scoreText}>{getUserName(item.userId)}   {item.score}    {formatTimestamp(item.timestamp)}</Text>
+                    </View>}
+
+            />
+        </View>
+    );
 }
 /*  varastossa
  */
 
 const styles = StyleSheet.create({
-  scoreContainer: {
-    marginTop: 20,
-    padding: 10,
-    backgroundColor: '#333',
-    borderRadius: 10,
-  },
-  scoreText: {
-    color: 'white',
-    fontSize: 18,
-    marginVertical: 5,
-
-
-  },
-  scoreList: {
-    backgroundColor: "gray",
-    flexDirection: "row",
-  },
+    scoreContainer: {
+        marginTop: 20,
+        padding: 10,
+        backgroundColor: '#333',
+        borderRadius: 10,
+    },
+    scoreText: {
+        color: 'white',
+        fontSize: 18,
+        marginVertical: 5,
+    },
 });

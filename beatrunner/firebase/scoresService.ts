@@ -1,17 +1,13 @@
-import { db } from "@/firebaseConfig";
-import { getAuth } from "firebase/auth";
-import { addDoc, collection, getDocs, query, serverTimestamp, where, limit, orderBy } from "firebase/firestore";
+import { auth, db } from "@/firebaseConfig";
+import { addDoc, collection, DocumentReference, getDocs, orderBy, query, serverTimestamp, where } from "firebase/firestore";
 
-const auth = getAuth();
-const user = auth.currentUser;
 
-export async function submitRunScore(score: number, levelId: string,) {
-    const auth = getAuth();
+export async function submitRunScore(score: number, levelId: string): Promise<DocumentReference | undefined> {
     const user = auth.currentUser;
     const numericLevelId = parseInt(levelId, 10);
 
     try {
-        await addDoc(collection(db, "scores"), {
+        return await addDoc(collection(db, "scores"), {
             userId: user?.uid,
             score: score,
             levelId: numericLevelId,
@@ -20,11 +16,12 @@ export async function submitRunScore(score: number, levelId: string,) {
     } catch (error) {
         console.error("Error submitting scores:", error);
     }
+
 }
 
-
+//not in use anymore
 export const fetchUserResults = async () => {
-    const auth = getAuth();
+
     const user = auth.currentUser;
 
     try {
