@@ -134,6 +134,8 @@ export default function ScoreScreen() {
             </View>
             <View>
                 <SegmentedButtons
+                    theme={{ roundness: 2 }}
+                    style={styles.selector}
                     value={statCategory}
                     multiSelect={false}
                     onValueChange={(val) => {
@@ -144,11 +146,13 @@ export default function ScoreScreen() {
                     buttons={[
                         {
                             value: "totalScore",
-                            label: "Total Score"
+                            label: "Total Score",
+                            uncheckedColor: "white",
                         },
                         {
                             value: "totalRuns",
-                            label: "Total Runs"
+                            label: "Total Runs",
+                            uncheckedColor: "white",
                         },
 
                     ]}
@@ -202,5 +206,8 @@ const styles = StyleSheet.create({
     listitems: {
         flexDirection: "row",
 
-    }
+    },
+    selector: {
+
+    },
 });

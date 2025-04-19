@@ -184,7 +184,11 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
                     {!loading && selectedMode === 'levelScores' && (
                         <View>
                             <Text style={styles.scoreText}>Highscores for {levelTitle}</Text>
-                            <Text style={styles.scoreText}>User     Points      Time</Text>
+                            <View style={styles.listitems}>
+                                <Text style={styles.scoreText}>User</Text>
+                                <Text style={styles.scoreText}>Points</Text>
+                                <Text style={styles.scoreText}>Time</Text>
+                            </View>
                             <FlatList
                                 data={levelData}
 
@@ -223,6 +227,7 @@ const styles = StyleSheet.create({
     },
     listitems: {
         flexDirection: "row",
+        justifyContent: "space-between",
 
-    }
+    },
 });
