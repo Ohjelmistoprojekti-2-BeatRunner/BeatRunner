@@ -2,7 +2,7 @@ import { formatDistanceToNow, format } from 'date-fns';
 
 //date-fns library to show timestamps in a readable way, like "10 minutes ago"
 export const formatTimestamp = (timestamp: any) => {
-    if(!timestamp) return "No date"
+    if (!timestamp) return "No date"
 
     const date = timestamp.toDate();
 

@@ -1,6 +1,8 @@
+import { fetchLevelById } from "@/firebase/levelsService";
 import { fetchUserById, UserProfile } from "@/firebase/usersService";
+import { useGetResults, UserResults } from "@/hooks/useGetResults";
 import { formatTimestamp } from "@/scripts/formatTimestamp";
-import { globalStyles } from "@/styles/globalStyles";
+import { globalStyles as gs } from "@/styles/globalStyles";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Modal, StyleSheet, Text, TouchableOpacity, View, } from "react-native";
 
@@ -9,76 +11,100 @@ type ProfileScoresModalProps = {
     onClose: () => void;
     userId?: string;
     levelId?: string;
+    mode: "profile" | "levelScores"
 };
 
-export default function ProfileScoresModal({ visible, onClose, userId, levelId, }: ProfileScoresModalProps) {
+export default function ProfileScoresModal({ visible, onClose, userId, levelId, mode }: ProfileScoresModalProps) {
+    const [selectedMode, setSelectedMode] = useState<"profile" | "levelScores">(mode)
+    const [currentUserId, setCurrentUserId] = useState<string | undefined>(userId);
+    const [currentLevelId, setCurrentLevelId] = useState<string | undefined>(levelId);
     const [profileData, setProfileData] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
-    const [levelData, setLevelData] = useState<string | null>(null);
+    const [levelData, setLevelData] = useState<UserResults[] | null>(null);
     const [previousUserId, setPreviousUserId] = useState<string | null>(null);
     const [previousLevelId, setPreviousLevelId] = useState<string | null>(null);
+    const [levelTitle, setLevelTitle] = useState<string | null>(null);
 
-    const isProfileMode = !!userId;
-    const isLevelScoresMode = !!levelId && !userId;
+    const { getLevelResults, getUserName } = useGetResults();
+
 
     useEffect(() => {
         if (!visible) return;
 
-        const loadProfileData = async () => {
-            if (userId && userId === previousUserId && profileData) {
-                // Sama käyttäjä jo haettu, ei tehdä mitään
-                return;
-            }
+        // Resetoi tilat kun modal avataan uudestaan
+        setCurrentUserId(userId);
+        setCurrentLevelId(levelId);
+        setSelectedMode(userId ? "profile" : "levelScores");
+    }, []);
 
-            try {
-                setLoading(true);
-                if (userId) {
-                    const data = await fetchUserById(userId);
-                    setProfileData(data);
-                    setPreviousUserId(userId);
-                }
-            } catch (err) {
-                console.error("Error loading profile", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadProfileData();
-    }, [userId, visible]);
-
+    // Hakee käyttäjäprofiilin jos currentUserId vaihtuu
     useEffect(() => {
-        if (!visible || !levelId) return;
-        if (levelId === previousLevelId && levelData) return;
-
-        const loadLevelScores = async () => {
+        const fetchProfile = async () => {
+            if (!currentUserId) return;
+            console.log("[FETCH] Haetaan profiili:", currentUserId);
+            setLoading(true);
             try {
-                setLoading(true);
-                const data = await fetchScoresByLevel(levelId); // tämä sun pitää toteuttaa
-                setLevelData(data);
-                setPreviousLevelId(levelId);
+                const data = await fetchUserById(currentUserId);
+                setProfileData(data);
+                setPreviousUserId(currentUserId);
             } catch (err) {
-                console.error("Error loading level scores", err);
+                console.error("[ERROR] Profiilin haku epäonnistui:", err);
             } finally {
                 setLoading(false);
             }
         };
 
-        loadLevelScores();
-    }, [levelId, visible]);
+        if (visible && currentUserId !== previousUserId) {
+            fetchProfile();
+        }
+    }, [currentUserId, visible]);
+
+    // Hakee levelin tiedot ja tulokset
+    useEffect(() => {
+        const fetchLevel = async () => {
+            if (!currentLevelId) return;
+            console.log("[FETCH] Haetaan leveli:", currentLevelId);
+            setLoading(true);
+            try {
+                const data = getLevelResults(currentLevelId);
+                setLevelData(data);
+                const level = await fetchLevelById(currentLevelId);
+                setLevelTitle(level?.title ?? "Unknown");
+                setPreviousLevelId(currentLevelId);
+            } catch (err) {
+                console.error("[ERROR] Levelin haku epäonnistui:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (visible && currentLevelId !== previousLevelId) {
+            fetchLevel();
+        }
+    }, [currentLevelId, visible]);
+
+    const handleLevelClick = (levelId: string) => {
+        setCurrentLevelId(levelId);
+        setSelectedMode('levelScores')
+    }
+
+    const handleUserClick = (userId: string) => {
+        setCurrentLevelId(userId);
+        setSelectedMode('profile')
+    }
 
     return (
         <Modal visible={visible} transparent animationType="fade">
             <View
                 style={[
-                    globalStyles.container,
+                    gs.container,
                     { justifyContent: "center", alignItems: "center" },
                 ]}
             >
                 <View style={styles.modal}>
                     <TouchableOpacity
                         style={[
-                            globalStyles.button,
+                            gs.button,
                             {
                                 position: "absolute",
                                 top: 10,
@@ -88,32 +114,35 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
                         ]}
                         onPress={onClose}
                     >
-                        <Text style={[globalStyles.buttonText, { fontSize: 24 }]}>✕</Text>
-                    </TouchableOpacity>
+                        <Text style={[gs.buttonText, { fontSize: 24 }]}>✕</Text>
 
-                    {loading ? (
+                    </TouchableOpacity>
+                    {loading && (
                         <ActivityIndicator size="large" color="#fff" style={{ marginTop: 50 }} />
-                    ) : isProfileMode && profileData ? (
+                    )}
+
+                    {/* profile mode: show users profile */}
+                    {!loading && selectedMode === 'profile' && profileData && (
                         <View>
-                            <Text style={[globalStyles.title, { textAlign: "center" }]}>
+                            <Text style={[gs.title, { textAlign: "center" }]}>
                                 {profileData.username}
                             </Text>
-
-                            <Text style={globalStyles.contentText}>
+                            {/*<Text style={gs.contentText}>
+                                Profile created: {formatTimestamp(profileData.createdAt)}
+                            </Text>*/}
+                            <Text style={gs.contentText}>
                                 Last run: {formatTimestamp(profileData.lastRun)}
                             </Text>
-                            <Text style={globalStyles.contentText}>
+                            <Text style={gs.contentText}>
                                 Total steps: {profileData.totalSteps}
                             </Text>
-                            <Text style={globalStyles.contentText}>
+                            <Text style={gs.contentText}>
                                 Total time: {profileData.totalTime}
                             </Text>
-                            <Text style={globalStyles.contentText}>
+                            <Text style={gs.contentText}>
                                 Total score: {profileData.totalScore}
                             </Text>
-                            <Text
-                                style={[globalStyles.contentText, { marginTop: 10 }]}
-                            >
+                            <Text style={[gs.contentText, { marginTop: 10 }]}>
                                 Levels completed: {Object.keys(profileData.bestScores ?? {}).length}
                             </Text>
 
@@ -123,23 +152,49 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
                                 renderItem={({ item }) => {
                                     const [level, scoreData] = item;
                                     return (
-                                        <TouchableOpacity onPress={() => handleLevelPress(level)}>
-                                            <View style={globalStyles.contentContainer}>
-                                                <Text style={globalStyles.contentText}>Level {level}</Text>
-                                                <Text style={globalStyles.contentText}>Score: {scoreData.score}</Text>
-                                            </View>
-                                        </TouchableOpacity>
+                                        <View style={gs.contentContainer}>
+                                            <TouchableOpacity onPress={() => handleLevelClick(level)}>
+                                                <Text style={gs.contentText}>
+                                                    Level {level}
+                                                </Text>
+                                            </TouchableOpacity>
+                                            <Text style={gs.contentText}>
+                                                Score: {scoreData.score}
+                                            </Text>
+                                            <Text style={gs.contentText}>
+                                                Score: {formatTimestamp(scoreData.timestamp)}
+                                            </Text>
+                                        </View>
+
                                     );
                                 }}
                                 style={{ marginTop: 20 }}
                             />
                         </View>
-                    ) : isLevelScoresMode ? (
-                        <Text style={globalStyles.contentText}>
-                            LevelScoresMode toteutus tähän...
-                        </Text>
-                    ) : (
-                        <Text style={globalStyles.contentText}>No data to show.</Text>
+                    )}
+                    {/* levelScores mode: show best results for a level*/}
+                    {!loading && selectedMode === 'levelScores' && (
+                        <View>
+                            <Text style={styles.scoreText}>Highscores for {levelTitle}</Text>
+                            <Text style={styles.scoreText}>User     Points      Time</Text>
+                            <FlatList
+                                data={levelData}
+
+                                renderItem={({ item }) =>
+                                    <View>
+
+                                        <TouchableOpacity onPress={() => handleUserClick(item.userId)}>
+                                            <Text style={styles.scoreText}>{getUserName(item.userId)}  </Text>
+                                        </TouchableOpacity>
+                                        <Text style={styles.scoreText}>{item.score}   </Text>
+                                        <Text style={styles.scoreText}>{formatTimestamp(item.timestamp)}</Text>
+                                    </View>}
+                            />
+                        </View>
+                    )}
+
+                    {!loading && !selectedMode && (
+                        <Text style={gs.contentText}>No data to show.</Text>
                     )}
                 </View>
             </View>
@@ -153,5 +208,10 @@ const styles = StyleSheet.create({
         backgroundColor: "#111",
         borderRadius: 12,
         padding: 20,
+    },
+    scoreText: {
+        color: 'white',
+        fontSize: 18,
+        marginVertical: 5,
     },
 });

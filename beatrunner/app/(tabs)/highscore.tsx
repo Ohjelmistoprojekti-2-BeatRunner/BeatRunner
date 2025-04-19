@@ -114,7 +114,7 @@ export default function ScoreScreen() {
                 }}>
                     <TextInput
                         style={globalStyles.input}
-                        placeholder="Username"
+                        placeholder="Search username"
                         placeholderTextColor="#888"
                         onChangeText={setSearchTerm}
                     />

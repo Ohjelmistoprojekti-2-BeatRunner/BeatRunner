@@ -9,7 +9,6 @@ interface BestScore {
   export interface UserProfile {
     id: string;
     username: string;
-    email?: string;
     totalRuns?: number;
     totalSteps?: number;
     totalTime?: number;
@@ -190,7 +189,6 @@ export const fetchUserById = async (userId: string): Promise<UserProfile | null>
       return {
         id: userId,
         username: userData.username ?? "Unknown",
-        email: userData.email,
         totalRuns: userData.totalRuns,
         totalSteps: userData.totalSteps,
         totalTime: userData.totalTime,
@@ -217,7 +215,6 @@ export const fetchAllUsers = async () => {
             return {
                 id: doc.id,
                 createdAt: data.createdAt,
-                email: data.email,
                 username: data.username,
             };
         });

@@ -4,7 +4,7 @@ import { fetchAllUsers, UserProfile } from "@/firebase/usersService";
 import React, { useEffect } from "react";
 import { useState } from "react";
 
-interface UserResults {
+export interface UserResults {
     levelId: number;
     userId: string;
     score: number;
@@ -36,16 +36,7 @@ export const useGetResults = () => {
     }
 
     const getUserName = (userId: string) => {
-        if (!allUsers || allUsers.length == 0) {
-            return null
-        }
-        let userName = allUsers.filter(result => result.id === userId)
-
-        if (userName.length === 0 || !userName[0]) {
-            return ""
-        } else {
-            return userName[0].username
-        }
+        return allUsers.find(user => user.id === userId)?.username ?? "";
 
     }
     //allUsersResults.sort((a, b) => b.score - a.score)
@@ -64,5 +55,5 @@ export const useGetResults = () => {
     }
     //console.log(levels);
 
-    return { getData, getUserName, getLevelResults }
+    return { getUserName, getLevelResults }
 }
