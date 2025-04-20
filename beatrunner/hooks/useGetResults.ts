@@ -5,7 +5,7 @@ import React, { useEffect } from "react";
 import { useState } from "react";
 
 export interface UserResults {
-    levelId: number;
+    levelId: string;
     userId: string;
     score: number;
     timestamp: number;
@@ -52,7 +52,7 @@ export const useGetResults = () => {
         if (!allUsersResults || allUsersResults.length == 0) {
             return null
         }
-        const levelIdInt = parseInt(levelId);
+        const levelIdInt = levelId;
         let level = allUsersResults.filter(result => result.levelId === levelIdInt)
 
 

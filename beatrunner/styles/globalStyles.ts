@@ -51,7 +51,7 @@ export const globalStyles = StyleSheet.create({
         borderRadius: 8,
         alignItems: 'center',
         width: '35%',
-      },
+    },
     buttonText: {
         color: 'white',
         fontSize: 24,
@@ -101,4 +101,29 @@ export const globalStyles = StyleSheet.create({
         color: 'lightblue',
         textDecorationLine: 'underline',
     },
+    //"table"-like styles for flatlists:
+    listRow: {
+        flexDirection: 'row',
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgb(97, 40, 112)',
+    },
+    listCell: {
+        flex: 1,
+        color: 'white',
+        fontSize: 16,
+        textAlign: 'left',
+    },
+    listCellLinkText: {
+        flex: 1,
+        color: 'white',
+        fontSize: 16,
+        textAlign: 'left',
+    },
+    listHeader: {
+        fontWeight: 'bold',
+        fontSize: 17,
+        color: 'rgb(97, 40, 112)',
+      },
+
 });

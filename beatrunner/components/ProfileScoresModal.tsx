@@ -1,10 +1,12 @@
+import { useUserContext } from "@/contexts/UserContext";
 import { fetchLevelById } from "@/firebase/levelsService";
+import { fetchLevelTopResultsWithUsername, Score } from "@/firebase/scoresService";
 import { fetchUserById, UserProfile } from "@/firebase/usersService";
-import { useGetResults, UserResults } from "@/hooks/useGetResults";
+import { useGetResults } from "@/hooks/useGetResults";
 import { formatTimestamp } from "@/scripts/formatTimestamp";
 import { globalStyles as gs } from "@/styles/globalStyles";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, Modal, StyleSheet, Text, TouchableOpacity, View, } from "react-native";
+import { ActivityIndicator, Dimensions, FlatList, Modal, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View, } from "react-native";
 
 type ProfileScoresModalProps = {
     visible: boolean;
@@ -20,11 +22,14 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
     const [currentLevelId, setCurrentLevelId] = useState<string | undefined>(levelId);
     const [profileData, setProfileData] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
-    const [levelData, setLevelData] = useState<UserResults[] | null>(null);
+    const [levelData, setLevelData] = useState<Score[]>([]);
     const [previousUserId, setPreviousUserId] = useState<string | null>(null);
     const [previousLevelId, setPreviousLevelId] = useState<string | null>(null);
     const [levelTitle, setLevelTitle] = useState<string | null>(null);
 
+    const { height: screenHeight } = Dimensions.get('window');
+
+    const { user, bestScores, userData, loading: authLoading } = useUserContext();
     const { getLevelResults, getUserName } = useGetResults();
 
 
@@ -73,7 +78,7 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
             console.log("fetch new level")
             setLoading(true);
             try {
-                const data = getLevelResults(currentLevelId);
+                const data = await fetchLevelTopResultsWithUsername(currentLevelId);
                 console.log("fetch", data)
                 setLevelData(data);
                 const level = await fetchLevelById(currentLevelId);
@@ -103,113 +108,136 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
 
     return (
         <Modal visible={visible} transparent animationType="fade">
-            <View
-                style={[
-                    gs.container,
-                    { justifyContent: "center", alignItems: "center" },
-                ]}
-            >
-                <View style={styles.modal}>
-                    <TouchableOpacity
-                        style={[
-                            gs.button,
-                            {
-                                position: "absolute",
-                                top: 10,
-                                right: 10,
-                                backgroundColor: "transparent",
-                            },
-                        ]}
-                        onPress={onClose}
-                    >
-                        <Text style={[gs.buttonText, { fontSize: 24 }]}>✕</Text>
+            <TouchableWithoutFeedback onPress={onClose}>
+                <View
+                    style={[
+                        gs.container, {
+                            justifyContent: "center",
+                            alignItems: "center",
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)'
+                        },
+                    ]}
+                >
+                    <TouchableWithoutFeedback>
+                        <View style={[styles.modal, {
+                            height: screenHeight * 0.85,
+                        }]}>
+                            <TouchableOpacity
+                                style={[
+                                    gs.button,
+                                    {
+                                        position: "absolute",
+                                        top: 10,
+                                        right: 10,
+                                        backgroundColor: "transparent",
+                                    },
+                                ]}
+                                onPress={onClose}
+                            >
+                                <Text style={[gs.buttonText, { fontSize: 24 }]}>✕</Text>
 
-                    </TouchableOpacity>
-                    {loading && (
-                        <ActivityIndicator size="large" color="#fff" style={{ marginTop: 50 }} />
-                    )}
+                            </TouchableOpacity>
+                            {loading && (
+                                <ActivityIndicator size="large" color="#fff" style={{ marginTop: 50 }} />
+                            )}
 
-                    {/* profile mode: show users profile */}
-                    {!loading && selectedMode === 'profile' && profileData && (
-                        <View>
-                            <Text style={[gs.title, { textAlign: "center" }]}>
-                                {profileData.username}
-                            </Text>
-                            {/*<Text style={gs.contentText}>
+                            {/* profile mode: show users profile */}
+                            {!loading && selectedMode === 'profile' && profileData && (
+                                <View>
+                                    <Text style={[gs.title, { textAlign: "center" }]}>
+                                        {profileData.username}
+                                    </Text>
+                                    {/*<Text style={gs.contentText}>
                                 Profile created: {formatTimestamp(profileData.createdAt)}
                             </Text>*/}
-                            <Text style={gs.contentText}>
-                                Last run: {formatTimestamp(profileData.lastRun)}
-                            </Text>
-                            <Text style={gs.contentText}>
-                                Total steps: {profileData.totalSteps}
-                            </Text>
-                            <Text style={gs.contentText}>
-                                Total time: {profileData.totalTime}
-                            </Text>
-                            <Text style={gs.contentText}>
-                                Total score: {profileData.totalScore}
-                            </Text>
-                            <Text style={[gs.contentText, { marginTop: 10 }]}>
-                                Levels completed: {Object.keys(profileData.bestScores ?? {}).length}
-                            </Text>
+                                    <Text style={gs.contentText}>
+                                        Last run: {formatTimestamp(profileData.lastRun)}
+                                    </Text>
+                                    <Text style={gs.contentText}>
+                                        Total steps: {profileData.totalSteps}
+                                    </Text>
+                                    <Text style={gs.contentText}>
+                                        Total time: {profileData.totalTime}
+                                    </Text>
+                                    <Text style={gs.contentText}>
+                                        Total score: {profileData.totalScore}
+                                    </Text>
+                                    <Text style={[gs.contentText, { marginTop: 10 }]}>
+                                        Levels completed: {Object.keys(profileData.bestScores ?? {}).length}
+                                    </Text>
 
-                            <FlatList
-                                data={Object.entries(profileData.bestScores ?? {})}
-                                keyExtractor={([level]) => level}
-                                renderItem={({ item }) => {
-                                    const [level, scoreData] = item;
-                                    return (
-                                        <View style={gs.contentContainer}>
-                                            <TouchableOpacity onPress={() => handleLevelClick(level)}>
-                                                <Text style={gs.contentText}>
-                                                    {scoreData.title}
-                                                </Text>
-                                            </TouchableOpacity>
-                                            <Text style={gs.contentText}>
-                                                Score: {scoreData.score}
-                                            </Text>
-                                            <Text style={gs.contentText}>
-                                                Score: {formatTimestamp(scoreData.timestamp)}
-                                            </Text>
-                                        </View>
-
-                                    );
-                                }}
-                                style={{ marginTop: 20 }}
-                            />
-                        </View>
-                    )}
-                    {/* levelScores mode: show best results for a level*/}
-                    {!loading && selectedMode === 'levelScores' && (
-                        <View>
-                            <Text style={styles.scoreText}>Highscores for {levelTitle}</Text>
-                            <View style={styles.listitems}>
-                                <Text style={styles.scoreText}>User</Text>
-                                <Text style={styles.scoreText}>Points</Text>
-                                <Text style={styles.scoreText}>Time</Text>
-                            </View>
-                            <FlatList
-                                data={levelData}
-
-                                renderItem={({ item }) =>
+                                    <FlatList
+                                        data={Object.entries(profileData.bestScores ?? {})}
+                                        keyExtractor={([level]) => level}
+                                        renderItem={({ item }) => {
+                                            const [level, scoreData] = item;
+                                            return (
+                                                <View style={gs.listRow}>
+                                                    <View style={gs.listCell}>
+                                                        <TouchableOpacity onPress={() => handleLevelClick(level)}>
+                                                            <Text style={gs.listCellLinkText}>{scoreData.title}</Text>
+                                                        </TouchableOpacity>
+                                                    </View>
+                                                    <Text style={gs.listCell}> {scoreData.score}</Text>
+                                                    <Text style={gs.listCell}>{formatTimestamp(scoreData.timestamp)}</Text>
+                                                </View>
+                                            );
+                                        }}
+                                        ListHeaderComponent={() => (
+                                            <View style={[gs.listRow, { borderBottomWidth: 1, borderBottomColor: '#444' }]}>
+                                                <Text style={[gs.listCell, gs.listHeader]}>Level</Text>
+                                                <Text style={[gs.listCell, gs.listHeader]}>Score</Text>
+                                                <Text style={[gs.listCell, gs.listHeader]}>Time</Text>
+                                            </View>
+                                        )}
+                                        style={{ marginTop: 20 }}
+                                    />
+                                </View>
+                            )}
+                            {/* levelScores mode: show best results for a level*/}
+                            {!loading && selectedMode === 'levelScores' && (
+                                <View>
+                                    <Text style={styles.scoreText}>Highscores for {levelTitle}</Text>
                                     <View style={styles.listitems}>
-                                        <TouchableOpacity onPress={() => handleUserClick(item.userId)}>
-                                            <Text style={styles.scoreText}>{getUserName(item.userId)}</Text>
-                                        </TouchableOpacity>
-                                        <Text style={styles.scoreText}>{item.score}</Text>
-                                        <Text style={styles.scoreText}>{formatTimestamp(item.timestamp)}</Text>
-                                    </View>}
-                            />
-                        </View>
-                    )}
+                                        <Text style={gs.contentText}>
+                                            {
+                                                currentLevelId && userData && bestScores[currentLevelId]
+                                                    ? `${userData.username}'s best score: ${bestScores[currentLevelId].score}`
+                                                    : "You haven't completed level yet!"
+                                            }
+                                        </Text>
+                                    </View>
+                                    <FlatList
+                                        data={levelData}
+                                        renderItem={({ item }) =>
+                                            <View style={gs.listRow}>
+                                                <View style={gs.listCell}>
+                                                    <TouchableOpacity onPress={() => handleUserClick(item.userId)}>
+                                                        <Text style={gs.listCellLinkText}>{item.username}</Text>
+                                                    </TouchableOpacity>
+                                                </View>
+                                                <Text style={gs.listCell}>{item.score}</Text>
+                                                <Text style={gs.listCell}>{formatTimestamp(item.timestamp)}</Text>
+                                            </View>}
+                                        ListHeaderComponent={() => (
+                                            <View style={[gs.listRow, { borderBottomWidth: 1, borderBottomColor: '#444' }]}>
+                                                <Text style={[gs.listCell, gs.listHeader]}>User</Text>
+                                                <Text style={[gs.listCell, gs.listHeader]}>Score</Text>
+                                                <Text style={[gs.listCell, gs.listHeader]}>Time</Text>
+                                            </View>
+                                        )}
+                                    />
+                                </View>
+                            )}
 
-                    {!loading && !selectedMode && (
-                        <Text style={gs.contentText}>No data to show.</Text>
-                    )}
+                            {!loading && !selectedMode && (
+                                <Text style={gs.contentText}>No data to show.</Text>
+                            )}
+                        </View>
+                    </TouchableWithoutFeedback>
                 </View>
-            </View>
-        </Modal>
+            </TouchableWithoutFeedback>
+        </Modal >
     );
 }
 

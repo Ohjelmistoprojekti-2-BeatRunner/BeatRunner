@@ -85,6 +85,13 @@ export default function ScoreScreen() {
         setModalVisible(true);
     };
 
+    const handleUserClick = (userId: string) => {
+        setSelectedUserId(userId);
+        setSelectedLevelId(undefined);
+        setSelectedMode('profile')
+        setModalVisible(true)
+    }
+
 
     if (loading) {
         return null;
@@ -167,12 +174,24 @@ export default function ScoreScreen() {
                     data={dataToRender}
 
                     renderItem={({ item }) =>
-                        <View style={styles.listitems}>
-                            <Text style={styles.scoreText}>{item.username}</Text>
-                            <Text style={styles.scoreText}>
+                        <View style={globalStyles.listRow}>
+                            <View style={globalStyles.listCell}>
+                                <TouchableOpacity onPress={() => handleUserClick(item.id)}>
+                                    <Text style={globalStyles.listCellLinkText}>{item.username}</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <Text style={globalStyles.listCell}>
                                 {statCategory === 'totalScore' ? item.totalScore : item.totalRuns}
                             </Text>
                         </View>}
+                    ListHeaderComponent={() => (
+                        <View style={[globalStyles.listRow, { borderBottomWidth: 1, borderBottomColor: '#444' }]}>
+                            <Text style={[globalStyles.listCell, globalStyles.listHeader]}>User</Text>
+                            <Text style={[globalStyles.listCell, globalStyles.listHeader]}>
+                                {statCategory === 'totalScore' ? 'Total score' : 'Total runs'}
+                            </Text>
+                        </View>
+                    )}
 
                 />
             </View>

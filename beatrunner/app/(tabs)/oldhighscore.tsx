@@ -16,7 +16,7 @@ import { router } from 'expo-router';
 import ProfileScoresModal from '@/components/ProfileScoresModal';
 
 interface UserResults {
-    levelId: number;
+    levelId: string;
     userId: string;
     score: number;
     timestamp: number;
@@ -70,7 +70,7 @@ export default function ScoreScreen() {
         if (!allUsersResults || allUsersResults.length == 0) {
             return null
         }
-        const levelIdInt = parseInt(levelId);
+        const levelIdInt = levelId;
         let level = allUsersResults.filter(result => result.levelId === levelIdInt)
 
 
