@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { globalStyles } from '@/styles/globalStyles';
 import { getAuth, signOut, deleteUser, EmailAuthProvider, reauthenticateWithCredential, updatePassword, updateProfile } from 'firebase/auth';
 import { router } from 'expo-router';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/firebaseConfig';
 
 export default function SettingsScreen() {
@@ -58,10 +58,12 @@ export default function SettingsScreen() {
 
   const handleChangeUsername = async () => {
     // Check input
-    if (!newUsername.trim()) {
+    const trimmedUsername = newUsername.trim();
+    if (!trimmedUsername) {
       Alert.alert('Error', 'Please enter a new username.');
       return;
     }
+  
 
     try {
       const auth = getAuth();
@@ -72,14 +74,24 @@ export default function SettingsScreen() {
         return;
       }
 
+      const usersRef = collection(db, 'users');
+      const q = query(usersRef, where('username', '==', trimmedUsername));
+      const querySnapshot = await getDocs(q);
+
+      const isTaken = querySnapshot.docs.some(doc => doc.id !== user.uid);
+      if (isTaken) {
+        Alert.alert('Error', 'Username is already taken.');
+        return;
+      }
+
       await updateProfile(user, {
-        displayName: newUsername.trim(),
+        displayName: trimmedUsername,
       });
 
       await user.reload();
 
       const userDocRef = doc(db, 'users', user.uid);
-      await updateDoc(userDocRef, { username: newUsername.trim() });
+      await updateDoc(userDocRef, { username: trimmedUsername });
 
       Alert.alert('Success', 'Username changed successfully.');
       setNewUsername('');
