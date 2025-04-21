@@ -4,6 +4,7 @@ import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
 export interface Level {
     id: string;
     title: string;
+    levelOrder: number
     difficulty: string;
     calories: number;
     songs: [];
@@ -44,6 +45,7 @@ export const fetchLevels = async () => {
             return {
                 id: doc.id,
                 title: data.title,
+                levelOrder: data.levelOrder,
                 difficulty: data.difficulty,
                 calories: data.calories,
                 songs: data.songs,

@@ -2,7 +2,7 @@ import ProfileScoresModal from '@/components/ProfileScoresModal';
 import { useUserContext } from '@/contexts/UserContext';
 import { fetchLevels, Level } from '@/firebase/levelsService';
 import { fetchUserIdByName, fetchUsersOrderByTotalRuns, fetchUsersOrderByTotalScore, UserProfile } from '@/firebase/usersService';
-import { globalStyles } from '@/styles/globalStyles';
+import { globalStyles as gs } from '@/styles/globalStyles';
 import React, { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SegmentedButtons } from 'react-native-paper';
@@ -99,7 +99,7 @@ export default function ScoreScreen() {
 
     return (
 
-        <View style={globalStyles.container}>
+        <View style={gs.container}>
             <View style={{
                 backgroundColor: '#000000dd'
             }}>
@@ -110,22 +110,22 @@ export default function ScoreScreen() {
                     padding: 10
                 }}>
                     <TextInput
-                        style={globalStyles.input}
+                        style={gs.input}
                         placeholder="Search username"
                         placeholderTextColor="#888"
                         onChangeText={setSearchTerm}
                     />
                     <TouchableOpacity style={[
-                        globalStyles.button
+                        gs.button
                     ]}
                         onPress={handleProfileModal}>
-                        <Text style={globalStyles.buttonText}>Search user</Text>
+                        <Text style={gs.buttonText}>Search user</Text>
                     </TouchableOpacity>
                 </View>
             </View>
             <View>
                 <DropDownPicker
-                    style={[globalStyles.dropdownpicker]}
+                    style={[gs.dropdownpicker]}
                     open={isLevelPickerOpen}
                     value={levelPickerValue}
                     items={pickerLevelOptions}
@@ -143,7 +143,7 @@ export default function ScoreScreen() {
             <View>
                 <SegmentedButtons
                     theme={{ roundness: 2 }}
-                    style={[globalStyles.selector]}
+                    style={[gs.selector]}
                     value={statCategory}
                     multiSelect={false}
                     onValueChange={(val) => {
@@ -175,20 +175,20 @@ export default function ScoreScreen() {
                     data={dataToRender}
 
                     renderItem={({ item }) =>
-                        <View style={globalStyles.listRow}>
-                            <View style={globalStyles.listCell}>
+                        <View style={gs.listRow}>
+                            <View style={gs.listCell}>
                                 <TouchableOpacity onPress={() => handleUserClick(item.id)}>
-                                    <Text style={globalStyles.listCellLinkText}>{item.username}</Text>
+                                    <Text style={gs.listCellLinkText}>{item.username}</Text>
                                 </TouchableOpacity>
                             </View>
-                            <Text style={globalStyles.listCell}>
+                            <Text style={gs.listCell}>
                                 {statCategory === 'totalScore' ? item.totalScore : item.totalRuns}
                             </Text>
                         </View>}
                     ListHeaderComponent={() => (
-                        <View style={[globalStyles.listRow, { borderBottomWidth: 1, borderBottomColor: '#444' }]}>
-                            <Text style={[globalStyles.listCell, globalStyles.listHeader]}>User</Text>
-                            <Text style={[globalStyles.listCell, globalStyles.listHeader]}>
+                        <View style={[gs.listRow, { borderBottomWidth: 2,}]}>
+                            <Text style={[gs.listCell, gs.listHeader]}>User</Text>
+                            <Text style={[gs.listCell, gs.listHeader]}>
                                 {statCategory === 'totalScore' ? 'Total score' : 'Total runs'}
                             </Text>
                         </View>

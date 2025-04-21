@@ -44,7 +44,14 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
                     snapshot.docs.forEach((doc) => {
                         scores[doc.id] = doc.data();
                     });
-                    setBestScores(scores);
+                    //sort bestScores to right level order
+                    const scoresArray = Object.entries(scores)
+                        .sort(([, a], [, b]) => a.levelOrder - b.levelOrder)
+                        .reduce((acc, [key, value]) => {
+                            acc[key] = value;
+                            return acc;
+                        }, {} as Record<string, any>);
+                    setBestScores(scoresArray);
                 });
             } else {
 

@@ -3,8 +3,10 @@ import { useUserContext } from '@/contexts/UserContext';
 import { fetchLevels, Level } from '@/firebase/levelsService';
 import { formatTimestamp } from '@/scripts/formatTimestamp';
 import { router } from 'expo-router';
+import { globalStyles as gs } from '@/styles/globalStyles';
 import React, { useDebugValue, useEffect, useState } from 'react';
-import { FlatList, Text, TouchableOpacity, View, StyleSheet, Image, TextStyle } from 'react-native';
+import { FlatList, Text, TouchableOpacity, View, StyleSheet, Image, TextStyle, ActivityIndicator } from 'react-native';
+import { fetchLevelTopResultsWithUsername } from '@/firebase/scoresService';
 
 export default function HomeScreen() {
 
@@ -23,7 +25,8 @@ export default function HomeScreen() {
             try {
                 setLoading(true);
                 const levelsData = await fetchLevels();
-                setLevels(levelsData);
+                const levelsDataInOrder = levelsData.sort((a, b) => a.levelOrder - b.levelOrder);
+                setLevels(levelsDataInOrder);
             } catch (error) {
                 console.error("Error loading levels: ", error);
             } finally {
@@ -60,21 +63,21 @@ export default function HomeScreen() {
         const levelCompleted = !!bestScores[id];
         return (
             <View style={{ margin: 10, width: 300 }}>
-                <TouchableOpacity style={levelCompleted ? globalStyles.buttonCompleted : globalStyles.button} onPress={() => router.replace({
+                <TouchableOpacity style={levelCompleted ? styles.levelButtonCompleted : styles.levelButton} onPress={() => router.replace({
                     pathname: "/level",
-                    params: { id, title, difficulty, calories, songs }
+                    params: { id, title, difficulty, calories, songs, }
                 })}>
                     <View>
-                        <Text style={[globalStyles.buttonText, { color: 'white' }]}>{title}</Text>
-                        <Text style={[getColorForDifficulty(difficulty), globalStyles.difficultyText]}>{difficulty}</Text>
+                        <Text style={[styles.buttonText, { color: 'white' }]}>{title}</Text>
+                        <Text style={[getColorForDifficulty(difficulty), styles.difficultyText]}>{difficulty}</Text>
                     </View>
                     <View>
                         {bestScores[id] ?
-                            <Text style={[getColorForDifficulty('default'), globalStyles.buttonText, { textAlign: 'right' }]}>{bestScores[id].score}</Text>
-                            : <Text style={[getColorForDifficulty('default'), globalStyles.difficultyText]}>Not yet played</Text>
+                            <Text style={[getColorForDifficulty('default'), styles.buttonText, { textAlign: 'right' }]}>{bestScores[id].score}</Text>
+                            : <Text style={[getColorForDifficulty('default'), styles.difficultyText]}>Not yet played</Text>
                         }
                         {bestScores[id] ?
-                            <Text style={[getColorForDifficulty('default'), globalStyles.difficultyText]}>{formatTimestamp(bestScores[id].timestamp)}</Text>
+                            <Text style={[getColorForDifficulty('default'), styles.difficultyText]}>{formatTimestamp(bestScores[id].timestamp)}</Text>
                             : ""
                         }
                     </View>
@@ -85,20 +88,20 @@ export default function HomeScreen() {
 
 
     return (
-        <View style={[globalStyles.container, {flex: 1} ]}>
+        <View style={[styles.container, { flex: 1 }]}>
 
-            <View style={globalStyles.topContainer}>
-                <Text style={globalStyles.title}>Welcome {userData?.username}</Text>
+            <View style={styles.topContainer}>
+                <Text style={styles.title}>Welcome {userData?.username}</Text>
                 <TouchableOpacity onPress={handleProfileModal}>
-                    <View style={globalStyles.contentContainer}>
-                        <View style={{ flexDirection: 'row' }}>
-                            <Text style={globalStyles.sectionTitle}>Total score: </Text>
-                            <Text style={globalStyles.contentText}>{userData?.totalScore}</Text>
+                    <View style={gs.statContentContainer}>
+                        <View style={gs.statContentRow}>
+                            <Text style={gs.statRowTitle}>Total score: </Text>
+                            <Text style={[gs.statRowText]}>{userData?.totalScore}</Text>
                         </View>
-                        <View style={{ flexDirection: 'row' }}>
-                            <Text style={globalStyles.sectionTitle}>Levels completed:
+                        <View style={gs.statContentRow}>
+                            <Text style={gs.statRowTitle}>Levels completed:
                             </Text>
-                            <Text style={globalStyles.contentText}>{Object.keys(bestScores).length}</Text>
+                            <Text style={[gs.statRowText]}>{Object.keys(bestScores).length}</Text>
                         </View>
 
                     </View>
@@ -106,16 +109,23 @@ export default function HomeScreen() {
             </View>
 
             <Image style={{ width: 'auto', height: 100 }} source={require('../../assets/images/rhytm.jpg')} />
+            {loading && (
+                <ActivityIndicator size="large" color="#fff" style={{ marginTop: 50 }} />
+            )}
+            {!loading && (
+                <View style={[styles.bottomContainer, { flex: 1 }]}>
 
-            <View style={[globalStyles.bottomContainer, {flex: 1}] }>
 
-                <Text style={globalStyles.title}>Levels</Text>
-                <FlatList
-                    data={levels}
-                    renderItem={({ item }) => <Item id={item.id} title={item.title} difficulty={item.difficulty} calories={item.calories} songs={item.songs} />}
-                />
+                    <FlatList
+                        data={levels}
+                        renderItem={({ item }) => <Item id={item.id} levelOrder={item.levelOrder} title={item.title} difficulty={item.difficulty} calories={item.calories} songs={item.songs} />}
 
-            </View>
+                        ListHeaderComponent={() => (
+                            <Text style={styles.title}>Levels</Text>
+                        )}
+                    />
+                </View>
+            )}
 
             {modalVisible && (
                 <ProfileScoresModal
@@ -130,7 +140,7 @@ export default function HomeScreen() {
     );
 }
 
-export const globalStyles = StyleSheet.create({
+export const styles = StyleSheet.create({
     title: {
         color: 'white',
         fontSize: 29,
@@ -155,7 +165,7 @@ export const globalStyles = StyleSheet.create({
         alignItems: 'center',
         paddingBottom: 50,
     },
-    button: {
+    levelButton: {
         paddingVertical: 13,
         paddingHorizontal: 20,
         borderWidth: 2,
@@ -166,7 +176,7 @@ export const globalStyles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
-    buttonCompleted: {
+    levelButtonCompleted: {
         paddingVertical: 13,
         paddingHorizontal: 20,
         borderWidth: 2,
@@ -203,7 +213,7 @@ export const globalStyles = StyleSheet.create({
         color: 'white',
         fontSize: 17,
         fontWeight: 'bold',
-        marginLeft: 20
+        marginLeft: 30
     },
     logoutButton: {
         marginTop: 20,
@@ -213,18 +223,6 @@ export const globalStyles = StyleSheet.create({
         alignItems: 'center',
         alignSelf: 'flex-end', // positioned on the right
         width: '30%',
-    },
-    contentContainer: {
-        marginTop: 20,
-        padding: 10,
-        backgroundColor: 'rgba(226, 44, 250, 0.18)',
-        boxShadow: 'inset 0 1px 20px 3px rgb(0, 0, 0)',
-        borderRadius: 15,
-    },
-    contentText: {
-        color: 'white',
-        fontSize: 17,
-        fontWeight: 'normal',
     },
     link: {
         marginTop: 20,

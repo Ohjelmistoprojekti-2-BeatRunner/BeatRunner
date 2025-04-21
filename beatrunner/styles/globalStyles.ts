@@ -117,7 +117,7 @@ export const globalStyles = StyleSheet.create({
     },
     listCellLinkText: {
         flex: 1,
-        color: 'white',
+        color: 'rgb(150, 90, 180)',
         fontSize: 16,
         textAlign: 'left',
     },
@@ -125,7 +125,34 @@ export const globalStyles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 17,
         color: 'rgb(97, 40, 112)',
+        textShadowColor: 'white',
     },
+    
+    //stat-box-styles:
+    statContentContainer: {
+        marginTop: 20,
+        padding: 10,
+        backgroundColor: 'rgba(226, 44, 250, 0.18)',
+        boxShadow: 'inset 0 1px 20px 3px rgb(0, 0, 0)',
+        borderRadius: 15,
+    },
+    statContentRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    statRowText: {
+        color: 'white',
+        fontSize: 17,
+        fontWeight: 'normal',
+        marginRight: 30
+    },
+    statRowTitle: {
+        color: 'white',
+        fontSize: 17,
+        fontWeight: 'bold',
+        marginLeft: 30
+    },
+
     dropdownpicker: {
         backgroundColor: "gray", borderColor: 'rgb(97, 40, 112)',
     },
