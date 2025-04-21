@@ -9,7 +9,7 @@ import { SegmentedButtons } from 'react-native-paper';
 import DropDownPicker from 'react-native-dropdown-picker';
 
 interface UserResults {
-    levelId: number;
+    levelId: string;
     userId: string;
     score: number;
     timestamp: number;

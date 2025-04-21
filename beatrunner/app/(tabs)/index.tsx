@@ -1,18 +1,10 @@
+import ProfileScoresModal from '@/components/ProfileScoresModal';
 import { useUserContext } from '@/contexts/UserContext';
 import { fetchLevels, Level } from '@/firebase/levelsService';
 import { formatTimestamp } from '@/scripts/formatTimestamp';
 import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { FlatList, Text, TouchableOpacity, View } from 'react-native';
-
-
-interface Level {
-    id: string;
-    title: string;
-    difficulty: string;
-    calories: number;
-    songs: [];
-}
+import React, { useDebugValue, useEffect, useState } from 'react';
+import { FlatList, Text, TouchableOpacity, View, StyleSheet, Image, TextStyle } from 'react-native';
 
 export default function HomeScreen() {
 
@@ -20,6 +12,11 @@ export default function HomeScreen() {
     const [levels, setLevels] = useState<Level[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const { user, userData, loading: authLoading } = useUserContext();
+
+    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedUserId, setSelectedUserId] = useState<string | undefined>(user?.uid);
+    const [selectedLevelId, setSelectedLevelId] = useState<string | undefined>(undefined);
+    const [selectedMode, setSelectedMode] = useState<'profile' | 'levelScores'>('profile');
 
     useEffect(() => {
         const getLevels = async () => {
@@ -40,45 +37,72 @@ export default function HomeScreen() {
     const getColorForDifficulty = (difficulty: string): TextStyle => {
         switch (difficulty) {
             case "easy":
-                return { color: '#64b55b'};
+                return { color: '#64b55b' };
             case "moderate":
-                return { color: '#e6c353'};
+                return { color: '#e6c353' };
             case "hard":
-                return { color: '#de6f80'};
+                return { color: '#de6f80' };
             default:
-                return { color: 'white'};
+                return { color: 'white' };
         }
     }
 
+    const handleProfileModal = async () => {
+        setSelectedLevelId(undefined);
+        setSelectedUserId(user?.uid);
+        setSelectedMode('profile');
+        setModalVisible(true);
+    };
 
-    const Item = ({ id, title, difficulty, calories, songs }: Level) => (
-        <View style={{ margin: 10, width: 300 }}>
-            <TouchableOpacity style={globalStyles.button} onPress={() => router.replace({
-                pathname: "/level",
-                params: { id, title, difficulty, calories, songs }
-            })}>
-                <Text style={globalStyles.buttonText}>{title}</Text>
-                <Text style={[getColorForDifficulty(difficulty), globalStyles.difficultyText]}>{difficulty}</Text>
-            </TouchableOpacity>
-        </View>
-    );
+
+    const Item = ({ id, title, difficulty, calories, songs }: Level) => {
+
+        const levelCompleted = !!bestScores[id];
+        return (
+            <View style={{ margin: 10, width: 300 }}>
+                <TouchableOpacity style={levelCompleted ? globalStyles.buttonCompleted : globalStyles.button} onPress={() => router.replace({
+                    pathname: "/level",
+                    params: { id, title, difficulty, calories, songs }
+                })}>
+                    <View>
+                        <Text style={[globalStyles.buttonText, {color: 'white'}]}>{title}</Text>
+                        <Text style={[getColorForDifficulty(difficulty), globalStyles.difficultyText]}>{difficulty}</Text>
+                    </View>
+                    <View>
+                        {bestScores[id] ?
+                            <Text style={[getColorForDifficulty('default'), globalStyles.buttonText, {textAlign: 'right'}]}>{bestScores[id].score}</Text>
+                            : <Text style={[getColorForDifficulty('default'), globalStyles.difficultyText]}>Not yet played</Text>
+                        }
+                        {bestScores[id] ?
+                            <Text style={[getColorForDifficulty('default'), globalStyles.difficultyText]}>{formatTimestamp(bestScores[id].timestamp)}</Text>
+                            : ""
+                        }
+                    </View>
+                </TouchableOpacity>
+            </View>
+        )
+    };
 
 
     return (
         <View style={globalStyles.container}>
-            <View style={globalStyles.contentContainer}>
-                <Text>{userData?.username}'s stats</Text>
-                <Text>Total steps: {userData?.totalSteps}</Text>
-                <Text>Total time: {userData?.totalTime}</Text>
-                <Text>Total score: {userData?.totalScore}</Text>
-                <Text>Levels completed: {Object.keys(bestScores).length}</Text>
-            </View>
+
             <View style={globalStyles.topContainer}>
-                <Text style={globalStyles.title}>Welcome username!</Text>
-                <View style={globalStyles.contentContainer}>
-                <Text style={globalStyles.sectionTitle}>Total time run: <Text style={globalStyles.contentText}>45.2 hours</Text></Text>
-                <Text style={globalStyles.sectionTitle}>Levels completed: <Text style={globalStyles.contentText}>2</Text></Text>
-                </View>
+                <Text style={globalStyles.title}>Welcome {userData?.username}</Text>
+                <TouchableOpacity onPress={handleProfileModal}>
+                    <View style={globalStyles.contentContainer}>
+                        <View style={{ flexDirection: 'row' }}>
+                            <Text style={globalStyles.sectionTitle}>Total score: </Text>
+                            <Text style={globalStyles.contentText}>{userData?.totalScore}</Text>
+                        </View>
+                        <View style={{ flexDirection: 'row' }}>
+                            <Text style={globalStyles.sectionTitle}>Levels completed:
+                            </Text>
+                            <Text style={globalStyles.contentText}>{Object.keys(bestScores).length}</Text>
+                        </View>
+
+                    </View>
+                </TouchableOpacity>
             </View>
 
             <Image style={{ width: 'auto', height: 100 }} source={require('../../assets/images/rhytm.jpg')} />
@@ -92,6 +116,16 @@ export default function HomeScreen() {
                 />
 
             </View>
+
+            {modalVisible && (
+                <ProfileScoresModal
+                    visible={modalVisible}
+                    userId={selectedUserId}
+                    levelId={selectedLevelId}
+                    onClose={() => setModalVisible(false)}
+                    mode={selectedMode}
+                />
+            )}
         </View>
     );
 }
@@ -132,13 +166,23 @@ export const globalStyles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
+    buttonCompleted: {
+        paddingVertical: 13,
+        paddingHorizontal: 30,
+        borderWidth: 2,
+        borderColor: 'rgb(97, 112, 40)',
+        borderRadius: 15,
+        backgroundColor: 'rgb(24, 3, 29)',
+        boxShadow: '5px 5px 6px rgb(89, 104, 34)',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
     difficultyText: {
         fontSize: 16,
         fontWeight: 'bold',
         textAlignVertical: 'center',
     },
     buttonText: {
-        color: 'white',
         fontSize: 23,
     },
     orText: {
@@ -180,7 +224,6 @@ export const globalStyles = StyleSheet.create({
     contentText: {
         color: 'white',
         fontSize: 17,
-        marginVertical: 5,
         fontWeight: 'normal',
     },
     link: {
