@@ -84,23 +84,42 @@ export default function SettingsScreen() {
         return;
       }
 
-      await updateProfile(user, {
-        displayName: trimmedUsername,
-      });
-
-      await user.reload();
-
-      const userDocRef = doc(db, 'users', user.uid);
-      await updateDoc(userDocRef, { username: trimmedUsername });
-
-      Alert.alert('Success', 'Username changed successfully.');
-      setNewUsername('');
-
+      Alert.alert(
+        'Confirm Username Change',
+        `Are you sure you want to change your username to "${trimmedUsername}"?`,
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'Yes',
+            onPress: async () => {
+              try {
+                await updateProfile(user, {
+                  displayName: trimmedUsername,
+                });
+  
+                await user.reload();
+  
+                const userDocRef = doc(db, 'users', user.uid);
+                await updateDoc(userDocRef, { username: trimmedUsername });
+  
+                Alert.alert('Success', 'Username changed successfully.');
+                setNewUsername('');
+              } catch (err) {
+                console.error(err);
+                Alert.alert('Error', 'Failed to change username.');
+              }
+            },
+          },
+        ]
+      );
     } catch (error: any) {
       console.error(error);
-      Alert.alert('Error', 'Failed to change username. Please try again.');
+      Alert.alert('Error', 'Failed to check username. Please try again.');
     }
-  };
+  }
 
   const handleChangePassword = async () => {
     try {
