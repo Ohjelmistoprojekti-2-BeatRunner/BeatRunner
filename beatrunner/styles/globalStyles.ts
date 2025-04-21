@@ -27,13 +27,14 @@ export const globalStyles = StyleSheet.create({
         paddingBottom: 50,
     },
     button: {
-        marginTop: 0,
+        marginTop: 3,
         paddingVertical: 15,
         paddingHorizontal: 30,
         borderWidth: 2,
         borderColor: 'white',
-        borderRadius: 15,
+        borderRadius: 8,
         backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        width: "76%"
     },
     buttonCompleted: {
         marginTop: 0,
@@ -68,7 +69,7 @@ export const globalStyles = StyleSheet.create({
         padding: 10,
         color: 'white',
         marginTop: 5,
-        width: '70%',
+        width: '76%',
     },
     sectionTitle: {
         color: 'white',
@@ -124,6 +125,6 @@ export const globalStyles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 17,
         color: 'rgb(97, 40, 112)',
-      },
+    },
 
 });

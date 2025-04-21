@@ -125,6 +125,9 @@ export default function ScoreScreen() {
             </View>
             <View>
                 <DropDownPicker
+                    style={{
+                        backgroundColor: "gray", borderColor: 'rgb(97, 40, 112)',
+                    }}
                     open={isLevelPickerOpen}
                     value={levelPickerValue}
                     items={pickerLevelOptions}
@@ -227,6 +230,6 @@ const styles = StyleSheet.create({
 
     },
     selector: {
-
+        marginTop: 10
     },
 });
