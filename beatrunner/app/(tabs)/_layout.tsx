@@ -39,7 +39,6 @@ export default function Layout() {
     <Drawer
       drawerContent={(props) => <DrawerTitleLogo {...props} />}>
       <Drawer.Screen name="index" options={{ title: 'Start Running' }} />
-      <Drawer.Screen name="stepcounter" options={{ title: 'Steps' }} />
       <Drawer.Screen name="highscore" options={{ title: 'Highscore' }} />
       <Drawer.Screen name="settings" options={{ title: 'Settings' }} />
       <Drawer.Screen name="help" options={{ title: 'Help' }} />
