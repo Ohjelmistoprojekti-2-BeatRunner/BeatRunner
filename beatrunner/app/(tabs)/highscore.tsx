@@ -125,6 +125,7 @@ export default function ScoreScreen() {
             </View>
             <View>
                 <DropDownPicker
+                    style={[globalStyles.dropdownpicker]}
                     open={isLevelPickerOpen}
                     value={levelPickerValue}
                     items={pickerLevelOptions}
@@ -142,7 +143,7 @@ export default function ScoreScreen() {
             <View>
                 <SegmentedButtons
                     theme={{ roundness: 2 }}
-                    style={styles.selector}
+                    style={[globalStyles.selector]}
                     value={statCategory}
                     multiSelect={false}
                     onValueChange={(val) => {
@@ -226,7 +227,5 @@ const styles = StyleSheet.create({
         flexDirection: "row",
 
     },
-    selector: {
 
-    },
 });
