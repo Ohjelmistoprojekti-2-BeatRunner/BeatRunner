@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { globalStyles } from '@/styles/globalStyles';
 import { getAuth, signOut, deleteUser, EmailAuthProvider, reauthenticateWithCredential, updatePassword, updateProfile } from 'firebase/auth';
 import { router } from 'expo-router';
@@ -156,7 +156,9 @@ export default function SettingsScreen() {
   };
 
   return (
-    <View style={globalStyles.container}>
+    <ScrollView style={globalStyles.container}>
+      <View style={{paddingBottom: 50 }}>
+        <Text style={globalStyles.title}>Settings</Text>
       <Text style={globalStyles.title}>Settings</Text>
       <Text style={globalStyles.sectionTitle}>Change Password</Text>
 
@@ -188,6 +190,7 @@ export default function SettingsScreen() {
       <TouchableOpacity style={globalStyles.logoutButton} onPress={handleLogout}>
         <Text style={globalStyles.buttonText}>Logout</Text>
       </TouchableOpacity>
-    </View>
+      </View>
+    </ScrollView>
   );
 }
