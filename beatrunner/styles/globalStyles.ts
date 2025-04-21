@@ -126,5 +126,10 @@ export const globalStyles = StyleSheet.create({
         fontSize: 17,
         color: 'rgb(97, 40, 112)',
     },
-
+    dropdownpicker: {
+        backgroundColor: "gray", borderColor: 'rgb(97, 40, 112)',
+    },
+    selector: {
+        marginTop: 10
+    },
 });
