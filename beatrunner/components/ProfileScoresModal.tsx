@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: 'rgb(97, 40, 112)',
         borderRadius: 15,
-        boxShadow: '1px 1px 2px rgb(89, 34, 104)',
+        boxShadow: '3px 3px 4px rgb(89, 34, 104)',
     },
     scoreText: {
         color: 'white',

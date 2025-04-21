@@ -117,14 +117,14 @@ export const globalStyles = StyleSheet.create({
     },
     listCellLinkText: {
         flex: 1,
-        color: 'rgb(150, 90, 180)',
+        color: 'rgb(180, 100, 200)',
         fontSize: 16,
         textAlign: 'left',
     },
     listHeader: {
         fontWeight: 'bold',
         fontSize: 17,
-        color: 'rgb(97, 40, 112)',
+        color: 'rgb(150, 90, 180)',
         textShadowColor: 'white',
     },
     
