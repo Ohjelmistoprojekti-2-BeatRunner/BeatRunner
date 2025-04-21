@@ -65,12 +65,12 @@ export default function HomeScreen() {
                     params: { id, title, difficulty, calories, songs }
                 })}>
                     <View>
-                        <Text style={[globalStyles.buttonText, {color: 'white'}]}>{title}</Text>
+                        <Text style={[globalStyles.buttonText, { color: 'white' }]}>{title}</Text>
                         <Text style={[getColorForDifficulty(difficulty), globalStyles.difficultyText]}>{difficulty}</Text>
                     </View>
                     <View>
                         {bestScores[id] ?
-                            <Text style={[getColorForDifficulty('default'), globalStyles.buttonText, {textAlign: 'right'}]}>{bestScores[id].score}</Text>
+                            <Text style={[getColorForDifficulty('default'), globalStyles.buttonText, { textAlign: 'right' }]}>{bestScores[id].score}</Text>
                             : <Text style={[getColorForDifficulty('default'), globalStyles.difficultyText]}>Not yet played</Text>
                         }
                         {bestScores[id] ?
@@ -85,7 +85,7 @@ export default function HomeScreen() {
 
 
     return (
-        <View style={globalStyles.container}>
+        <View style={[globalStyles.container, {flex: 1} ]}>
 
             <View style={globalStyles.topContainer}>
                 <Text style={globalStyles.title}>Welcome {userData?.username}</Text>
@@ -107,7 +107,7 @@ export default function HomeScreen() {
 
             <Image style={{ width: 'auto', height: 100 }} source={require('../../assets/images/rhytm.jpg')} />
 
-            <View style={globalStyles.bottomContainer}>
+            <View style={[globalStyles.bottomContainer, {flex: 1}] }>
 
                 <Text style={globalStyles.title}>Levels</Text>
                 <FlatList
@@ -157,7 +157,7 @@ export const globalStyles = StyleSheet.create({
     },
     button: {
         paddingVertical: 13,
-        paddingHorizontal: 30,
+        paddingHorizontal: 20,
         borderWidth: 2,
         borderColor: 'rgb(97, 40, 112)',
         borderRadius: 15,
@@ -168,7 +168,7 @@ export const globalStyles = StyleSheet.create({
     },
     buttonCompleted: {
         paddingVertical: 13,
-        paddingHorizontal: 30,
+        paddingHorizontal: 20,
         borderWidth: 2,
         borderColor: 'rgb(97, 112, 40)',
         borderRadius: 15,
