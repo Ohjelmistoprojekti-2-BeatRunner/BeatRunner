@@ -21,13 +21,14 @@ export const aboutStyles = StyleSheet.create({
         marginTop: 10,
         marginBottom: 23,
         padding: 10,
-        backgroundColor: '#212622',
+        backgroundColor: 'rgb(29, 3, 36)',
         borderRadius: 20,
+        boxShadow: 'inset 0 1px 20px 3px rgb(0, 0, 0)',
     },
     contentText: {
         color: 'white',
         fontSize: 16,
-        marginVertical: 5,
+        margin: 7,
     },
     link: {
         color: 'lightblue',
@@ -36,7 +37,6 @@ export const aboutStyles = StyleSheet.create({
     sectionTitle: {
         color: 'white',
         fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 5
+        fontWeight: 'bold'
     },
 })

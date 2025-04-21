@@ -19,6 +19,9 @@ export const helpStyles = StyleSheet.create({
       },
       textContainer: {
         flex: 1,
+        backgroundColor: 'rgb(24, 3, 29)',
+        boxShadow: 'inset 0 1px 20px 3px rgb(0, 0, 0)',
+        borderRadius: 20,
       },
       slideHeader: {
         fontSize: 30,
