@@ -5,6 +5,7 @@ export const globalStyles = StyleSheet.create({
         color: 'white',
         fontSize: 32,
         fontWeight: 'bold',
+        margin: 20
     },
     indexContainer: {
         flex: 1,
@@ -14,7 +15,6 @@ export const globalStyles = StyleSheet.create({
         flex: 1,
         backgroundColor: 'black',
         padding: 20,
-        paddingTop: 40,
     },
     topContainer: {
         flex: 1,
@@ -47,15 +47,18 @@ export const globalStyles = StyleSheet.create({
     },
     smallButton: {
         marginTop: 20,
-        backgroundColor: '#555',
-        padding: 12,
-        borderRadius: 8,
+        backgroundColor: 'rgba(226, 44, 250, 0.18)',
+        borderColor: 'rgb(180, 100, 200)',
+        padding: 10,
+        borderRadius: 12,
         alignItems: 'center',
-        width: '35%',
+        width: 200,
+        height: 50,
+        borderWidth: 2
     },
     buttonText: {
         color: 'white',
-        fontSize: 24,
+        fontSize: 20,
     },
     orText: {
         color: 'white',
@@ -63,13 +66,14 @@ export const globalStyles = StyleSheet.create({
         marginVertical: 10,
     },
     input: {
-        borderWidth: 1,
-        borderColor: 'white',
+        borderWidth: 2,
+        borderColor: 'rgb(180, 100, 200)',
         borderRadius: 8,
         padding: 10,
         color: 'white',
         marginTop: 5,
         width: '76%',
+        backgroundColor: 'rgba(226, 44, 250, 0.18)'
     },
     sectionTitle: {
         color: 'white',
@@ -101,6 +105,7 @@ export const globalStyles = StyleSheet.create({
         marginTop: 20,
         color: 'lightblue',
         textDecorationLine: 'underline',
+        fontSize: 18
     },
     //"table"-like styles for flatlists:
     listRow: {

@@ -156,7 +156,7 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={globalStyles.container}>
-      <View style={{paddingBottom: 50 }}>
+      <View style={{paddingBottom: 70 }}>
         <Text style={globalStyles.title}>Settings</Text>
       <Text style={globalStyles.sectionTitle}>Change Password</Text>
 

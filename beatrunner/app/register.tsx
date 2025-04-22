@@ -125,18 +125,19 @@ export default function RegisterScreen() {
 
       {/* Registration Form */}
       <View style={globalStyles.container}>
+        <View style={globalStyles.topContainer}>
         <Text style={globalStyles.title}>Register</Text>
         <TextInput
           style={globalStyles.input}
           placeholder="Email"
-          placeholderTextColor="#888"
+          placeholderTextColor="#cfc0cf"
           autoCapitalize="none"
           onChangeText={setEmail}
         />
         <TextInput
           style={globalStyles.input}
           placeholder="Password"
-          placeholderTextColor="#888"
+          placeholderTextColor="#cfc0cf"
           secureTextEntry={true}
           onChangeText={setPassword}
         />
@@ -146,6 +147,7 @@ export default function RegisterScreen() {
         <TouchableOpacity onPress={() => router.replace('/login')}>
           <Text style={globalStyles.link}>Already have an account? Login here!</Text>
         </TouchableOpacity>
+      </View>
       </View>
     </>
   );
