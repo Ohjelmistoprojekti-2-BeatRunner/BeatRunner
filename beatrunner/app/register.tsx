@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, Modal } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Alert, Modal, BackHandler } from 'react-native';
 import { useRouter } from 'expo-router';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '@/firebaseConfig';
@@ -13,6 +13,14 @@ export default function RegisterScreen() {
   const [username, setUsername] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [userId, setUserId] = useState('');
+
+    useEffect(() => {
+        const backAction = () => { return true;};
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+        return () => {
+            backHandler.remove();
+        };
+    }, []);
 
   const handleRegister = async () => {
     if (!email || !password) {

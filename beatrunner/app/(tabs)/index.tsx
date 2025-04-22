@@ -7,6 +7,7 @@ import { globalStyles as gs } from '@/styles/globalStyles';
 import React, { useDebugValue, useEffect, useState } from 'react';
 import { FlatList, Text, TouchableOpacity, View, StyleSheet, Image, TextStyle, ActivityIndicator } from 'react-native';
 import { fetchLevelTopResultsWithUsername } from '@/firebase/scoresService';
+import { getAuth } from 'firebase/auth';
 
 export default function HomeScreen() {
 
@@ -21,6 +22,7 @@ export default function HomeScreen() {
     const [selectedMode, setSelectedMode] = useState<'profile' | 'levelScores'>('profile');
 
     useEffect(() => {
+        if (!user) return;
         const getLevels = async () => {
             try {
                 setLoading(true);
@@ -34,7 +36,7 @@ export default function HomeScreen() {
         };
 
         getLevels();
-    }, []);
+    }, [user]);
 
     const getColorForDifficulty = (difficulty: string): TextStyle => {
         switch (difficulty) {
