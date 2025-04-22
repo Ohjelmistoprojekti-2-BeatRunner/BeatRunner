@@ -145,7 +145,7 @@ export default function ScoreScreen() {
             </View>
             <View>
                 <SegmentedButtons
-                    theme={{ roundness: 2 }}
+                    theme={{ roundness: 2, colors: { secondaryContainer: "white", outline: 'rgb(97, 40, 112)' } }}
                     style={[gs.selector]}
                     value={statCategory}
                     multiSelect={false}

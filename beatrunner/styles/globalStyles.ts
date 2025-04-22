@@ -127,7 +127,7 @@ export const globalStyles = StyleSheet.create({
         color: 'rgb(150, 90, 180)',
         textShadowColor: 'white',
     },
-    
+
     //stat-box-styles:
     statContentContainer: {
         marginTop: 20,
@@ -157,6 +157,9 @@ export const globalStyles = StyleSheet.create({
         backgroundColor: "gray", borderColor: 'rgb(97, 40, 112)',
     },
     selector: {
-        marginTop: 10
+        marginTop: 10,
+        backgroundColor: 'rgb(97, 40, 112)',
+        borderRadius: 9,
+        borderColor: "purple"
     },
 });
