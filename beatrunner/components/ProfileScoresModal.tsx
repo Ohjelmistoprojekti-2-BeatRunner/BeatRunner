@@ -2,12 +2,10 @@ import { useUserContext } from "@/contexts/UserContext";
 import { fetchLevelById } from "@/firebase/levelsService";
 import { fetchLevelTopResultsWithUsername, Score } from "@/firebase/scoresService";
 import { fetchUserById, UserProfile } from "@/firebase/usersService";
-import { useGetResults } from "@/hooks/useGetResults";
 import { formatTimestamp } from "@/scripts/formatTimestamp";
 import { globalStyles as gs } from "@/styles/globalStyles";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Dimensions, FlatList, Modal, Pressable, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View, } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
+import { ActivityIndicator, Dimensions, FlatList, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 
 type ProfileScoresModalProps = {
@@ -18,7 +16,7 @@ type ProfileScoresModalProps = {
     mode: "profile" | "levelScores"
 };
 
-export default function ProfileScoresModal({ visible, onClose, userId, levelId, mode }: ProfileScoresModalProps) {
+export default function ProfileScoresModal({ visible, onClose, userId, levelId, mode }: Readonly<ProfileScoresModalProps>) {
     const [selectedMode, setSelectedMode] = useState<"profile" | "levelScores">(mode)
     const [currentUserId, setCurrentUserId] = useState<string | undefined>(userId);
     const [currentLevelId, setCurrentLevelId] = useState<string | undefined>(levelId);
@@ -32,7 +30,7 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
     const { height: screenHeight } = Dimensions.get('window');
 
     const { user, bestScores, userData, loading: authLoading } = useUserContext();
-    const { getLevelResults, getUserName } = useGetResults();
+
 
 
     useEffect(() => {
@@ -108,8 +106,136 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
         setSelectedMode('profile')
     }
 
+    const returnProfile = () => {
+        if (profileData) return (
+
+            <View style={{ flex: 1 }}>
+                <View style={{ paddingBottom: 10 }}>
+                    <Text style={[gs.title, { textAlign: "center" }]}>
+                        {profileData.username}
+                    </Text>
+                </View>
+                <View style={[gs.statContentContainer, { boxShadow: 'inset 0 1px 20px 3px #111' }]}>
+                    <View style={gs.statContentRow}>
+                        <Text style={gs.statRowTitle}>Profile created:</Text>
+                        {/*<Text style={gs.statRowText}>{formatTimestamp(profileData.createdAt)}</Text>*/}
+                    </View>
+                    <View style={gs.statContentRow}>
+                        <Text style={gs.statRowTitle}>Last run:</Text>
+                        <Text style={gs.statRowText}>{formatTimestamp(profileData.lastRun)}</Text>
+                    </View>
+                </View>
+                <View style={[gs.statContentContainer, { boxShadow: 'inset 0 1px 20px 3px #111', }]}>
+                    <View style={gs.statContentRow}>
+                        <Text style={gs.statRowTitle}>Total steps:</Text>
+                        <Text style={gs.statRowText}>{profileData.totalSteps}</Text>
+                    </View>
+                    <View style={gs.statContentRow}>
+                        <Text style={gs.statRowTitle}>Total time:</Text>
+                        <Text style={gs.statRowText}>{profileData.totalTime}</Text>
+                    </View>
+                    <View style={gs.statContentRow}>
+                        <Text style={gs.statRowTitle}>Total score:</Text>
+                        <Text style={gs.statRowText}>{profileData.totalScore}</Text>
+                    </View>
+                </View>
+                <View style={[gs.statContentContainer, { boxShadow: 'inset 0 1px 20px 3px #111', }]}>
+                    <View style={gs.statContentRow}>
+                        <Text style={gs.statRowTitle}>Levels completed:</Text>
+                        <Text style={gs.statRowText}>{Object.keys(profileData.bestScores ?? {}).length} </Text>
+                    </View>
+                </View>
+                <View style={{ flex: 1 }}>
+                    <FlatList
+                        style={{ marginTop: 10, flex: 1 }}
+                        data={Object.entries(profileData.bestScores ?? {})}
+                        keyExtractor={([level]) => level}
+                        renderItem={({ item }) => {
+                            const [level, scoreData] = item;
+                            return (
+                                <View style={gs.listRow}>
+                                    <View style={gs.listCell}>
+                                        <TouchableOpacity onPress={() => handleLevelClick(level)}>
+                                            <Text style={gs.listCellLinkText}>{scoreData.title}</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                    <Text style={gs.listCell}> {scoreData.score}</Text>
+                                    <Text style={gs.listCell}>{formatTimestamp(scoreData.timestamp)}</Text>
+                                </View>
+                            );
+                        }}
+                        ListHeaderComponent={() => (
+                            <View style={[gs.listRow, { borderBottomWidth: 2, }]}>
+                                <Text style={[gs.listCell, gs.listHeader]}>Level</Text>
+                                <Text style={[gs.listCell, gs.listHeader]}>Score</Text>
+                                <Text style={[gs.listCell, gs.listHeader]}>Time</Text>
+                            </View>
+                        )}
+                    />
+                </View>
+            </View>
+
+        )
+    }
+
+    const returnLevelScores = () => (
+        <View style={{ flex: 1 }}>
+            <View style={{ paddingBottom: 10 }}>
+                <Text style={[gs.title, { textAlign: "center" }]}>
+                    {levelTitle}
+                </Text>
+            </View>
+            <View style={[gs.statContentContainer, { boxShadow: 'inset 0 1px 20px 3px #111', }]}>
+                <View style={gs.statContentRow}>
+                    <Text style={gs.statRowTitle}>
+                        {
+                            currentLevelId && userData && bestScores[currentLevelId]
+                                ? `Your best score`
+                                : "You haven't completed level yet!"
+                        }
+                    </Text>
+                    <Text style={gs.statRowText}>
+                        {
+                            currentLevelId && userData && bestScores[currentLevelId]
+                                ? `${bestScores[currentLevelId].score}`
+                                : ""
+                        }
+                    </Text>
+                </View>
+            </View>
+            <View style={{ flex: 1 }}>
+                <FlatList
+                    style={{ flex: 1 }}
+                    data={levelData}
+                    renderItem={({ item }) =>
+                        <View style={gs.listRow}>
+                            <View style={gs.listCell}>
+                                <TouchableOpacity onPress={() => handleUserClick(item.userId)}>
+                                    <Text style={gs.listCellLinkText}>{item.username}</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <Text style={gs.listCell}>{item.score}</Text>
+                            <Text style={gs.listCell}>{formatTimestamp(item.timestamp)}</Text>
+                        </View>}
+                    ListHeaderComponent={() => (
+                        <View style={[gs.listRow, { borderBottomWidth: 2, }]}>
+                            <Text style={[gs.listCell, gs.listHeader]}>User</Text>
+                            <Text style={[gs.listCell, gs.listHeader]}>Score</Text>
+                            <Text style={[gs.listCell, gs.listHeader]}>Time</Text>
+                        </View>
+                    )}
+                />
+            </View>
+        </View>
+    )
+
+
     return (
-        <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+        <Modal
+            visible={visible}
+            transparent
+            animationType="fade"
+            onRequestClose={onClose}>
             <View
                 style={[
                     gs.container, {
@@ -119,6 +245,7 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
                     },
                 ]}
             >
+                {/*Close Modal on press outside modal-box*/}
                 <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
                 <View style={[styles.modal, {
                     height: screenHeight * 0.85,
@@ -129,125 +256,13 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
                     {loading && (
                         <ActivityIndicator size="large" color="#fff" style={{ marginTop: 50 }} />
                     )}
-
                     {/* profile mode: show users profile */}
                     {!loading && selectedMode === 'profile' && profileData && (
-                        <View style={{ flex: 1 }}>
-                            <View style={{ paddingBottom: 10 }}>
-                                <Text style={[gs.title, { textAlign: "center" }]}>
-                                    {profileData.username}
-                                </Text>
-                            </View>
-                            <View style={[gs.statContentContainer, { boxShadow: 'inset 0 1px 20px 3px #111' }]}>
-                                <View style={gs.statContentRow}>
-                                    <Text style={gs.statRowTitle}>Profile created:</Text>
-                                    {/*<Text style={gs.statRowText}>{formatTimestamp(profileData.createdAt)}</Text>*/}
-                                </View>
-                                <View style={gs.statContentRow}>
-                                    <Text style={gs.statRowTitle}>Last run:</Text>
-                                    <Text style={gs.statRowText}>{formatTimestamp(profileData.lastRun)}</Text>
-                                </View>
-                            </View>
-                            <View style={[gs.statContentContainer, { boxShadow: 'inset 0 1px 20px 3px #111', }]}>
-                                <View style={gs.statContentRow}>
-                                    <Text style={gs.statRowTitle}>Total steps:</Text>
-                                    <Text style={gs.statRowText}>{profileData.totalSteps}</Text>
-                                </View>
-                                <View style={gs.statContentRow}>
-                                    <Text style={gs.statRowTitle}>Total time:</Text>
-                                    <Text style={gs.statRowText}>{profileData.totalTime}</Text>
-                                </View>
-                                <View style={gs.statContentRow}>
-                                    <Text style={gs.statRowTitle}>Total score:</Text>
-                                    <Text style={gs.statRowText}>{profileData.totalScore}</Text>
-                                </View>
-                            </View>
-                            <View style={[gs.statContentContainer, { boxShadow: 'inset 0 1px 20px 3px #111', }]}>
-                                <View style={gs.statContentRow}>
-                                    <Text style={gs.statRowTitle}>Levels completed:</Text>
-                                    <Text style={gs.statRowText}>{Object.keys(profileData.bestScores ?? {}).length} </Text>
-                                </View>
-                            </View>
-                            <View style={{ flex: 1 }}>
-                                <FlatList
-                                    style={{ marginTop: 10, flex: 1 }}
-                                    data={Object.entries(profileData.bestScores ?? {})}
-                                    keyExtractor={([level]) => level}
-                                    renderItem={({ item }) => {
-                                        const [level, scoreData] = item;
-                                        return (
-                                            <View style={gs.listRow}>
-                                                <View style={gs.listCell}>
-                                                    <TouchableOpacity onPress={() => handleLevelClick(level)}>
-                                                        <Text style={gs.listCellLinkText}>{scoreData.title}</Text>
-                                                    </TouchableOpacity>
-                                                </View>
-                                                <Text style={gs.listCell}> {scoreData.score}</Text>
-                                                <Text style={gs.listCell}>{formatTimestamp(scoreData.timestamp)}</Text>
-                                            </View>
-                                        );
-                                    }}
-                                    ListHeaderComponent={() => (
-                                        <View style={[gs.listRow, { borderBottomWidth: 2, }]}>
-                                            <Text style={[gs.listCell, gs.listHeader]}>Level</Text>
-                                            <Text style={[gs.listCell, gs.listHeader]}>Score</Text>
-                                            <Text style={[gs.listCell, gs.listHeader]}>Time</Text>
-                                        </View>
-                                    )}
-                                />
-                            </View>
-                        </View>
+                        returnProfile()
                     )}
                     {/* levelScores mode: show best results for a level*/}
                     {!loading && selectedMode === 'levelScores' && (
-                        <View style={{ flex: 1 }}>
-                            <View style={{ paddingBottom: 10 }}>
-                                <Text style={[gs.title, { textAlign: "center" }]}>
-                                    {levelTitle}
-                                </Text>
-                            </View>
-                            <View style={[gs.statContentContainer, { boxShadow: 'inset 0 1px 20px 3px #111', }]}>
-                                <View style={gs.statContentRow}>
-                                    <Text style={gs.statRowTitle}>
-                                        {
-                                            currentLevelId && userData && bestScores[currentLevelId]
-                                                ? `Your best score`
-                                                : "You haven't completed level yet!"
-                                        }
-                                    </Text>
-                                    <Text style={gs.statRowText}>
-                                        {
-                                            currentLevelId && userData && bestScores[currentLevelId]
-                                                ? `${bestScores[currentLevelId].score}`
-                                                : ""
-                                        }
-                                    </Text>
-                                </View>
-                            </View>
-                            <View style={{ flex: 1 }}>
-                                <FlatList
-                                    style={{ flex: 1 }}
-                                    data={levelData}
-                                    renderItem={({ item }) =>
-                                        <View style={gs.listRow}>
-                                            <View style={gs.listCell}>
-                                                <TouchableOpacity onPress={() => handleUserClick(item.userId)}>
-                                                    <Text style={gs.listCellLinkText}>{item.username}</Text>
-                                                </TouchableOpacity>
-                                            </View>
-                                            <Text style={gs.listCell}>{item.score}</Text>
-                                            <Text style={gs.listCell}>{formatTimestamp(item.timestamp)}</Text>
-                                        </View>}
-                                    ListHeaderComponent={() => (
-                                        <View style={[gs.listRow, { borderBottomWidth: 2, }]}>
-                                            <Text style={[gs.listCell, gs.listHeader]}>User</Text>
-                                            <Text style={[gs.listCell, gs.listHeader]}>Score</Text>
-                                            <Text style={[gs.listCell, gs.listHeader]}>Time</Text>
-                                        </View>
-                                    )}
-                                />
-                            </View>
-                        </View>
+                        returnLevelScores()
                     )}
 
                     {!loading && !selectedMode && (
@@ -268,16 +283,6 @@ const styles = StyleSheet.create({
         borderColor: 'rgb(97, 40, 112)',
         borderRadius: 15,
         boxShadow: '3px 3px 4px rgb(89, 34, 104)',
-    },
-    scoreText: {
-        color: 'white',
-        fontSize: 18,
-        marginVertical: 5,
-    },
-    listitems: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-
     },
     closeButton: {
         position: 'absolute',

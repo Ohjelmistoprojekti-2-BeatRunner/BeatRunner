@@ -4,7 +4,7 @@ import { fetchLevels, Level } from '@/firebase/levelsService';
 import { fetchUserIdByName, fetchUsersOrderByTotalRuns, fetchUsersOrderByTotalScore, UserProfile } from '@/firebase/usersService';
 import { globalStyles as gs } from '@/styles/globalStyles';
 import React, { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SegmentedButtons } from 'react-native-paper';
 import DropDownPicker from 'react-native-dropdown-picker';
 
@@ -28,6 +28,7 @@ export default function ScoreScreen() {
     const [statCategory, setStatCategory] = useState<"totalScore" | "totalRuns">("totalScore");
     const [levels, setLevels] = useState<Level[]>([])
     const [allUsers, setAllUsers] = useState<UserProfile[]>([])
+    const [loading, setLoading] = useState<boolean>(true);
 
     const [searchTerm, setSearchTerm] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
@@ -39,7 +40,7 @@ export default function ScoreScreen() {
     const [levelPickerValue, setLevelPickerValue] = useState(null);
     const [pickerLevelOptions, setPickerLevelOptions] = useState<PickerLevel[]>([]);;
 
-    const { user, userData, loading } = useUserContext();
+    const { user, userData, loading: authLoading } = useUserContext();
 
     const dataToRender = statCategory === "totalScore" ? totalScoreUsers : totalRunsUsers;
 
@@ -59,6 +60,8 @@ export default function ScoreScreen() {
             value: item.id
         }));
         setPickerLevelOptions(pickerItems);
+        setLoading(false)
+
     }
 
 
@@ -93,21 +96,21 @@ export default function ScoreScreen() {
     }
 
 
-    if (loading) {
+    if (authLoading) {
         return null;
     }
 
     return (
 
-        <View style={gs.container}>
+        (<View style={[gs.container, { flex: 1, }]}>
             <View style={{
-                backgroundColor: '#000000dd'
+                backgroundColor: '#000000dd',
             }}>
                 <View style={{
                     width: '85%',
                     backgroundColor: 'black',
                     borderRadius: 10,
-                    padding: 10
+                    padding: 10,
                 }}>
                     <TextInput
                         style={gs.input}
@@ -165,47 +168,58 @@ export default function ScoreScreen() {
 
                     ]}
                 />
-                <Text style={styles.scoreText}>
-                    {statCategory === 'totalScore' ?
-                        "Leaderboard: Total Score" :
-                        "Leaderboard: Total Runs"
-                    }
-                </Text>
-                <FlatList
-                    data={dataToRender}
-
-                    renderItem={({ item }) =>
-                        <View style={gs.listRow}>
-                            <View style={gs.listCell}>
-                                <TouchableOpacity onPress={() => handleUserClick(item.id)}>
-                                    <Text style={gs.listCellLinkText}>{item.username}</Text>
-                                </TouchableOpacity>
-                            </View>
-                            <Text style={gs.listCell}>
-                                {statCategory === 'totalScore' ? item.totalScore : item.totalRuns}
-                            </Text>
-                        </View>}
-                    ListHeaderComponent={() => (
-                        <View style={[gs.listRow, { borderBottomWidth: 2,}]}>
-                            <Text style={[gs.listCell, gs.listHeader]}>User</Text>
-                            <Text style={[gs.listCell, gs.listHeader]}>
-                                {statCategory === 'totalScore' ? 'Total score' : 'Total runs'}
-                            </Text>
-                        </View>
-                    )}
-
-                />
             </View>
-            {modalVisible && (
-                <ProfileScoresModal
-                    visible={modalVisible}
-                    userId={selectedUserId}
-                    levelId={selectedLevelId}
-                    onClose={() => setModalVisible(false)}
-                    mode={selectedMode}
-                />
+
+            {loading && (
+                <ActivityIndicator size="large" color="#fff" style={{ marginTop: 50 }} />
             )}
-        </View>
+            {!loading && (
+                <View style={{ flex: 1 }}>
+                    <FlatList
+                        data={dataToRender}
+                        renderItem={({ item }) =>
+                            <View style={gs.listRow}>
+                                <View style={gs.listCell}>
+                                    <TouchableOpacity onPress={() => handleUserClick(item.id)}>
+                                        <Text style={gs.listCellLinkText}>{item.username}</Text>
+                                    </TouchableOpacity>
+                                </View>
+                                <Text style={gs.listCell}>
+                                    {statCategory === 'totalScore' ? item.totalScore : item.totalRuns}
+                                </Text>
+                            </View>}
+                        ListHeaderComponent={() => (
+                            <View>
+                                <Text style={styles.scoreText}>
+                                    {statCategory === 'totalScore' ?
+                                        "Leaderboard: Total Score" :
+                                        "Leaderboard: Total Runs"
+                                    }
+                                </Text>
+                                <View style={[gs.listRow, { borderBottomWidth: 2, }]}>
+                                    <Text style={[gs.listCell, gs.listHeader]}>User</Text>
+                                    <Text style={[gs.listCell, gs.listHeader]}>
+                                        {statCategory === 'totalScore' ? 'Total score' : 'Total runs'}
+                                    </Text>
+                                </View>
+                            </View>
+                        )}
+
+                    />
+                </View>
+            )}
+            {
+                modalVisible && (
+                    <ProfileScoresModal
+                        visible={modalVisible}
+                        userId={selectedUserId}
+                        levelId={selectedLevelId}
+                        onClose={() => setModalVisible(false)}
+                        mode={selectedMode}
+                    />
+                )
+            }
+        </View >)
     );
 }
 

@@ -25,8 +25,7 @@ export default function HomeScreen() {
             try {
                 setLoading(true);
                 const levelsData = await fetchLevels();
-                const levelsDataInOrder = levelsData.sort((a, b) => a.levelOrder - b.levelOrder);
-                setLevels(levelsDataInOrder);
+                setLevels(levelsData);
             } catch (error) {
                 console.error("Error loading levels: ", error);
             } finally {

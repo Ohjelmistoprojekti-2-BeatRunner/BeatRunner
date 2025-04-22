@@ -1,5 +1,5 @@
 import { db } from '@/firebaseConfig';
-import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, orderBy, query } from 'firebase/firestore';
 
 export interface Level {
     id: string;
@@ -37,7 +37,9 @@ export const fetchLevelById = async (levelId: string) => {
 export const fetchLevels = async () => {
     try {
         const levelsCollection = collection(db, 'levels');
-        const levelsSnapshot = await getDocs(levelsCollection);
+        const levelsQuery = query(levelsCollection, orderBy('levelOrder'))
+        
+        const levelsSnapshot = await getDocs(levelsQuery);
 
         const levels = levelsSnapshot.docs.map(doc => {
             const data = doc.data();
