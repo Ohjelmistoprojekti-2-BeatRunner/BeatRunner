@@ -6,9 +6,10 @@ import Slider from '@react-native-community/slider';
 import { Audio } from 'expo-av';
 import { Accelerometer } from 'expo-sensors';
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useUserContext } from '@/contexts/UserContext';
+import { Ionicons } from '@expo/vector-icons';
 
 interface StepDetectorProps {
     onStepDetected?: (stepCount: number, tempo: number, timestamp: number) => void;
@@ -22,6 +23,7 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
     const [stepTimestamps, setStepTimestamps] = useState<number[]>([]);
     const currentTempoRef = useRef<number>(0);
     const [localThreshold, setLocalThreshold] = useState(threshold); // For threshold-slider ui
+    const [modalVisible, setModalVisible] = useState(false);
 
     const { user } = useUserContext();
 
@@ -209,22 +211,52 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
 
     return (
         <View>
-            <Animated.View style={[styles.stepIndicator, stepIndicatorStyle]} />
+            <Modal
+                animationType='slide'
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={globalStyles.levelModalCentered}>
+                    <View style={globalStyles.levelSettingsModal}>
 
-            <View style={styles.controlsContainer}>
-                <Text style={globalStyles.contentText}>Sensitivity: {threshold.toFixed(2)}</Text>
-                <Slider
-                    style={styles.slider}
-                    minimumValue={0.5}
-                    maximumValue={2.0}
-                    step={0.1}
-                    value={localThreshold}
-                    onValueChange={handleValueChange}
-                    onSlidingComplete={handleSlidingComplete}
-                    minimumTrackTintColor="#4CAF50"
-                    maximumTrackTintColor="#000000"
-                />
+                        <View style={globalStyles.levelModalTopLine}>
+                            <Text style={globalStyles.statRowTitle2}>Settings</Text>
+                        </View>
+
+                        <Animated.View style={[styles.stepIndicator, stepIndicatorStyle]} />
+
+                        <View style={styles.controlsContainer}>
+                            <Text style={globalStyles.contentText}>Sensitivity: {threshold.toFixed(2)}</Text>
+                            <Slider
+                                style={styles.slider}
+                                minimumValue={0.5}
+                                maximumValue={2.0}
+                                step={0.1}
+                                value={localThreshold}
+                                onValueChange={handleValueChange}
+                                onSlidingComplete={handleSlidingComplete}
+                                minimumTrackTintColor="#4CAF50"
+                                maximumTrackTintColor="#000000"
+                            />
+                        </View>
+
+                        <TouchableOpacity style={[globalStyles.smallButton, { flexDirection: 'row', gap: 10, margin: 20 }]} onPress={() => setModalVisible(false)}>
+                            <Ionicons name="close" size={25} color="white" />
+                            <Text style={globalStyles.buttonText}>Close settings</Text>
+                        </TouchableOpacity>
+
+                    </View>
+                </View>
+            </Modal>
+
+            <View style={globalStyles.buttonContainer}>
+                <TouchableOpacity style={[globalStyles.smallButton, { flexDirection: 'row', gap: 10 }]} onPress={() => setModalVisible(true)}>
+                    <Ionicons name="settings-outline" size={25} color="white" />
+                    <Text style={globalStyles.buttonText}>Settings</Text>
+                </TouchableOpacity>
             </View>
+
         </View>
     );
 };
@@ -239,12 +271,12 @@ const styles = StyleSheet.create({
         alignSelf: 'center'
     },
     controlsContainer: {
-        marginTop: 20,
+        marginTop: 30,
         width: '100%',
         alignItems: 'center'
     },
     slider: {
-        width: '80%',
+        width: 280,
         height: 40
     },
     timestampContainer: {

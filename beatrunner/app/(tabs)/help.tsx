@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 export default function HelpScreen() {
   return (
-    <Swiper>
+    <Swiper style={{backgroundColor: 'black'}}>
 
     <View style={helpStyles.slide}>
         <Text style={helpStyles.slideHeader}>How to get started</Text>

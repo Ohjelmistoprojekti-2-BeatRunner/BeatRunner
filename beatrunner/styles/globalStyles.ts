@@ -1,4 +1,7 @@
 import { StyleSheet } from 'react-native';
+import { Dimensions } from 'react-native';
+
+const screenWidth = Dimensions.get('window').width;
 
 export const globalStyles = StyleSheet.create({
     title: {
@@ -167,4 +170,146 @@ export const globalStyles = StyleSheet.create({
         borderRadius: 9,
         borderColor: "purple"
     },
+
+    // level styles:
+    playerContainer: {
+        borderRadius: 100,
+        height: 350,
+        width: screenWidth + 30,
+        alignItems: 'center',
+        marginBottom: -60,
+        backgroundColor: 'rgba(226, 44, 250, 0.18)',
+        borderColor: "rgb(89, 34, 104)",
+        borderWidth: 3,
+        boxShadow: 'inset 0 5px 30px 6px rgb(89, 34, 104)',
+        alignContent: 'center'
+    },
+    statRowTitle2: {
+        color: 'white',
+        fontSize: 20,
+        fontWeight: 'bold',
+        zIndex: 1,
+        padding: 20
+    },
+    playbutton: {
+        width: 90,
+        height: 90,
+        borderRadius: 45,
+        backgroundColor: '#1DB954',
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 5,
+        zIndex: 1
+    },
+    stopButton: {
+        width: 75,
+        height: 75,
+        borderRadius: 37.5,
+        backgroundColor: '#FF3B30',
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 5,
+        zIndex: 1
+    },
+    playerButtons: {
+        flexDirection: 'row',
+        zIndex: 1,
+        paddingBottom: 30,
+        marginTop: 10
+
+    },
+    buttonLabel: {
+        marginTop: 4,
+        fontSize: 15,
+        color: 'white',
+        fontWeight: '700',
+        textAlign: 'center',
+        zIndex: 1
+    },
+    buttonContainer: {
+        alignItems: 'center',
+        marginHorizontal: 20,
+        justifyContent: 'center',
+        zIndex: 1
+    },
+    levelSectionTitle: {
+        color: 'white',
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginLeft: 10
+    },
+    levelContentContainer: {
+        marginTop: 60,
+        marginBottom: 23,
+        padding: 10,
+        backgroundColor: 'rgb(29, 3, 36)',
+        borderRadius: 20,
+        boxShadow: 'inset 0 1px 20px 3px rgb(0, 0, 0)',
+        margin: 50
+    },
+    levelSettingsModal: {
+        margin: 20,
+        backgroundColor: 'rgb(29, 3, 36)',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+        borderRadius: 30,
+        borderColor: "rgb(89, 34, 104)",
+        borderWidth: 3,
+        width: 300,
+    },
+    levelModalCentered: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    levelModalTopLine: {
+        alignContent: 'center',
+        margin: 10,
+    },
+    levelTitle: {
+        color: 'white',
+        fontSize: 32,
+        fontWeight: 'bold',
+        margin: 20,
+        textAlignVertical: 'center'
+    },
+    levelDifficultyText: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginLeft: 20,
+        textAlignVertical: 'center'
+    },
+    levelContainer: {
+        flex: 1,
+        backgroundColor: 'black',
+    },
+    levelTopContainer: {
+        justifyContent: 'center',
+        flexDirection: 'row',
+        flex: 1,
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgb(89, 34, 104)'
+    },
+    levelBottomContainer: {
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        flex: 8
+    },
+    
+
 });

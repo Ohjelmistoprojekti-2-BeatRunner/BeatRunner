@@ -105,7 +105,6 @@ export default function RegisterScreen() {
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
       >
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000000dd' }}>
           <View style={{ width: '85%', backgroundColor: 'black', borderRadius: 10, padding: 20 }}>

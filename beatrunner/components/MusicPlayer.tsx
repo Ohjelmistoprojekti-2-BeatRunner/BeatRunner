@@ -1,10 +1,11 @@
 import { useMusicContext } from '@/contexts/MusicContext';
 import { globalStyles } from '@/styles/globalStyles';
 import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { StyleSheet, Text, View, Dimensions } from 'react-native';
 import { fetchSongs } from '@/firebase/songsService';
 import { useTimerContext } from '@/contexts/TimerContext';
+import LottieView from 'lottie-react-native';
 
 interface Song {
     id: string;
@@ -22,6 +23,8 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
 
     const player = useAudioPlayer(audioUri ? audioUri : '', 1000);
     const status = useAudioPlayerStatus(player);
+    const animationRef = useRef<LottieView>(null);
+    const screenWidth = Dimensions.get('window').width;
 
     useEffect(() => {
         const fetchLevelSongs = async () => {
@@ -41,7 +44,7 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
     useEffect(() => {
         console.log("Level Songs:", levelSongs);
     }, [levelSongs]);
-    
+
     useEffect(() => {
         console.log("Current Song ID:", currentSongId);
     }, [currentSongId]);
@@ -112,41 +115,22 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
     useEffect(() => {
         if (!audioUri || !songPlaying) {
             stopMusic();
+            animationRef.current?.reset();
         } else {
             console.log("Starting new song:", audioUri);
             player.play();
+            animationRef.current?.play();
         }
     }, [audioUri, songPlaying]);
 
     return (
-        <View style={globalStyles.contentContainer}>
-            <View style={styles.controls}>
-                <Text style={globalStyles.buttonText}>
-                    {songPlaying ? currentSongId : ''}
-                </Text>
-                <Text style={globalStyles.buttonText}>
-                    {songPlaying ? 'Music playing' : 'Paused'}
-                </Text>
-            </View>
-        </View>
+        <>
+            <Text style={globalStyles.statRowTitle2}>
+                {songPlaying
+                    ? `Playing song ${currentSongId} of ${levelSongs.length}`
+                    : `Paused - song ${currentSongId} of ${levelSongs.length}`}
+            </Text>
+            <LottieView ref={animationRef} source={require('../assets/images/musicanimation.json')} loop autoPlay={false} resizeMode='cover' style={{ width: screenWidth, height: 80, zIndex: 0 }} />
+        </>
     );
 }
-
-const styles = StyleSheet.create({
-    songDetails: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flex: 1,
-    },
-    songInfo: {
-        marginLeft: 10,
-    },
-    songTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#fff',
-    },
-    controls: {
-        paddingHorizontal: 10,
-    },
-});

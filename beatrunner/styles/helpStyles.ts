@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 export const helpStyles = StyleSheet.create({
     slide: {
         padding: 20,
+        backgroundColor:'black'
       },
       slideRow: {
         flexDirection: 'row',

@@ -4,6 +4,7 @@ import { fetchLevels, Level } from '@/firebase/levelsService';
 import { formatTimestamp } from '@/scripts/formatTimestamp';
 import { router } from 'expo-router';
 import { globalStyles as gs } from '@/styles/globalStyles';
+import { indexStyles } from '@/styles/indexStyles';
 import React, { useDebugValue, useEffect, useState } from 'react';
 import { FlatList, Text, TouchableOpacity, View, StyleSheet, Image, TextStyle, ActivityIndicator } from 'react-native';
 import { fetchLevelTopResultsWithUsername } from '@/firebase/scoresService';
@@ -64,21 +65,21 @@ export default function HomeScreen() {
         const levelCompleted = !!bestScores[id];
         return (
             <View style={{ margin: 10, width: 300 }}>
-                <TouchableOpacity style={levelCompleted ? styles.levelButtonCompleted : styles.levelButton} onPress={() => router.replace({
+                <TouchableOpacity style={levelCompleted ? indexStyles.levelButtonCompleted : indexStyles.levelButton} onPress={() => router.replace({
                     pathname: "/level",
                     params: { id, title, difficulty, calories, songs, }
                 })}>
                     <View>
-                        <Text style={[styles.buttonText, { color: 'white' }]}>{title}</Text>
-                        <Text style={[getColorForDifficulty(difficulty), styles.difficultyText]}>{difficulty}</Text>
+                        <Text style={[indexStyles.buttonText, { color: 'white' }]}>{title}</Text>
+                        <Text style={[getColorForDifficulty(difficulty), indexStyles.difficultyText]}>{difficulty}</Text>
                     </View>
                     <View>
                         {bestScores[id] ?
-                            <Text style={[getColorForDifficulty('default'), styles.buttonText, { textAlign: 'right' }]}>{bestScores[id].score}</Text>
-                            : <Text style={[getColorForDifficulty('default'), styles.difficultyText]}>Not yet played</Text>
+                            <Text style={[getColorForDifficulty('default'), indexStyles.buttonText, { textAlign: 'right' }]}>{bestScores[id].score}</Text>
+                            : <Text style={[getColorForDifficulty('default'), indexStyles.difficultyText]}>Not yet played</Text>
                         }
                         {bestScores[id] ?
-                            <Text style={[getColorForDifficulty('default'), styles.difficultyText]}>{formatTimestamp(bestScores[id].timestamp)}</Text>
+                            <Text style={[getColorForDifficulty('default'), indexStyles.difficultyText]}>{formatTimestamp(bestScores[id].timestamp)}</Text>
                             : ""
                         }
                     </View>
@@ -89,10 +90,10 @@ export default function HomeScreen() {
 
 
     return (
-        <View style={[styles.container, { flex: 1 }]}>
+        <View style={[indexStyles.container, { flex: 1 }]}>
 
-            <View style={styles.topContainer}>
-                <Text style={styles.title}>Welcome {userData?.username}</Text>
+            <View style={indexStyles.topContainer}>
+                <Text style={indexStyles.title}>Welcome {userData?.username}</Text>
                 <TouchableOpacity onPress={handleProfileModal}>
                     <View style={gs.statContentContainer}>
                         <View style={gs.statContentRow}>
@@ -114,7 +115,7 @@ export default function HomeScreen() {
                 <ActivityIndicator size="large" color="#fff" style={{ marginTop: 50 }} />
             )}
             {!loading && (
-                <View style={[styles.bottomContainer, { flex: 1 }]}>
+                <View style={[indexStyles.bottomContainer, { flex: 1 }]}>
 
 
                     <FlatList
@@ -122,7 +123,7 @@ export default function HomeScreen() {
                         renderItem={({ item }) => <Item id={item.id} levelOrder={item.levelOrder} title={item.title} difficulty={item.difficulty} calories={item.calories} songs={item.songs} />}
 
                         ListHeaderComponent={() => (
-                            <Text style={styles.title}>Levels</Text>
+                            <Text style={indexStyles.title}>Levels</Text>
                         )}
                     />
                 </View>
@@ -140,96 +141,3 @@ export default function HomeScreen() {
         </View>
     );
 }
-
-export const styles = StyleSheet.create({
-    title: {
-        color: 'white',
-        fontSize: 29,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        marginBottom: 10
-    },
-    indexContainer: {
-        flex: 1,
-        backgroundColor: 'black',
-    },
-    container: {
-        flex: 1,
-        backgroundColor: 'black',
-        padding: 3,
-    },
-    topContainer: {
-        marginTop: 20,
-        margin: 20
-    },
-    bottomContainer: {
-        alignItems: 'center',
-        paddingBottom: 50,
-    },
-    levelButton: {
-        paddingVertical: 13,
-        paddingHorizontal: 20,
-        borderWidth: 2,
-        borderColor: 'rgb(97, 40, 112)',
-        borderRadius: 15,
-        backgroundColor: 'rgb(24, 3, 29)',
-        boxShadow: '5px 5px 6px rgb(89, 34, 104)',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    levelButtonCompleted: {
-        paddingVertical: 13,
-        paddingHorizontal: 20,
-        borderWidth: 2,
-        borderColor: 'rgb(97, 112, 40)',
-        borderRadius: 15,
-        backgroundColor: 'rgb(24, 3, 29)',
-        boxShadow: '5px 5px 6px rgb(89, 104, 34)',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    difficultyText: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        textAlignVertical: 'center',
-    },
-    buttonText: {
-        fontSize: 23,
-    },
-    orText: {
-        color: 'white',
-        fontSize: 24,
-        marginVertical: 10,
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: 'white',
-        borderRadius: 8,
-        padding: 10,
-        color: 'white',
-        marginTop: 5,
-        width: '70%',
-    },
-    sectionTitle: {
-        color: 'white',
-        fontSize: 17,
-        fontWeight: 'bold',
-        marginLeft: 30
-    },
-    logoutButton: {
-        marginTop: 20,
-        backgroundColor: '#8b0000', // red color for Logout
-        padding: 12,
-        borderRadius: 8,
-        alignItems: 'center',
-        alignSelf: 'flex-end', // positioned on the right
-        width: '30%',
-    },
-    link: {
-        marginTop: 20,
-        color: 'lightblue',
-        textDecorationLine: 'underline',
-    },
-});
-
-
