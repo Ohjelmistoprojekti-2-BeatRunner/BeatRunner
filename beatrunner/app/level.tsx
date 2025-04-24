@@ -29,12 +29,12 @@ export default function LevelScreen() {
     return (
         <View style={globalStyles.levelContainer}>
             <View style={globalStyles.levelTopContainer}>
-            <Text style={globalStyles.levelTitle}>{title}</Text>
-            <Text style={[getColorForDifficulty(difficulty.toString()), globalStyles.levelDifficultyText]}>{difficulty}</Text>
+                <Text style={globalStyles.levelTitle}>{title}</Text>
+                <Text style={[getColorForDifficulty(difficulty.toString()), globalStyles.levelDifficultyText]}>{difficulty}</Text>
             </View>
             <View style={globalStyles.levelBottomContainer}>
-            <Player levelId={levelId} 
-                    songs={Array.isArray(songs) ? songs : [songs]}/>
+                <Player levelId={levelId}
+                    songs={Array.isArray(songs) ? songs : [songs]} />
             </View>
 
         </View >
