@@ -17,6 +17,7 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
 
     const [levelSongs, setLevelSongs] = useState<Song[]>([]);
     const [loading, setLoading] = useState(true);
+    const [currentIndex, setCurrentIndex] = useState(Number);
 
     const { setPlayer, audioUri, songPlaying, currentSongId, setCurrentSongId, setSongBpm, setLevelEnd, levelEnd } = useMusicContext();
     const { resetTimer } = useTimerContext();
@@ -87,7 +88,7 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
         if (!currentSongId) return;
 
         console.log(currentSongId);
-        const currentIndex = levelSongs.findIndex(song => Number(song.id) === currentSongId);
+        setCurrentIndex(levelSongs.findIndex(song => Number(song.id) === currentSongId));
         const nextIndex = (currentIndex + 1) % levelSongs.length;
         const nextSong = levelSongs[nextIndex];
         await stopMusic();
@@ -131,8 +132,8 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
         <>
             <Text style={globalStyles.statRowTitle2}>
                 {songPlaying
-                    ? `Playing song ${currentSongId} of ${levelSongs.length}`
-                    : `Paused - song ${currentSongId} of ${levelSongs.length}`}
+                    ? `Playing song ${currentIndex + 1} of ${levelSongs.length}`
+                    : `Paused - song ${currentIndex + 1} of ${levelSongs.length}`}
             </Text>
             <LottieView ref={animationRef} source={require('../assets/images/musicanimation.json')} loop autoPlay={false} resizeMode='cover' style={{ width: screenWidth, height: 80, zIndex: 0 }} />
         </>
