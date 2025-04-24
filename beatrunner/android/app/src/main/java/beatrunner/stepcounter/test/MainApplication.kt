@@ -1,4 +1,4 @@
-package com.ilohil.beatrunner
+package beatrunner.stepcounter.test
 
 import android.app.Application
 import android.content.res.Configuration

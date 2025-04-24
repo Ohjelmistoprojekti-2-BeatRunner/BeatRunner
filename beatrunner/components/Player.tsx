@@ -4,12 +4,20 @@ import { useScores } from '@/hooks/useScores';
 import { globalStyles } from '@/styles/globalStyles';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Alert, BackHandler, Button, InteractionManager, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, BackHandler, Button, InteractionManager, ScrollView, StyleSheet, Text, TouchableOpacity, View, Modal } from 'react-native';
 import MusicPlayer from './MusicPlayer';
 import StepDetector from './StepDetector';
 import { useMusicContext } from '@/contexts/MusicContext';
+import { useUserContext } from '@/contexts/UserContext';
+import { Ionicons } from '@expo/vector-icons';
+import { aboutStyles } from '@/styles/aboutStyles';
 
-const Player = ({ songs }: { songs: string[] }) => {
+type PlayerProps = {
+    levelId: string;
+    songs: string[];
+};
+
+const Player = ({ levelId, songs }: PlayerProps) => {
     const { time, startTimer, pauseTimer, resetTimer } = useTimerContext();
     const [isPlaying, setIsPlaying] = useState(false);
     const [stepTimestamps, setStepTimestamps] = useState<number[]>([]);
@@ -18,6 +26,8 @@ const Player = ({ songs }: { songs: string[] }) => {
     const [started, setStarted] = useState(false);
 
     const { songBpm, levelEnd, setLevelEnd } = useMusicContext();
+
+    const { bestScores, loading: userLoading, user } = useUserContext();
 
     const { startMusicDetector, stopMusicDetector } = useMusicDetector();
     const { score, calculateStepScore, endLevel } = useScores();
@@ -69,9 +79,10 @@ const Player = ({ songs }: { songs: string[] }) => {
                     text: "Exit",
                     onPress: () => {
                         stopMusicDetector();
-                        resetTimer();
-                        endLevel();
+                        pauseTimer();
+                        endLevel(levelId);
                         setTimeout(() => {
+                            resetTimer()
                             router.replace({ pathname: "/(tabs)" })
                         }, 500);
                     }
@@ -82,16 +93,20 @@ const Player = ({ songs }: { songs: string[] }) => {
 
     const gameEnd = () => {
         Alert.alert(
-            "Congratulations! Level passed.",
-            `Your score was: ${score}`,
+            "Level passed.",
+            `${bestScores[levelId]?.score && score > bestScores[levelId]?.score ?
+                `New highscore! ${score}` :
+                `Your score was: ${score}`
+            }`,
             [
                 {
                     text: "Exit",
                     onPress: () => {
-                        resetTimer();
+                        pauseTimer();
                         setLevelEnd(false);
-                        endLevel();
+                        endLevel(levelId);
                         setTimeout(() => {
+                            resetTimer()
                             router.replace({ pathname: "/(tabs)" })
                         }, 500);
                     }
@@ -123,80 +138,54 @@ const Player = ({ songs }: { songs: string[] }) => {
     }, []);
 
     return (
-        <View style={globalStyles.container}>
+        <View>
+
+            {/* 
+       <Text style={globalStyles.contentText}>Step Count: {stepCount}</Text>
+        <Text style={globalStyles.contentText}>Tempo: {tempo} SPM</Text>
+        <Text style={globalStyles.contentText}> Score: {score} points</Text>
+
+        <Text style={globalStyles.contentText}> Songs bpm: {songBpm} </Text>
+
+          */}
+
             <StepDetector onStepDetected={handleStepDetected} autoStart={isPlaying} />
 
-            <Text style={globalStyles.contentText}>Step Count: {stepCount}</Text>
-            <Text style={globalStyles.contentText}>Tempo: {tempo} SPM</Text>
-            <Text style={globalStyles.contentText}> Score: {score} points</Text>
+            <View style={globalStyles.levelContentContainer}>
+                <Text style={globalStyles.levelSectionTitle}> Score: {score} points</Text>
+                <Text style={globalStyles.levelSectionTitle}> Time: {(time / 1000).toFixed(2)} s </Text>
+                <Text style={globalStyles.levelSectionTitle}> Step Count: {stepCount} </Text>
+            </View>
 
-            <Text style={globalStyles.contentText}> Songs bpm: {songBpm} </Text>
+            <View style={{ justifyContent: 'flex-end', flex: 1 }}>
+                <View style={globalStyles.playerContainer}>
 
-            <MusicPlayer songs={songs} />
+                    <MusicPlayer songs={songs} />
 
-            <Button
-                title={isPlaying ? 'Pause Both' : 'Play Both'}
-                onPress={togglePlayPause}
-                color="#4CAF50"
-            />
+                    <View style={globalStyles.playerButtons}>
 
-            {started && (
-                <Button
-                    title={'End game'}
-                    onPress={askBeforeExit}
-                    color="#4CAF50"
-                />
-            )}
+                        <View style={{ width: 90 }} />
 
-            <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold', marginVertical: 10 }}>
-                Timer: {(time / 1000).toFixed(2)} s
-            </Text>
+                        <View style={globalStyles.buttonContainer}>
+                            <TouchableOpacity style={globalStyles.playbutton} onPress={togglePlayPause}>
+                                <Ionicons name={isPlaying ? "pause" : "play"} size={45} color="white" />
+                            </TouchableOpacity>
+                            <Text style={globalStyles.buttonLabel}>{isPlaying ? "Pause level" : "Start level"}</Text>
+                        </View>
 
-            <View style={styles.timestampContainer}>
-                <ScrollView style={styles.timestampScroll}>
-                    {stepTimestamps.length > 0 ? (
-                        stepTimestamps.slice(-5).map((timestamp, index) => (
-                            <Text key={index} style={styles.timestampText}>
-                                Step {stepTimestamps.length - 5 + index + 1}: {(timestamp / 1000).toFixed(3)}s
-                            </Text>
-                        ))
-                    ) : (
-                        <Text style={styles.noTimestampsText}>No steps detected yet</Text>
-                    )}
-                </ScrollView>
+
+                        <View style={globalStyles.buttonContainer}>
+                            <TouchableOpacity style={globalStyles.stopButton} onPress={askBeforeExit}>
+                                <Ionicons name="stop" size={28} color="white" />
+                            </TouchableOpacity>
+                            <Text style={globalStyles.buttonLabel}>End level</Text>
+                        </View>
+                    </View>
+                </View>
             </View>
         </View>
+
     );
 };
-
-const styles = StyleSheet.create({ //for testing the timestamps only
-    timestampContainer: {
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        borderRadius: 10,
-        padding: 15,
-        marginHorizontal: 20,
-        marginVertical: 10,
-        borderColor: '#4CAF50',
-        borderWidth: 1,
-        maxHeight: 200
-    },
-    timestampScroll: {
-        maxHeight: 150
-    },
-    timestampText: {
-        color: '#4CAF50',
-        fontSize: 16,
-        paddingVertical: 5,
-        borderBottomWidth: 1,
-        borderBottomColor: 'rgba(255,255,255,0.1)'
-    },
-    noTimestampsText: {
-        color: 'rgba(255,255,255,0.5)',
-        fontSize: 16,
-        textAlign: 'center',
-        fontStyle: 'italic',
-        paddingVertical: 10
-    }
-});
 
 export default Player;

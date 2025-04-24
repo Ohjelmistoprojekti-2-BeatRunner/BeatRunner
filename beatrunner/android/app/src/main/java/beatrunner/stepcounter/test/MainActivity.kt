@@ -1,4 +1,4 @@
-package com.ilohil.beatrunner
+package beatrunner.stepcounter.test
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

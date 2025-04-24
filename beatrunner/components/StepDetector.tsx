@@ -1,13 +1,15 @@
-import { useStepDetector } from '@/contexts/StepDetectorContext';
-import { useMusicContext } from '@/contexts/MusicContext';
+import { useStepDetectorContext } from '@/contexts/StepDetectorContext';
 import { useTimerContext } from '@/contexts/TimerContext'; // Import TimerContext
+import { updateUserThreshold } from '@/firebase/usersService';
 import { globalStyles } from '@/styles/globalStyles';
 import Slider from '@react-native-community/slider';
 import { Audio } from 'expo-av';
 import { Accelerometer } from 'expo-sensors';
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View, Button } from 'react-native';
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { useUserContext } from '@/contexts/UserContext';
+import { Ionicons } from '@expo/vector-icons';
 
 interface StepDetectorProps {
     onStepDetected?: (stepCount: number, tempo: number, timestamp: number) => void;
@@ -16,10 +18,14 @@ interface StepDetectorProps {
 
 const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart = false }) => {
     // StepDetectorContext variables
-    const { isDetecting, threshold, setThreshold, tempo, setTempo, stepCount, setStepCount } = useStepDetector();
+    const { isDetecting, threshold, setThreshold, tempo, setTempo, stepCount, setStepCount } = useStepDetectorContext();
     const [sound, setSound] = useState<Audio.Sound | null>(null);
     const [stepTimestamps, setStepTimestamps] = useState<number[]>([]);
     const currentTempoRef = useRef<number>(0);
+    const [localThreshold, setLocalThreshold] = useState(threshold); // For threshold-slider ui
+    const [modalVisible, setModalVisible] = useState(false);
+
+    const { user } = useUserContext();
 
     const localStepCountRef = useRef<number>(0);
 
@@ -95,12 +101,12 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
         if (autoStart && !subscriptionRef.current) {
             console.log("Starting step detection due to autoStart");
             startDetection();
-        } 
+        }
         else if (!autoStart && subscriptionRef.current) {
             console.log("Stopping step detection due to autoStart becoming false");
             stopDetection();
         }
-        
+
         return () => {
             if (subscriptionRef.current) {
                 console.log("Cleaning up step detection on unmount");
@@ -119,7 +125,7 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
         if (isInInactiveStateRef.current) {
             const inactiveTime = now - lastStepTimeRef.current;
             const minimumStepInterval = tempo > 0 ? (60000 / tempo) * 0.5 : 200;
-            
+
             if (inactiveTime > minimumStepInterval) {
                 isInInactiveStateRef.current = false;
             } else {
@@ -190,23 +196,67 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
         };
     });
 
+    // Handling slider UI
+    const handleValueChange = (value: number) => {
+        setLocalThreshold(value);
+    };
+
+    // After sliding is complete, change threshold-value and save to db
+    const handleSlidingComplete = (value: number) => {
+        if (user) updateUserThreshold(value);
+        setThreshold(value);
+        setLocalThreshold(value);
+    };
+
+
     return (
         <View>
-            <Animated.View style={[styles.stepIndicator, stepIndicatorStyle]} />
+            <Modal
+                animationType='slide'
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={globalStyles.levelModalCentered}>
+                    <View style={globalStyles.levelSettingsModal}>
 
-            <View style={styles.controlsContainer}>
-                <Text style={globalStyles.contentText}>Sensitivity: {threshold.toFixed(2)}</Text>
-                <Slider
-                    style={styles.slider}
-                    minimumValue={0.5}
-                    maximumValue={2.0}
-                    step={0.1}
-                    value={threshold}
-                    onValueChange={setThreshold}
-                    minimumTrackTintColor="#4CAF50"
-                    maximumTrackTintColor="#000000"
-                />
+                        <View style={globalStyles.levelModalTopLine}>
+                            <Text style={globalStyles.statRowTitle2}>Settings</Text>
+                        </View>
+
+                        <Animated.View style={[styles.stepIndicator, stepIndicatorStyle]} />
+
+                        <View style={styles.controlsContainer}>
+                            <Text style={globalStyles.contentText}>Sensitivity: {threshold.toFixed(2)}</Text>
+                            <Slider
+                                style={styles.slider}
+                                minimumValue={0.5}
+                                maximumValue={2.0}
+                                step={0.1}
+                                value={localThreshold}
+                                onValueChange={handleValueChange}
+                                onSlidingComplete={handleSlidingComplete}
+                                minimumTrackTintColor="#4CAF50"
+                                maximumTrackTintColor="#000000"
+                            />
+                        </View>
+
+                        <TouchableOpacity style={[globalStyles.smallButton, { flexDirection: 'row', gap: 10, margin: 20 }]} onPress={() => setModalVisible(false)}>
+                            <Ionicons name="close" size={25} color="white" />
+                            <Text style={globalStyles.buttonText}>Close settings</Text>
+                        </TouchableOpacity>
+
+                    </View>
+                </View>
+            </Modal>
+
+            <View style={globalStyles.buttonContainer}>
+                <TouchableOpacity style={[globalStyles.smallButton, { flexDirection: 'row', gap: 10 }]} onPress={() => setModalVisible(true)}>
+                    <Ionicons name="settings-outline" size={25} color="white" />
+                    <Text style={globalStyles.buttonText}>Settings</Text>
+                </TouchableOpacity>
             </View>
+
         </View>
     );
 };
@@ -221,12 +271,12 @@ const styles = StyleSheet.create({
         alignSelf: 'center'
     },
     controlsContainer: {
-        marginTop: 20,
+        marginTop: 30,
         width: '100%',
         alignItems: 'center'
     },
     slider: {
-        width: '80%',
+        width: 280,
         height: 40
     },
     timestampContainer: {
