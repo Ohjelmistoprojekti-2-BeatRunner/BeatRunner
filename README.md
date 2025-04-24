@@ -22,12 +22,12 @@ Preliminary technologies planned for the project:
 
 #### 2. Clone the repository:
 
-`git clone https://github.com/your-repo/beatrunner.git`
+`git clone https://github.com/Ohjelmistoprojekti-2-BeatRunner/BeatRunner.git`
 `cd beatrunner`
 
 #### 3. Run the app:
 
-`expo start`
+`npx expo start`
 
 ## User Interface
 ### User Interface Diagram
