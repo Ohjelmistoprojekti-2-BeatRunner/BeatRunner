@@ -1,7 +1,7 @@
-import { LevelProvider } from '@/contexts/LevelContext';
 import { MusicProvider } from '@/contexts/MusicContext';
 import { StepDetectorProvider } from '@/contexts/StepDetectorContext';
 import { TimerProvider } from '@/contexts/TimerContext';
+import { UserProvider } from '@/contexts/UserContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
@@ -76,10 +76,10 @@ export default function RootLayout() {
 
     return (
 
-        <MusicProvider>
-            <TimerProvider>
-                <StepDetectorProvider>
-                    <LevelProvider>
+        <UserProvider>
+            <MusicProvider>
+                <TimerProvider>
+                    <StepDetectorProvider>
                         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
                             <Stack>
                                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -87,15 +87,21 @@ export default function RootLayout() {
                                 <Stack.Screen name="level" options={{
                                     headerTitle: "Level"
                                 }} />
-                                <Stack.Screen name="login" options={{ headerTitle: "Login" }} />
-                                <Stack.Screen name="register" options={{ headerTitle: "Register" }} />
+                                <Stack.Screen name="login" options={{
+                                    headerTitle: "Login",
+                                    headerBackVisible: false,
+                                }} />
+                                <Stack.Screen name="register" options={{
+                                    headerTitle: "Register",
+                                    headerBackVisible: false,
+                                }} />
                             </Stack>
                             <StatusBar style="auto" />
                         </ThemeProvider>
-                    </LevelProvider>
-                </StepDetectorProvider>
-            </TimerProvider>
-        </MusicProvider>
+                    </StepDetectorProvider>
+                </TimerProvider>
+            </MusicProvider>
+        </UserProvider>
 
     )
 };

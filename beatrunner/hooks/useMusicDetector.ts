@@ -1,9 +1,9 @@
 import { useMusicContext } from '@/contexts/MusicContext';
-import { useStepDetector } from '@/contexts/StepDetectorContext';
+import { useStepDetectorContext } from '@/contexts/StepDetectorContext';
 
 export const useMusicDetector = () => {
     const { setSongPlaying } = useMusicContext();
-    const { setIsDetecting } = useStepDetector();
+    const { setIsDetecting } = useStepDetectorContext();
 
     const startMusicDetector = () => {
         setSongPlaying(true);

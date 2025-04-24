@@ -86,9 +86,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.ilohil.beatrunner'
+    namespace 'beatrunner.stepcounter.test'
     defaultConfig {
-        applicationId 'com.ilohil.beatrunner'
+        applicationId 'beatrunner.stepcounter.test'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
