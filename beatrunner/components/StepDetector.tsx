@@ -134,13 +134,13 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
             });
 
             // Play sound if loaded
-            if (sound) {
+            /*if (sound) {
                 try {
                     await sound.replayAsync();
                 } catch (error) {
                     console.warn("Could not play step sound", error);
                 }
-            }
+            }*/
 
             // Record timestamp for this step with high precision
             const preciseTimestamp = getCurrentTime();

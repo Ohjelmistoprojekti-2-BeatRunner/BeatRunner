@@ -1,6 +1,7 @@
 import { useTimerContext } from '@/contexts/TimerContext';
 import { useMusicDetector } from '@/hooks/useMusicDetector';
 import { useScores } from '@/hooks/useScores';
+import { useStepAccuracy } from '@/hooks/useStepAccuracy';
 import { globalStyles } from '@/styles/globalStyles';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -21,6 +22,7 @@ const Player = ({ songs }: { songs: string[] }) => {
 
     const { startMusicDetector, stopMusicDetector } = useMusicDetector();
     const { score, calculateStepScore, endLevel } = useScores();
+    const { processStep } = useStepAccuracy();
 
     useEffect(() => {
         if (isPlaying) {
@@ -53,11 +55,11 @@ const Player = ({ songs }: { songs: string[] }) => {
     const handleStepDetected = (detectedStepCount: number, detectedTempo: number, timestamp: number) => {
         console.log(`Step Count: ${detectedStepCount}, Tempo: ${detectedTempo}, Time: ${(timestamp / 1000).toFixed(3)}s`);
         calculateStepScore(timestamp, songBpm);
+        processStep(timestamp, songBpm);
         setStepCount(detectedStepCount);
         setTempo(detectedTempo);
         setStepTimestamps(prev => [...prev, timestamp]);
     };
-
 
     const askBeforeExit = () => {
         Alert.alert(
