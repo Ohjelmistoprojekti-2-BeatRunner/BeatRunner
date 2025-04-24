@@ -69,13 +69,15 @@ export function useScores() {
     const endLevel = async (levelId: string) => {
         const time = getCurrentTime()
 
-        const scoreRef = await submitRunScore(score, levelId);
-        if (!scoreRef) {
-            console.error("Score submission failed");
-            return;
+        if (score > 0) { 
+            const scoreRef = await submitRunScore(score, levelId);
+            if (!scoreRef) {
+                console.error("Score submission failed");
+                return;
+            }
+            await updateUserTotalScore(score, time, stepCount)
+            await updateUserBestScores(score, levelId, scoreRef);
         }
-        await updateUserTotalScore(score, time, stepCount)
-        await updateUserBestScores(score, levelId, scoreRef);
         setScore(0);
         setLastscores([]);
     };

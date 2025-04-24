@@ -2,7 +2,7 @@ import { useMusicContext } from '@/contexts/MusicContext';
 import { globalStyles } from '@/styles/globalStyles';
 import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, InteractionManager } from 'react-native';
 import { fetchSongs } from '@/firebase/songsService';
 import { useTimerContext } from '@/contexts/TimerContext';
 import LottieView from 'lottie-react-native';
@@ -108,17 +108,21 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
 
     const stopMusic = async () => {
         if (player && player.playing) {
-            await player.pause();
+            InteractionManager.runAfterInteractions(async () => { // Ensure ExoPlayer methods are called on the main thread to prevent crashes
+                player.pause();
+            });
         }
     };
+
 
     useEffect(() => {
         if (!audioUri || !songPlaying) {
             stopMusic();
             animationRef.current?.reset();
         } else {
-            console.log("Starting new song:", audioUri);
-            player.play();
+            InteractionManager.runAfterInteractions(async () => {
+                player.play();
+            });
             animationRef.current?.play();
         }
     }, [audioUri, songPlaying]);
