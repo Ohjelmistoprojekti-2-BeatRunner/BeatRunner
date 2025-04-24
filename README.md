@@ -17,7 +17,8 @@ Preliminary technologies planned for the project:
 
 - Node.js installed
 - Expo CLI installed (npm install -g expo-cli)
-- APK installed on Android device (you can find it [here](https://expo.dev/accounts/beatrunner/projects/beatrunner/builds/2e51205a-cefe-403a-bc9d-d88b587ab30c)) 
+- Node modules installed (npm install)
+- APK installed on Android device (you can find it [here](https://expo.dev/accounts/beatrunner/projects/beatrunner/builds/d357db4d-85d1-49f3-bbe0-563cf0209398)) 
 
 #### 2. Clone the repository:
 
