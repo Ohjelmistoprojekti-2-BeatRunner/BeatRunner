@@ -1,15 +1,13 @@
 # BeatRunner
 
-BeatRunner (Working title) is an app, that challenges users to stay in sync with their running pace to the beat of music.
+BeatRunner (Working title) is a mobile app, that challenges users to stay in sync with the beat of music while running.
 
-The program measures the runner's step rhythm and compares it to the tempo of chosen music. The app comes with pre-installed songs that users can start running to. Staying on beat with the music is rewarded with high scores, which can be compared on leaderboards against others. Initially, the focus of this project is on an Android implementation, but an iPhone version will also be considered.
+The app measures the runner's step rhythm and compares it to the tempo of chosen music. It includes pre-installed songs that are tailored for running sessions. The app features levels, each with different songs and difficulty based on tempo. Staying on beat earns you high scores, which can be compared on leaderboards against others. The project currently focuses on an Android implementation.
 
 ## Technologies
 
-Preliminary technologies planned for the project:
-
 - Expo for the mobile UI and communication with phone sensors
-- Firebase for user account management, storing high scores etc.
+- Firebase and Firestore for user account management, storing high scores etc.
 
 ## Installation & Setup
 
@@ -35,10 +33,12 @@ Preliminary technologies planned for the project:
 
 ## Usage
 
-1. Sign up / Log in inside the app
+1. Sign up or log in
 2. Select a level
-3. Start running
-4. Earn points based on timing and compare scores with others
+3. Start your run
+4. Earn points by staying on beat
+5. Compare your score against others on the leaderboard
+6. Have fun!
 
 ---
 
