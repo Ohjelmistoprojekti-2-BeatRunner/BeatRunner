@@ -30,9 +30,8 @@ Preliminary technologies planned for the project:
 `npx expo start`
 
 ## User Interface
-### User Interface Diagram
 
-![Käyttöliittymäkaavio](./Images/Kayttoliittymakaavio.png)
+![Käyttöliittymäkaavio](./Images/Kayttoliittyma.png)
 
 ## Usage
 
