@@ -259,7 +259,6 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
 
                         {/* Step sound toggle UI */}
                         <View style={styles.toggleContainer}>
-                            <Text style={globalStyles.contentText}>Step Sound Effects</Text>
                             <View style={styles.toggleRow}>
                                 <TouchableOpacity 
                                     style={[
