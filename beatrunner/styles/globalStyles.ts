@@ -162,7 +162,7 @@ export const globalStyles = StyleSheet.create({
     },
 
     dropdownpicker: {
-        backgroundColor: "gray", borderColor: 'rgb(97, 40, 112)',
+        backgroundColor: "rgb(24, 3, 29)", borderColor: 'rgb(97, 40, 112)', marginBottom: 20
     },
     selector: {
         marginTop: 10,
@@ -184,12 +184,12 @@ export const globalStyles = StyleSheet.create({
         boxShadow: 'inset 0 5px 30px 6px rgb(89, 34, 104)',
         alignContent: 'center'
     },
-    statRowTitle2: {
+    playerHeader: {
         color: 'white',
         fontSize: 20,
         fontWeight: 'bold',
         zIndex: 1,
-        padding: 20
+        marginTop: 20
     },
     playbutton: {
         width: 90,
@@ -222,8 +222,8 @@ export const globalStyles = StyleSheet.create({
     playerButtons: {
         flexDirection: 'row',
         zIndex: 1,
-        paddingBottom: 30,
-        marginTop: 10
+        paddingBottom: 40,
+        marginTop: 7
 
     },
     buttonLabel: {
@@ -289,10 +289,11 @@ export const globalStyles = StyleSheet.create({
         textAlignVertical: 'center'
     },
     levelDifficultyText: {
-        fontSize: 20,
+        fontSize: 16,
         fontWeight: 'bold',
         marginLeft: 20,
-        textAlignVertical: 'center'
+        textAlignVertical: 'center',
+        marginTop: 7
     },
     levelContainer: {
         flex: 1,

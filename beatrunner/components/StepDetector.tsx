@@ -236,7 +236,7 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
                     <View style={globalStyles.levelSettingsModal}>
 
                         <View style={globalStyles.levelModalTopLine}>
-                            <Text style={globalStyles.statRowTitle2}>Settings</Text>
+                            <Text style={globalStyles.playerHeader}>Settings</Text>
                         </View>
 
                         <Animated.View style={[styles.stepIndicator, stepIndicatorStyle]} />

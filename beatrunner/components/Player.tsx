@@ -125,8 +125,20 @@ const Player = ({ levelId, songs }: PlayerProps) => {
     useEffect(() => {
         const backAction = () => {
             pauseTimer();
-            askBeforeExit();
-            return true;
+
+            if (!started) {
+                stopMusicDetector();
+                endLevel(levelId);
+                setTimeout(() => {
+                    resetTimer();
+                    router.replace({ pathname: "/(tabs)" });
+                }, 500);
+                setStarted(false);
+                return true;
+            } else {
+                askBeforeExit();
+                return true;
+            }
         };
 
         const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
@@ -134,7 +146,7 @@ const Player = ({ levelId, songs }: PlayerProps) => {
         return () => {
             backHandler.remove();
         };
-    }, []);
+    }, [started]);
 
     return (
         <View>
@@ -152,7 +164,7 @@ const Player = ({ levelId, songs }: PlayerProps) => {
 
             <View style={globalStyles.levelContentContainer}>
                 <Text style={globalStyles.levelSectionTitle}> Score: {score} points</Text>
-                <Text style={globalStyles.levelSectionTitle}> Time: {(time / 1000).toFixed(2)} s </Text>
+                <Text style={globalStyles.levelSectionTitle}> Highscore: {bestScores[levelId]?.score ?? 0} points</Text>
                 <Text style={globalStyles.levelSectionTitle}> Step Count: {stepCount} </Text>
             </View>
 

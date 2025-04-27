@@ -43,13 +43,7 @@ export default function HelpScreen() {
           <Image style={helpStyles.slideIcon} source={require('../../assets/images/steps.png')} />
           <View style={helpStyles.textContainer}>
             <Text style={helpStyles.slideHeader2}>Stepping to the beat</Text>
-            <Text style={helpStyles.slideText}>While completing a level, you’ll hear this sound indicating when to step. If your steps are off-beat, the sound gets slightly louder to help you sync better with the rhythm.</Text>
-            <TouchableOpacity style={helpStyles.slideButton}>
-              <View style={helpStyles.slideButtonContent}>
-                <Ionicons name="play" style={helpStyles.slideButtonIcon} />
-                <Text style={helpStyles.slideButtonText}>Play sound</Text>
-              </View>
-            </TouchableOpacity>
+            <Text style={helpStyles.slideText}>While completing a level, your goal is to match your steps to the beat of the music. You can enable or disable step sounds in the settings. It's recommended to test your step accuracy in the test level and make adjustments if needed before starting a full run.</Text>
           </View>
         </View>
 
@@ -57,13 +51,7 @@ export default function HelpScreen() {
           <Image style={helpStyles.slideIcon} source={require('../../assets/images/trophy.png')} />
           <View style={helpStyles.textContainer}>
             <Text style={helpStyles.slideHeader2}>Scoring points</Text>
-            <Text style={helpStyles.slideText}>You earn the most points by stepping in time with the music. Maintaining a streak of well-timed steps gives you bonus points. You’ll hear this sound when you're on a streak.</Text>
-            <TouchableOpacity style={helpStyles.slideButton}>
-              <View style={helpStyles.slideButtonContent}>
-                <Ionicons name="play" style={helpStyles.slideButtonIcon} />
-                <Text style={helpStyles.slideButtonText}>Play sound</Text>
-              </View>
-            </TouchableOpacity>
+            <Text style={helpStyles.slideText}>You earn the most points by stepping in time with the music. Maintaining a streak of well-timed steps gives you bonus points.</Text>
           </View>
         </View>
 

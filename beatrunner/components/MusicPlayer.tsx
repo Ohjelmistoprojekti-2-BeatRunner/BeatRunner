@@ -20,7 +20,7 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
     const [currentIndex, setCurrentIndex] = useState(Number);
 
     const { setPlayer, audioUri, songPlaying, currentSongId, setCurrentSongId, setSongBpm, setLevelEnd, levelEnd } = useMusicContext();
-    const { resetTimer } = useTimerContext();
+    const { time, resetTimer } = useTimerContext();
 
     const player = useAudioPlayer(audioUri ? audioUri : '', 1000);
     const status = useAudioPlayerStatus(player);
@@ -130,11 +130,12 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
 
     return (
         <>
-            <Text style={globalStyles.statRowTitle2}>
+            <Text style={globalStyles.playerHeader}>
                 {songPlaying
                     ? `Playing song ${currentIndex + 1} of ${levelSongs.length}`
                     : `Paused - song ${currentIndex + 1} of ${levelSongs.length}`}
             </Text>
+            <Text style={globalStyles.buttonLabel}>Time: {(time / 1000).toFixed(2)} s</Text>
             <LottieView ref={animationRef} source={require('../assets/images/musicanimation.json')} loop autoPlay={false} resizeMode='cover' style={{ width: screenWidth, height: 80, zIndex: 0 }} />
         </>
     );

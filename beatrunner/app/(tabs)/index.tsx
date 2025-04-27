@@ -40,13 +40,15 @@ export default function HomeScreen() {
     }, [user]);
 
     const getColorForDifficulty = (difficulty: string): TextStyle => {
-        switch (difficulty) {
-            case "easy":
+        switch (difficulty.split(" ")[0]) {
+            case "Easy":
                 return { color: '#64b55b' };
-            case "moderate":
+            case "Medium":
                 return { color: '#e6c353' };
-            case "hard":
+            case "Hard":
                 return { color: '#de6f80' };
+            case "Impossible":
+                return {color: '#ab1dab'}
             default:
                 return { color: 'white' };
         }

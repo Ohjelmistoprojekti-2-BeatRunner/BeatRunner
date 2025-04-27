@@ -107,10 +107,10 @@ export default function ScoreScreen() {
                 backgroundColor: '#000000dd',
             }}>
                 <View style={{
-                    width: '85%',
                     backgroundColor: 'black',
                     borderRadius: 10,
                     padding: 10,
+                    alignItems: 'center'
                 }}>
                     <TextInput
                         style={gs.input}
@@ -119,10 +119,10 @@ export default function ScoreScreen() {
                         onChangeText={setSearchTerm}
                     />
                     <TouchableOpacity style={[
-                        gs.button
+                        gs.smallButton, {marginBottom: 20, marginTop: 10, width: 130}
                     ]}
                         onPress={handleProfileModal}>
-                        <Text style={gs.buttonText}>Search user</Text>
+                        <Text style={gs.buttonLabel}>Search user</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -135,6 +135,7 @@ export default function ScoreScreen() {
                     setOpen={setIsLevelPickerOpen}
                     setValue={setLevelPickerValue}
                     setItems={setPickerLevelOptions}
+                    theme='DARK'
                     onChangeValue={(val) => {
                         if (val) {
                             handleLevelModal(val);
@@ -233,9 +234,10 @@ const styles = StyleSheet.create({
     },
     scoreText: {
         color: 'white',
-        fontSize: 18,
+        fontSize: 20,
         marginVertical: 5,
-        marginLeft: 5
+        marginTop: 10,
+        marginBottom: 10
     },
     listitems: {
         flexDirection: "row",
