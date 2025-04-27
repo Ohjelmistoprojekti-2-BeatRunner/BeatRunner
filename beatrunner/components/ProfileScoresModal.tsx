@@ -118,7 +118,7 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
                 <View style={[gs.statContentContainer, { boxShadow: 'inset 0 1px 20px 3px #111' }]}>
                     <View style={gs.statContentRow}>
                         <Text style={gs.statRowTitle}>Profile created:</Text>
-                        {/*<Text style={gs.statRowText}>{formatTimestamp(profileData.createdAt)}</Text>*/}
+                        <Text style={gs.statRowText}>{formatTimestamp(profileData.createdAt)}</Text>
                     </View>
                     <View style={gs.statContentRow}>
                         <Text style={gs.statRowTitle}>Last run:</Text>
@@ -131,8 +131,8 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
                         <Text style={gs.statRowText}>{profileData.totalSteps}</Text>
                     </View>
                     <View style={gs.statContentRow}>
-                        <Text style={gs.statRowTitle}>Total time:</Text>
-                        <Text style={gs.statRowText}>{profileData.totalTime}</Text>
+                        <Text style={gs.statRowTitle}>Total runs:</Text>
+                        <Text style={gs.statRowText}>{profileData.totalRuns}</Text>
                     </View>
                     <View style={gs.statContentRow}>
                         <Text style={gs.statRowTitle}>Total score:</Text>

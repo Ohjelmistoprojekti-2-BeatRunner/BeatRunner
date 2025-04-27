@@ -1,16 +1,15 @@
+import { useMusicContext } from '@/contexts/MusicContext';
 import { useTimerContext } from '@/contexts/TimerContext';
+import { useUserContext } from '@/contexts/UserContext';
 import { useMusicDetector } from '@/hooks/useMusicDetector';
 import { useScores } from '@/hooks/useScores';
 import { globalStyles } from '@/styles/globalStyles';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Alert, BackHandler, Button, InteractionManager, ScrollView, StyleSheet, Text, TouchableOpacity, View, Modal } from 'react-native';
+import { Alert, BackHandler, InteractionManager, Text, TouchableOpacity, View } from 'react-native';
 import MusicPlayer from './MusicPlayer';
 import StepDetector from './StepDetector';
-import { useMusicContext } from '@/contexts/MusicContext';
-import { useUserContext } from '@/contexts/UserContext';
-import { Ionicons } from '@expo/vector-icons';
-import { aboutStyles } from '@/styles/aboutStyles';
 
 type PlayerProps = {
     levelId: string;
@@ -51,7 +50,7 @@ const Player = ({ levelId, songs }: PlayerProps) => {
             setStarted(true);
         }
 
-        InteractionManager.runAfterInteractions(() => {
+        InteractionManager.runAfterInteractions(() => {  //Delay starting/stopping player and detector before UI is ready to prevent problems with timings   
             if (!isPlaying) {
                 startMusicDetector();
             } else {

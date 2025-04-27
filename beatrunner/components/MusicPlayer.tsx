@@ -2,7 +2,7 @@ import { useMusicContext } from '@/contexts/MusicContext';
 import { globalStyles } from '@/styles/globalStyles';
 import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, InteractionManager } from 'react-native';
 import { fetchSongs } from '@/firebase/songsService';
 import { useTimerContext } from '@/contexts/TimerContext';
 import LottieView from 'lottie-react-native';
@@ -17,6 +17,7 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
 
     const [levelSongs, setLevelSongs] = useState<Song[]>([]);
     const [loading, setLoading] = useState(true);
+    const [currentIndex, setCurrentIndex] = useState(Number);
 
     const { setPlayer, audioUri, songPlaying, currentSongId, setCurrentSongId, setSongBpm, setLevelEnd, levelEnd } = useMusicContext();
     const { resetTimer } = useTimerContext();
@@ -87,7 +88,7 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
         if (!currentSongId) return;
 
         console.log(currentSongId);
-        const currentIndex = levelSongs.findIndex(song => Number(song.id) === currentSongId);
+        setCurrentIndex(levelSongs.findIndex(song => Number(song.id) === currentSongId));
         const nextIndex = (currentIndex + 1) % levelSongs.length;
         const nextSong = levelSongs[nextIndex];
         await stopMusic();
@@ -108,17 +109,21 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
 
     const stopMusic = async () => {
         if (player && player.playing) {
-            await player.pause();
+            InteractionManager.runAfterInteractions(async () => { // Ensure ExoPlayer methods are called on the main thread to prevent crashes
+                player.pause();
+            });
         }
     };
+
 
     useEffect(() => {
         if (!audioUri || !songPlaying) {
             stopMusic();
             animationRef.current?.reset();
         } else {
-            console.log("Starting new song:", audioUri);
-            player.play();
+            InteractionManager.runAfterInteractions(async () => {
+                player.play();
+            });
             animationRef.current?.play();
         }
     }, [audioUri, songPlaying]);
@@ -127,8 +132,8 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
         <>
             <Text style={globalStyles.statRowTitle2}>
                 {songPlaying
-                    ? `Playing song ${currentSongId} of ${levelSongs.length}`
-                    : `Paused - song ${currentSongId} of ${levelSongs.length}`}
+                    ? `Playing song ${currentIndex + 1} of ${levelSongs.length}`
+                    : `Paused - song ${currentIndex + 1} of ${levelSongs.length}`}
             </Text>
             <LottieView ref={animationRef} source={require('../assets/images/musicanimation.json')} loop autoPlay={false} resizeMode='cover' style={{ width: screenWidth, height: 80, zIndex: 0 }} />
         </>
