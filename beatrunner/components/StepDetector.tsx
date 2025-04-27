@@ -1,12 +1,13 @@
 import { useStepDetectorContext } from '@/contexts/StepDetectorContext';
-import { useTimerContext } from '@/contexts/TimerContext'; // Import TimerContext
+import { useTimerContext } from '@/contexts/TimerContext';
+import { useMusicContext } from '@/contexts/MusicContext';
 import { updateUserThreshold } from '@/firebase/usersService';
 import { globalStyles } from '@/styles/globalStyles';
 import Slider from '@react-native-community/slider';
 import { Audio } from 'expo-av';
 import { Accelerometer } from 'expo-sensors';
 import React, { useEffect, useRef, useState } from 'react';
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Modal, StyleSheet, Text, TouchableOpacity, View, Switch } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useUserContext } from '@/contexts/UserContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,17 +20,19 @@ interface StepDetectorProps {
 const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart = false }) => {
     // StepDetectorContext variables
     const { isDetecting, threshold, setThreshold, tempo, setTempo, stepCount, setStepCount } = useStepDetectorContext();
+    const { songBpm } = useMusicContext();
     const [sound, setSound] = useState<Audio.Sound | null>(null);
     const [stepTimestamps, setStepTimestamps] = useState<number[]>([]);
     const currentTempoRef = useRef<number>(0);
-    const [localThreshold, setLocalThreshold] = useState(threshold); // For threshold-slider ui
+    const [localThreshold, setLocalThreshold] = useState(threshold);
     const [modalVisible, setModalVisible] = useState(false);
-
+    const [stepSoundEnabled, setStepSoundEnabled] = useState(false);
+    const stepSoundEnabledRef = useRef(false);
+    
     const { user } = useUserContext();
 
     const localStepCountRef = useRef<number>(0);
 
-    // Get timer from TimerContext
     const { time, getCurrentTime } = useTimerContext();
 
     // References for step detection
@@ -39,7 +42,6 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
     const isInInactiveStateRef = useRef(false);
     const subscriptionRef = useRef<any>(null);
 
-    // Animated values
     const animatedStepOpacity = useSharedValue(1);
 
     // Load sound effect
@@ -64,56 +66,51 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
         };
     }, []);
 
-    // Function to toggle step detection
-    const toggleDetection = () => {
-        if (isDetecting) {
-            stopDetection();
-        } else {
-            startDetection();
+    // Flag to track if we're actively listening for steps (regardless of autoStart)
+    const [detectingSteps, setDetectingSteps] = useState(false);
+
+    useEffect(() => {
+        const shouldDetectSteps = autoStart || stepSoundEnabled;
+
+        if (shouldDetectSteps && !subscriptionRef.current) {
+            console.log("Starting step detection due to autoStart or step sound enabled");
+            startStepDetection();
+        } 
+        else if (!shouldDetectSteps && subscriptionRef.current) {
+            console.log("Stopping step detection");
+            stopStepDetection();
         }
-    };
+        return () => {
+            if (subscriptionRef.current) {
+                console.log("Cleaning up step detection on unmount");
+                stopStepDetection();
+            }
+        };
+    }, [autoStart, stepSoundEnabled]);
 
-    // Start step detection
-    const startDetection = async () => {
-        setStepCount(0);
-        localStepCountRef.current = 0;
-        setTempo(0);
-        currentTempoRef.current = 0;
-        stepTimesRef.current = [];
-        setStepTimestamps([]);
-
+    const startStepDetection = async () => {
+        // Only reset counters if autoStart is true (normal game mode)
+        if (autoStart) {
+            setStepCount(0);
+            localStepCountRef.current = 0;
+            setTempo(0);
+            currentTempoRef.current = 0;
+            stepTimesRef.current = [];
+            setStepTimestamps([]);
+        }
         Accelerometer.setUpdateInterval(20); // ~50Hz
-
+        setDetectingSteps(true);
         subscriptionRef.current = Accelerometer.addListener(data => {
             processAccelerometerData(data);
         });
     };
-
-    // Stop step detection
-    const stopDetection = () => {
+    const stopStepDetection = () => {
         if (subscriptionRef.current) {
             subscriptionRef.current.remove();
             subscriptionRef.current = null;
+            setDetectingSteps(false);
         }
     };
-
-    useEffect(() => {
-        if (autoStart && !subscriptionRef.current) {
-            console.log("Starting step detection due to autoStart");
-            startDetection();
-        }
-        else if (!autoStart && subscriptionRef.current) {
-            console.log("Stopping step detection due to autoStart becoming false");
-            stopDetection();
-        }
-
-        return () => {
-            if (subscriptionRef.current) {
-                console.log("Cleaning up step detection on unmount");
-                stopDetection();
-            }
-        };
-    }, [autoStart]);
 
     // Process accelerometer data for step detection
     const processAccelerometerData = async (data: any) => {
@@ -121,11 +118,18 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
         const magnitude = Math.sqrt(x * x + y * y + z * z);
         const now = Date.now();
 
+        // Calculate the minimum step interval based on the song's BPM
+        // Use songBpm if available, otherwise fall back to detected tempo
+        const currentBpm = songBpm > 0 ? songBpm : (tempo > 0 ? tempo : 120);
+        
+        // Calculate minimum time between steps (45% of the beat interval)
+        const beatInterval = 60000 / currentBpm; 
+        const minimumStepInterval = beatInterval * 0.45;
+
         // Check if we're in an inactive state to avoid false positives
         if (isInInactiveStateRef.current) {
             const inactiveTime = now - lastStepTimeRef.current;
-            const minimumStepInterval = tempo > 0 ? (60000 / tempo) * 0.5 : 200;
-
+            
             if (inactiveTime > minimumStepInterval) {
                 isInInactiveStateRef.current = false;
             } else {
@@ -134,13 +138,12 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
         }
 
         if (magnitude > threshold) {
-            // Animate step indicator
             animatedStepOpacity.value = withTiming(0.2, { duration: 100 }, () => {
                 animatedStepOpacity.value = withTiming(1, { duration: 100 });
             });
 
-            // Play sound if loaded
-            if (sound) {
+            if (sound && stepSoundEnabledRef.current) {
+                console.log("Playing step sound, enabled:", stepSoundEnabledRef.current);
                 try {
                     await sound.replayAsync();
                 } catch (error) {
@@ -148,39 +151,40 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
                 }
             }
 
-            // Record timestamp for this step with high precision
-            const preciseTimestamp = getCurrentTime();
-            const newStepTimestamps = [...stepTimestamps, preciseTimestamp];
-            setStepTimestamps(newStepTimestamps);
+            if (autoStart) {
+                const preciseTimestamp = getCurrentTime();
+                const newStepTimestamps = [...stepTimestamps, preciseTimestamp];
+                setStepTimestamps(newStepTimestamps);
 
-            // Calculate step intervals and tempo
-            if (lastStepTimeRef.current > 0) {
-                const interval = now - lastStepTimeRef.current;
-                stepTimesRef.current.push(interval);
+                // Calculate step intervals and tempo
+                if (lastStepTimeRef.current > 0) {
+                    const interval = now - lastStepTimeRef.current;
+                    stepTimesRef.current.push(interval);
 
-                // Keep only the last 5 steps for a rolling average
-                if (stepTimesRef.current.length > 5) {
-                    stepTimesRef.current.shift();
+                    // Keep only the last 5 steps for a rolling average
+                    if (stepTimesRef.current.length > 5) {
+                        stepTimesRef.current.shift();
+                    }
+
+                    // Calculate average tempo based on recent steps
+                    if (stepTimesRef.current.length > 0) {
+                        const avgInterval = stepTimesRef.current.reduce((sum, val) => sum + val, 0) / stepTimesRef.current.length;
+                        const newTempo = Math.round(60000 / avgInterval);
+                        currentTempoRef.current = newTempo;
+                        setTempo(newTempo);
+                    }
                 }
 
-                // Calculate average tempo based on recent steps
-                if (stepTimesRef.current.length > 0) {
-                    const avgInterval = stepTimesRef.current.reduce((sum, val) => sum + val, 0) / stepTimesRef.current.length;
-                    const newTempo = Math.round(60000 / avgInterval);
-                    currentTempoRef.current = newTempo;
-                    setTempo(newTempo);
+                // Increment local step count reference
+                localStepCountRef.current += 1;
+
+                // Update global step count
+                setStepCount(localStepCountRef.current);
+
+                // Notify parent component if callback provided
+                if (onStepDetected) {
+                    onStepDetected(localStepCountRef.current, currentTempoRef.current, preciseTimestamp);
                 }
-            }
-
-            // Increment local step count reference
-            localStepCountRef.current += 1;
-
-            // Update global step count
-            setStepCount(localStepCountRef.current);
-
-            // Notify parent component if callback provided
-            if (onStepDetected) {
-                onStepDetected(localStepCountRef.current, currentTempoRef.current, preciseTimestamp);
             }
 
             // Set inactive state to avoid multiple steps being detected from a single step
@@ -208,6 +212,17 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
         setLocalThreshold(value);
     };
 
+    const toggleStepSound = () => {
+        setStepSoundEnabled(previous => {
+            const newValue = !previous;
+            return newValue;
+        });
+    };
+
+    useEffect(() => {
+        stepSoundEnabledRef.current = stepSoundEnabled;
+        console.log("Step sound state updated, new value:", stepSoundEnabled);
+    }, [stepSoundEnabled]);
 
     return (
         <View>
@@ -226,6 +241,7 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
 
                         <Animated.View style={[styles.stepIndicator, stepIndicatorStyle]} />
 
+                        {/* Sensitivity slider UI */}
                         <View style={styles.controlsContainer}>
                             <Text style={globalStyles.contentText}>Sensitivity: {threshold.toFixed(2)}</Text>
                             <Slider
@@ -241,7 +257,36 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
                             />
                         </View>
 
-                        <TouchableOpacity style={[globalStyles.smallButton, { flexDirection: 'row', gap: 10, margin: 20 }]} onPress={() => setModalVisible(false)}>
+                        {/* Step sound toggle UI */}
+                        <View style={styles.toggleContainer}>
+                            <Text style={globalStyles.contentText}>Step Sound Effects</Text>
+                            <View style={styles.toggleRow}>
+                                <TouchableOpacity 
+                                    style={[
+                                        styles.toggleButton, 
+                                        stepSoundEnabled ? styles.toggleButtonActive : styles.toggleButtonInactive
+                                    ]}
+                                    onPress={() => {
+                                        console.log("Touch event on toggle button");
+                                        toggleStepSound();
+                                    }}
+                                >
+                                    <Ionicons 
+                                        name={stepSoundEnabled ? "volume-high" : "volume-mute"} 
+                                        size={22} 
+                                        color="white" 
+                                    />
+                                    <Text style={styles.toggleText}>
+                                        {stepSoundEnabled ? "Steps Sound On" : "Steps Sound Off"}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+
+                        <TouchableOpacity 
+                            style={[globalStyles.smallButton, { flexDirection: 'row', gap: 10, margin: 20 }]} 
+                            onPress={() => setModalVisible(false)}
+                        >
                             <Ionicons name="close" size={25} color="white" />
                             <Text style={globalStyles.buttonText}>Close settings</Text>
                         </TouchableOpacity>
@@ -251,7 +296,10 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
             </Modal>
 
             <View style={globalStyles.buttonContainer}>
-                <TouchableOpacity style={[globalStyles.smallButton, { flexDirection: 'row', gap: 10 }]} onPress={() => setModalVisible(true)}>
+                <TouchableOpacity 
+                    style={[globalStyles.smallButton, { flexDirection: 'row', gap: 10 }]} 
+                    onPress={() => setModalVisible(true)}
+                >
                     <Ionicons name="settings-outline" size={25} color="white" />
                     <Text style={globalStyles.buttonText}>Settings</Text>
                 </TouchableOpacity>
@@ -282,7 +330,41 @@ const styles = StyleSheet.create({
     timestampContainer: {
         marginTop: 10,
         alignItems: 'center'
-    }
+    },
+    toggleContainer: {
+        marginTop: 20,
+        width: '100%',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+    },
+    toggleRow: {
+        flexDirection: 'row',
+        marginTop: 10,
+        marginBottom: 10,
+        width: '100%',
+        justifyContent: 'center',
+    },
+    toggleButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 20,
+        paddingVertical: 12,
+        borderRadius: 30,
+        gap: 10,
+        minWidth: 180,
+    },
+    toggleButtonActive: {
+        backgroundColor: '#4CAF50',
+    },
+    toggleButtonInactive: {
+        backgroundColor: '#555555',
+    },
+    toggleText: {
+        color: 'white',
+        fontWeight: '600',
+        fontSize: 16,
+    },
 });
 
 export default StepDetector;
