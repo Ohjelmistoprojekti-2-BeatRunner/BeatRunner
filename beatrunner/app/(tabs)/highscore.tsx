@@ -123,6 +123,7 @@ export default function ScoreScreen() {
                     open={isLevelPickerOpen}
                     value={levelPickerValue}
                     items={pickerLevelOptions}
+                    placeholder='Select a level'
                     setOpen={setIsLevelPickerOpen}
                     setValue={setLevelPickerValue}
                     setItems={setPickerLevelOptions}

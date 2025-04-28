@@ -52,9 +52,8 @@ export function useScores() {
     };
 
 
-    // end level and Reset points 
+    // End level and reset points 
     const endLevel = async (levelId: string, playTime: number) => {
-        const time = getCurrentTime()
 
         if (score > 0) { 
             const scoreRef = await submitRunScore(score, levelId);
