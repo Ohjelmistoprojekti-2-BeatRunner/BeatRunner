@@ -1,6 +1,6 @@
 import { aboutStyles } from '@/styles/aboutStyles';
 import React from 'react';
-import { Text, View, Linking, Image } from 'react-native';
+import { Image, Linking, Text, View } from 'react-native';
 
 export default function AboutScreen() {
     return (

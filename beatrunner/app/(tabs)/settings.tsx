@@ -2,7 +2,7 @@ import { auth, db } from '@/firebaseConfig';
 import { globalStyles } from '@/styles/globalStyles';
 import { router } from 'expo-router';
 import { deleteUser, EmailAuthProvider, reauthenticateWithCredential, signOut, updatePassword, updateProfile } from 'firebase/auth';
-import { doc, updateDoc, collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, doc, getDocs, query, updateDoc, where } from 'firebase/firestore';
 import React, { useState } from 'react';
 import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
@@ -21,7 +21,7 @@ export default function SettingsScreen() {
       setTimeout(() => {
         Alert.alert('Logged out', 'You have been successfully logged out.');
         router.replace('/login');
-    }, 300);
+      }, 300);
     } catch (error) {
       Alert.alert('Error', 'Failed to log out. Please try again.');
       console.error(error);
@@ -64,7 +64,7 @@ export default function SettingsScreen() {
       Alert.alert('Error', 'Please enter a new username.');
       return;
     }
-  
+
 
     try {
       const user = auth.currentUser;
@@ -99,12 +99,12 @@ export default function SettingsScreen() {
                 await updateProfile(user, {
                   displayName: trimmedUsername,
                 });
-  
+
                 await user.reload();
-  
+
                 const userDocRef = doc(db, 'users', user.uid);
                 await updateDoc(userDocRef, { username: trimmedUsername });
-  
+
                 Alert.alert('Success', 'Username changed successfully.');
                 setNewUsername('');
               } catch (err) {
@@ -156,38 +156,38 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={globalStyles.container}>
-      <View style={{paddingBottom: 70 }}>
+      <View style={{ paddingBottom: 70 }}>
         <Text style={globalStyles.title}>Settings</Text>
-      <Text style={globalStyles.sectionTitle}>Change Password</Text>
+        <Text style={globalStyles.sectionTitle}>Change Password</Text>
 
-      <TextInput style={globalStyles.input} placeholder="Enter current password" placeholderTextColor="#888" secureTextEntry value={password} onChangeText={setPassword}/>
-      <TextInput style={globalStyles.input} placeholder="Enter new password" placeholderTextColor="#888" secureTextEntry value={newPassword} onChangeText={setNewPassword} />
-      <TextInput style={globalStyles.input} placeholder="Re-enter new password" placeholderTextColor="#888" secureTextEntry value={confirmPassword} onChangeText={setConfirmPassword} />
+        <TextInput style={globalStyles.input} placeholder="Enter current password" placeholderTextColor="#888" secureTextEntry value={password} onChangeText={setPassword} />
+        <TextInput style={globalStyles.input} placeholder="Enter new password" placeholderTextColor="#888" secureTextEntry value={newPassword} onChangeText={setNewPassword} />
+        <TextInput style={globalStyles.input} placeholder="Re-enter new password" placeholderTextColor="#888" secureTextEntry value={confirmPassword} onChangeText={setConfirmPassword} />
 
-      <TouchableOpacity style={globalStyles.smallButton} onPress={handleChangePassword}>
-        <Text style={globalStyles.buttonText}>Apply</Text>
-      </TouchableOpacity>
-      <Text style={globalStyles.sectionTitle}>Change Username</Text>
-      <TextInput style={globalStyles.input} placeholder="Enter new username" placeholderTextColor="#888" value={newUsername} onChangeText={setNewUsername}
-      />
-      <TouchableOpacity style={globalStyles.smallButton} onPress={handleChangeUsername}>
-        <Text style={globalStyles.buttonText}>Apply</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={globalStyles.smallButton} onPress={handleChangePassword}>
+          <Text style={globalStyles.buttonText}>Apply</Text>
+        </TouchableOpacity>
+        <Text style={globalStyles.sectionTitle}>Change Username</Text>
+        <TextInput style={globalStyles.input} placeholder="Enter new username" placeholderTextColor="#888" value={newUsername} onChangeText={setNewUsername}
+        />
+        <TouchableOpacity style={globalStyles.smallButton} onPress={handleChangeUsername}>
+          <Text style={globalStyles.buttonText}>Apply</Text>
+        </TouchableOpacity>
 
-      <Text style={globalStyles.sectionTitle}>Remove Account</Text>
-      <TextInput style={globalStyles.input} placeholder="Enter email" placeholderTextColor="#888" value={email} onChangeText={setEmail}
-      />
+        <Text style={globalStyles.sectionTitle}>Remove Account</Text>
+        <TextInput style={globalStyles.input} placeholder="Enter email" placeholderTextColor="#888" value={email} onChangeText={setEmail}
+        />
 
-      <TextInput style={globalStyles.input} placeholder="Enter password" placeholderTextColor="#888" secureTextEntry value={password} onChangeText={setPassword}
-      />
+        <TextInput style={globalStyles.input} placeholder="Enter password" placeholderTextColor="#888" secureTextEntry value={password} onChangeText={setPassword}
+        />
 
-      <TouchableOpacity style={globalStyles.smallButton} onPress={handleDeleteAccount}>
-        <Text style={globalStyles.buttonText}>Delete Account</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={globalStyles.smallButton} onPress={handleDeleteAccount}>
+          <Text style={globalStyles.buttonText}>Delete Account</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity style={globalStyles.logoutButton} onPress={handleLogout}>
-        <Text style={globalStyles.buttonText}>Logout</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={globalStyles.logoutButton} onPress={handleLogout}>
+          <Text style={globalStyles.buttonText}>Logout</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );

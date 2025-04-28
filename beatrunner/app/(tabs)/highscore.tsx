@@ -5,21 +5,13 @@ import { fetchUserIdByName, fetchUsersOrderByTotalRuns, fetchUsersOrderByTotalSc
 import { globalStyles as gs } from '@/styles/globalStyles';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { SegmentedButtons } from 'react-native-paper';
 import DropDownPicker from 'react-native-dropdown-picker';
-
-interface UserResults {
-    levelId: string;
-    userId: string;
-    score: number;
-    timestamp: number;
-}
+import { SegmentedButtons } from 'react-native-paper';
 
 type PickerLevel = {
     label: string;
     value: string;
 };
-
 
 export default function ScoreScreen() {
 
@@ -27,7 +19,6 @@ export default function ScoreScreen() {
     const [totalRunsUsers, setTotalRunsUsers] = useState<UserProfile[]>([]);
     const [statCategory, setStatCategory] = useState<"totalScore" | "totalRuns">("totalScore");
     const [levels, setLevels] = useState<Level[]>([])
-    const [allUsers, setAllUsers] = useState<UserProfile[]>([])
     const [loading, setLoading] = useState<boolean>(true);
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -43,11 +34,11 @@ export default function ScoreScreen() {
     const { user, userData, loading: authLoading } = useUserContext();
 
     const dataToRender = statCategory === "totalScore" ? totalScoreUsers : totalRunsUsers;
-
+    //gets all data from the database when app loads
     useEffect(() => {
         getData();
     }, []);
-
+    //Gets all user information and sets the states
     const getData = async () => {
         const levelData = await fetchLevels();
         const topTotalScoreUsers = await fetchUsersOrderByTotalScore();
@@ -64,7 +55,7 @@ export default function ScoreScreen() {
 
     }
 
-
+    //checks search term and sets user and mode
     const handleProfileModal = async () => {
         if (!searchTerm.trim()) return;
 
@@ -79,7 +70,7 @@ export default function ScoreScreen() {
         }
 
     };
-
+    //sets the levelId and mode to levelScores
     const handleLevelModal = async (levelId: string) => {
         console.log("here", levelId)
         setSelectedUserId(undefined);
@@ -87,7 +78,7 @@ export default function ScoreScreen() {
         setSelectedMode('levelScores');
         setModalVisible(true);
     };
-
+    //sets the levelId and mode to levelScores
     const handleUserClick = (userId: string) => {
         setSelectedUserId(userId);
         setSelectedLevelId(undefined);
@@ -95,7 +86,7 @@ export default function ScoreScreen() {
         setModalVisible(true)
     }
 
-
+    //checks if user is authenticated
     if (authLoading) {
         return null;
     }
@@ -119,7 +110,7 @@ export default function ScoreScreen() {
                         onChangeText={setSearchTerm}
                     />
                     <TouchableOpacity style={[
-                        gs.smallButton, {marginBottom: 20, marginTop: 10, width: 130}
+                        gs.smallButton, { marginBottom: 20, marginTop: 10, width: 130 }
                     ]}
                         onPress={handleProfileModal}>
                         <Text style={gs.buttonLabel}>Search user</Text>
@@ -238,10 +229,6 @@ const styles = StyleSheet.create({
         marginVertical: 5,
         marginTop: 10,
         marginBottom: 10
-    },
-    listitems: {
-        flexDirection: "row",
-
     },
 
 });

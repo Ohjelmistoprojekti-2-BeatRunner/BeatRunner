@@ -10,12 +10,12 @@ function DrawerTitleLogo(props: any) {
   const titleColor = useThemeColor({ light: 'black', dark: 'white' }, 'text');
   const { user, userData, loading } = useUserContext();
 
-  
+
   if (loading) {
     return null;
   }
 
- 
+  //shows how is logged in if logged in
   return (
     <DrawerContentScrollView {...props}>
       <Text style={[styles.title, { color: titleColor }]}>BeatRunner</Text>
@@ -23,7 +23,7 @@ function DrawerTitleLogo(props: any) {
         <View>
           <Text style={[globalStyles.contentText, { color: titleColor }]}>Logged in as:</Text>
           <Text style={[globalStyles.contentText, { color: titleColor }]}>
-            {userData?.username || user.email} 
+            {userData?.username || user.email}
           </Text>
         </View>
       ) : (

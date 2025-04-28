@@ -1,14 +1,13 @@
 import { helpStyles } from '@/styles/helpStyles';
 import React from 'react';
-import { Text, View, Image, TouchableOpacity } from 'react-native';
-import Swiper from 'react-native-swiper'
-import { Ionicons } from '@expo/vector-icons';
+import { Image, Text, View } from 'react-native';
+import Swiper from 'react-native-swiper';
 
 export default function HelpScreen() {
   return (
-    <Swiper style={{backgroundColor: 'black'}}>
+    <Swiper style={{ backgroundColor: 'black' }}>
 
-    <View style={helpStyles.slide}>
+      <View style={helpStyles.slide}>
         <Text style={helpStyles.slideHeader}>How to get started</Text>
 
         <View style={helpStyles.slideRow}>

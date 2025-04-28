@@ -24,7 +24,7 @@ export default function RootLayout() {
 
     const router = useRouter();
 
-
+    //check if user is logged in and redirect to login page if not
     useEffect(() => {
         let loggedIn = false
         const checkLoginStatus = async () => {
