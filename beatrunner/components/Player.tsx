@@ -24,8 +24,9 @@ const Player = ({ levelId, songs }: PlayerProps) => {
     const [tempo, setTempo] = useState(0);
     const [started, setStarted] = useState(false);
 
-    const intervalRef = useRef<any | null>(null);
-    const [playTime, setPlayTime] = useState(0)
+    const [playTime, setPlayTime] = useState(0);
+    const requestRef = useRef<number | null>(null);;
+    const startTimeRef = useRef<number | null>(null);
 
     const { songBpm, levelEnd, setLevelEnd } = useMusicContext();
 
@@ -34,32 +35,30 @@ const Player = ({ levelId, songs }: PlayerProps) => {
     const { startMusicDetector, stopMusicDetector } = useMusicDetector();
     const { score, calculateStepScore, endLevel } = useScores();
 
+    const animate = (time: number) => {
+        if (startTimeRef.current !== null) {
+            setPlayTime(time - startTimeRef.current);
+        }
+        requestRef.current = requestAnimationFrame(animate);
+    };
+
     useEffect(() => {
         if (isPlaying) {
-            startTimer();
+            startTimeRef.current = performance.now() - playTime;
+            requestRef.current = requestAnimationFrame(animate);
         } else {
-            pauseTimer();
+            if (requestRef.current !== null) {
+                cancelAnimationFrame(requestRef.current);
+                requestRef.current = null;
+            }
         }
+
         return () => {
-            pauseTimer();
+            if (requestRef.current !== null) {
+                cancelAnimationFrame(requestRef.current);
+            }
         };
-    }, [isPlaying, startTimer, pauseTimer]);
-
-    useEffect(() => {
-        if (isPlaying) {
-            intervalRef.current = setInterval(() => {
-                setPlayTime(prevPlayTime => prevPlayTime + 1);
-            }, 10);
-        } else if (intervalRef.current !== null) {
-            clearInterval(intervalRef.current);
-        }
     }, [isPlaying]);
-
-    useEffect(() => {
-        if (intervalRef.current !== null) {
-            clearInterval(intervalRef.current);
-        }
-    }, [levelEnd]);
 
 
     const togglePlayPause = () => {
@@ -169,35 +168,35 @@ const Player = ({ levelId, songs }: PlayerProps) => {
         return () => {
             backHandler.remove();
         };
-    }, []);
+    }, [started]);
 
     return (
         <View>
             <StepDetector onStepDetected={handleStepDetected} autoStart={isPlaying} />
 
-            <View style={[globalStyles.statContentContainer, {marginLeft: 30, marginRight: 30, marginTop: 60}]}>
+            <View style={[globalStyles.statContentContainer, { marginLeft: 30, marginRight: 30, marginTop: 30 }]}>
                 <View style={globalStyles.statContentRow}>
-                    <Text style={[globalStyles.statRowTitle, {fontSize: 20}]}>Highscore: </Text>
-                    <Text style={[globalStyles.statRowText, {fontSize: 20}]}>{bestScores[levelId]?.score ?? 0} points</Text>
+                    <Text style={[globalStyles.statRowTitle, { fontSize: 20 }]}>Highscore: </Text>
+                    <Text style={[globalStyles.statRowText, { fontSize: 20 }]}>{bestScores[levelId]?.score ?? 0} points</Text>
                 </View>
 
             </View>
 
-            <View style={[globalStyles.statContentContainer, {marginLeft: 30, marginRight: 30}]}>
+            <View style={[globalStyles.statContentContainer, { marginLeft: 30, marginRight: 30 }]}>
                 <View style={globalStyles.statContentRow}>
-                    <Text style={[globalStyles.statRowTitle, {fontSize: 20}]}>Score:</Text>
-                    <Text style={[globalStyles.statRowText, {fontSize: 20}]}>{score} points</Text>
+                    <Text style={[globalStyles.statRowTitle, { fontSize: 20 }]}>Score:</Text>
+                    <Text style={[globalStyles.statRowText, { fontSize: 20 }]}>{score} points</Text>
                 </View>
                 <View style={globalStyles.statContentRow}>
-                    <Text style={[globalStyles.statRowTitle, {fontSize: 20}]}>Step Count:</Text>
-                    <Text style={[globalStyles.statRowText, {fontSize: 20}]}>{stepCount}</Text>
+                    <Text style={[globalStyles.statRowTitle, { fontSize: 20 }]}>Step Count:</Text>
+                    <Text style={[globalStyles.statRowText, { fontSize: 20 }]}>{stepCount}</Text>
                 </View>
             </View>
 
-            <View style={[globalStyles.statContentContainer, {marginLeft: 30, marginRight: 30, marginTop: 40}]}>
+            <View style={[globalStyles.statContentContainer, { marginLeft: 30, marginRight: 30 }]}>
                 <View style={globalStyles.statContentRow}>
-                    <Text style={[globalStyles.statRowTitle, {fontSize: 30}]}>Time:</Text>
-                    <Text style={[globalStyles.statRowText, {fontSize: 30}]}> {(playTime / 100).toFixed(2)} s</Text>
+                    <Text style={[globalStyles.statRowTitle, { fontSize: 30 }]}>Time:</Text>
+                    <Text style={[globalStyles.statRowText, { fontSize: 30 }]}> {(playTime / 1000).toFixed(2)} s</Text>
                 </View>
             </View>
 

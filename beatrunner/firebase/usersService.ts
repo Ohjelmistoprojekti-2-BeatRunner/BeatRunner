@@ -1,4 +1,4 @@
-import { auth, db } from "@/firebaseConfig";
+import { auth, db } from "@/firebase/firebaseConfig";
 import { collection, doc, DocumentData, DocumentReference, getDoc, getDocs, limit, orderBy, query, runTransaction, serverTimestamp, where } from "firebase/firestore";
 
 interface BestScore {

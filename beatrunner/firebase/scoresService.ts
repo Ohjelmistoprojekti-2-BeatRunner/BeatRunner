@@ -1,4 +1,4 @@
-import { auth, db } from "@/firebaseConfig";
+import { auth, db } from "@/firebase/firebaseConfig";
 import { addDoc, collection, doc, DocumentReference, getDoc, getDocs, limit, orderBy, query, serverTimestamp, where } from "firebase/firestore";
 
 export interface Score {

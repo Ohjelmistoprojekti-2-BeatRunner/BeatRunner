@@ -176,7 +176,7 @@ export const globalStyles = StyleSheet.create({
         height: 350,
         width: screenWidth + 30,
         alignItems: 'center',
-        marginBottom: -60,
+        marginBottom: -80,
         backgroundColor: 'rgba(226, 44, 250, 0.18)',
         borderColor: "rgb(89, 34, 104)",
         borderWidth: 3,
@@ -222,7 +222,7 @@ export const globalStyles = StyleSheet.create({
         flexDirection: 'row',
         zIndex: 1,
         paddingBottom: 40,
-        marginTop: 7
+        marginTop: 9
 
     },
     buttonLabel: {
