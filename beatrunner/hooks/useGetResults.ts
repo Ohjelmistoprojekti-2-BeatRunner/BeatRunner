@@ -1,8 +1,7 @@
 import { Level } from "@/firebase/levelsService";
 import { fetchAllUserResults } from "@/firebase/scoresService";
 import { fetchAllUsers, UserProfile } from "@/firebase/usersService";
-import React, { useEffect } from "react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export interface UserResults {
     levelId: string;
@@ -15,7 +14,6 @@ export interface UserResults {
 // Not in use
 
 export const useGetResults = () => {
-
     const [allUsersResults, setAllUsersResults] = useState<UserResults[]>([]);
     //const [userResults, setUserResults] = useState<UserResults[]>([]);
     const [value, setValue] = React.useState<number>(1);
@@ -39,16 +37,12 @@ export const useGetResults = () => {
             return null
         }
         let userName = allUsers.filter(result => result.id === userId)
-
         if (userName.length === 0 || !userName[0]) {
             return ""
         } else {
             return userName[0].username
         }
-
     }
-    //allUsersResults.sort((a, b) => b.score - a.score)
-
 
     const getLevelResults = (levelId: string) => {
         if (!allUsersResults || allUsersResults.length == 0) {
@@ -56,11 +50,8 @@ export const useGetResults = () => {
         }
         const levelIdInt = levelId;
         let level = allUsersResults.filter(result => result.levelId === levelIdInt)
-
-
-
         return level
     }
-
+    
     return { getUserName, getLevelResults }
 }

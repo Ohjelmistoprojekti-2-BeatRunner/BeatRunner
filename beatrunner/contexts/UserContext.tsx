@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
-import { collection, doc, DocumentData, onSnapshot, query } from "firebase/firestore";
 import { auth, db } from "@/firebaseConfig";
+import { User as FirebaseUser, onAuthStateChanged } from "firebase/auth";
+import { collection, doc, DocumentData, onSnapshot, query } from "firebase/firestore";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 type UserContextType = {
     user: FirebaseUser | null;

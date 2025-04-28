@@ -49,7 +49,7 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
     useEffect(() => {
         const fetchProfile = async () => {
             if (!currentUserId || selectedMode !== 'profile') return;
-            // check if data for user already fetched:
+            // Check if data for user already fetched:
             if (currentUserId === previousUserId && profileData) return;
             setLoading(true);
             try {
@@ -63,7 +63,6 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
                 setLoading(false);
             }
         };
-
         if (visible) {
             fetchProfile();
         }
@@ -73,13 +72,16 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
     useEffect(() => {
         const fetchLevel = async () => {
             if (!currentLevelId || selectedMode !== 'levelScores') return;
-            // check if data for level already fetched:
+
+            // Avoid re-fetching if the data for the current level is already loaded
             if (currentLevelId === previousLevelId && levelData) return;
             setLoading(true);
             try {
                 const data = await fetchLevelTopResultsWithUsername(currentLevelId);
                 console.log("Fetched data for level: ", currentLevelId);
                 setLevelData(data);
+
+                // Fetch level metadata (e.g., title)
                 const level = await fetchLevelById(currentLevelId);
                 setLevelTitle(level?.title ?? "Unknown");
                 console.log("Fetched title for level: ", level?.title);
