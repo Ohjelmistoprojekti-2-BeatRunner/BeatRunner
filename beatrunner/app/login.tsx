@@ -12,6 +12,9 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
+
+  // Disable back button during login
+  
     useEffect(() => {
         const backAction = () => { return true;
         };
