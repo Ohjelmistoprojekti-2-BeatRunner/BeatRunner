@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, Modal, BackHandler } from 'react-native';
+import { auth, db } from '@/firebaseConfig';
+import { globalStyles } from '@/styles/globalStyles';
 import { useRouter } from 'expo-router';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth, db } from '@/firebaseConfig';
-import { doc, setDoc, updateDoc, getDocs, collection, query, where, serverTimestamp } from 'firebase/firestore';
-import { globalStyles } from '@/styles/globalStyles';
+import { collection, doc, getDocs, query, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { Alert, BackHandler, Modal, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -14,13 +14,14 @@ export default function RegisterScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [userId, setUserId] = useState('');
 
-    useEffect(() => {
-        const backAction = () => { return true;};
-        const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
-        return () => {
-            backHandler.remove();
-        };
-    }, []);
+  // Disable back button during registration
+  useEffect(() => {
+    const backAction = () => { return true; };
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    return () => {
+      backHandler.remove();
+    };
+  }, []);
 
   const handleRegister = async () => {
     if (!email || !password) {
@@ -32,12 +33,14 @@ export default function RegisterScreen() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Alusta käyttäjädokumentti ilman usernamea
+      // Initialize a blank user document in Firestore with timestamp and null username
+
       await setDoc(doc(db, 'users', user.uid), {
         createdAt: serverTimestamp(),
         username: null,
       });
 
+      // save user ID
       setUserId(user.uid);
       setModalVisible(true);
     } catch (error: any) {
@@ -70,10 +73,10 @@ export default function RegisterScreen() {
     const nameLowercase = trimmedUsername.toLowerCase()
 
     try {
-      // Tarkistetaan, onko käyttäjänimi jo käytössä
+      // Check if username is already taken
       const usernameQuery = query(
         collection(db, 'users'),
-        where('usernameLowercase', '==', nameLowercase) // firestore is case-sensitive: usernameLowercase for username comparisons.
+        where('usernameLowercase', '==', nameLowercase)
       );
       const existing = await getDocs(usernameQuery);
 
@@ -82,7 +85,7 @@ export default function RegisterScreen() {
         return;
       }
 
-      // Päivitetään username olemassa olevaan dokumenttiin
+      // Update user document with username
       await updateDoc(doc(db, 'users', userId), {
         username: trimmedUsername,
         usernameLowercase: nameLowercase,
@@ -91,7 +94,7 @@ export default function RegisterScreen() {
       Alert.alert('Success', 'Account created!');
       setModalVisible(false);
 
-      // Siirrytään suoraan etusivulle (sisäänkirjautuneena)
+      // Redirect to home page
       router.replace('/');
     } catch (error: any) {
       Alert.alert('Error saving username', error.message);
@@ -100,7 +103,6 @@ export default function RegisterScreen() {
 
   return (
     <>
-      {/* Username Modal */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -121,32 +123,30 @@ export default function RegisterScreen() {
           </View>
         </View>
       </Modal>
-
-      {/* Registration Form */}
       <View style={globalStyles.container}>
         <View style={globalStyles.topContainer}>
-        <Text style={globalStyles.title}>Register</Text>
-        <TextInput
-          style={globalStyles.input}
-          placeholder="Email"
-          placeholderTextColor="#cfc0cf"
-          autoCapitalize="none"
-          onChangeText={setEmail}
-        />
-        <TextInput
-          style={globalStyles.input}
-          placeholder="Password"
-          placeholderTextColor="#cfc0cf"
-          secureTextEntry={true}
-          onChangeText={setPassword}
-        />
-        <TouchableOpacity style={globalStyles.smallButton} onPress={handleRegister}>
-          <Text style={globalStyles.buttonText}>Register</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.replace('/login')}>
-          <Text style={globalStyles.link}>Already have an account? Login here!</Text>
-        </TouchableOpacity>
-      </View>
+          <Text style={globalStyles.title}>Register</Text>
+          <TextInput
+            style={globalStyles.input}
+            placeholder="Email"
+            placeholderTextColor="#cfc0cf"
+            autoCapitalize="none"
+            onChangeText={setEmail}
+          />
+          <TextInput
+            style={globalStyles.input}
+            placeholder="Password"
+            placeholderTextColor="#cfc0cf"
+            secureTextEntry={true}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity style={globalStyles.smallButton} onPress={handleRegister}>
+            <Text style={globalStyles.buttonText}>Register</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.replace('/login')}>
+            <Text style={globalStyles.link}>Already have an account? Login here!</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </>
   );

@@ -2,13 +2,11 @@ import ProfileScoresModal from '@/components/ProfileScoresModal';
 import { useUserContext } from '@/contexts/UserContext';
 import { fetchLevels, Level } from '@/firebase/levelsService';
 import { formatTimestamp } from '@/scripts/formatTimestamp';
-import { router } from 'expo-router';
 import { globalStyles as gs } from '@/styles/globalStyles';
 import { indexStyles } from '@/styles/indexStyles';
-import React, { useDebugValue, useEffect, useState } from 'react';
-import { FlatList, Text, TouchableOpacity, View, StyleSheet, Image, TextStyle, ActivityIndicator } from 'react-native';
-import { fetchLevelTopResultsWithUsername } from '@/firebase/scoresService';
-import { getAuth } from 'firebase/auth';
+import { router } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, Image, Text, TextStyle, TouchableOpacity, View } from 'react-native';
 
 export default function HomeScreen() {
 
@@ -48,7 +46,7 @@ export default function HomeScreen() {
             case "Hard":
                 return { color: '#de6f80' };
             case "Impossible":
-                return {color: '#ab1dab'}
+                return { color: '#ab1dab' }
             default:
                 return { color: 'white' };
         }
@@ -61,7 +59,7 @@ export default function HomeScreen() {
         setModalVisible(true);
     };
 
-
+    //gets levels from levels and sets color for difficulty
     const Item = ({ id, title, difficulty, calories, songs }: Level) => {
 
         const levelCompleted = !!bestScores[id];

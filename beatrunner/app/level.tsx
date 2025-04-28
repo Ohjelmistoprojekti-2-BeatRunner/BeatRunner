@@ -3,7 +3,7 @@ import Player from '@/components/Player';
 import { globalStyles } from '@/styles/globalStyles';
 import { useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import { Text, View, StyleSheet, TextStyle } from 'react-native';
+import { Text, TextStyle, View } from 'react-native';
 
 
 export default function LevelScreen() {

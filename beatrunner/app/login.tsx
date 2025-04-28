@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, BackHandler } from 'react-native';
-import { useRouter } from 'expo-router';
-import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/firebaseConfig';
 import { globalStyles } from '@/styles/globalStyles';
+import { useRouter } from 'expo-router';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import React, { useEffect, useState } from 'react';
+import { Alert, BackHandler, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 
 export default function LoginScreen() {
@@ -12,16 +12,20 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        const backAction = () => { return true;
-        };
-    
-        const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
-    
-        return () => {
-            backHandler.remove();
-        };
-    }, []);
+
+  // Disable back button during login
+
+  useEffect(() => {
+    const backAction = () => {
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+    return () => {
+      backHandler.remove();
+    };
+  }, []);
 
   const handleLogin = async () => {
 
@@ -49,29 +53,29 @@ export default function LoginScreen() {
   return (
     <View style={globalStyles.container}>
       <View style={globalStyles.topContainer}>
-      <Text style={globalStyles.title}>Login</Text>
+        <Text style={globalStyles.title}>Login</Text>
 
-      <TextInput
-        style={globalStyles.input}
-        placeholder="Email"
-        onChangeText={setEmail}
-        placeholderTextColor="#cfc0cf"
-      />
-      <TextInput
-        style={globalStyles.input}
-        placeholder="Password"
-        secureTextEntry={true}
-        onChangeText={setPassword}
-        placeholderTextColor="#cfc0cf"
-      />
+        <TextInput
+          style={globalStyles.input}
+          placeholder="Email"
+          onChangeText={setEmail}
+          placeholderTextColor="#cfc0cf"
+        />
+        <TextInput
+          style={globalStyles.input}
+          placeholder="Password"
+          secureTextEntry={true}
+          onChangeText={setPassword}
+          placeholderTextColor="#cfc0cf"
+        />
 
-      <TouchableOpacity style={globalStyles.smallButton} onPress={handleLogin} disabled={loading}>
-        <Text style={globalStyles.buttonText}>{loading ? 'Logging in...' : 'Login'}</Text>
-      </TouchableOpacity>
-      
-      <TouchableOpacity onPress={() => router.replace('./register')}>
-        <Text style={globalStyles.link}>Don't have an account? Register here</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={globalStyles.smallButton} onPress={handleLogin} disabled={loading}>
+          <Text style={globalStyles.buttonText}>{loading ? 'Logging in...' : 'Login'}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => router.replace('./register')}>
+          <Text style={globalStyles.link}>Don't have an account? Register here</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
