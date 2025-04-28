@@ -14,8 +14,6 @@ The app measures the runner's step rhythm and compares it to the tempo of chosen
 #### 1. Prerequisites:
 
 - Node.js installed
-- Expo CLI installed (npm install -g expo-cli)
-- Node modules installed (npm install)
 - APK installed on Android device (you can find it [here](https://expo.dev/accounts/beatrunner/projects/beatrunner/builds/d357db4d-85d1-49f3-bbe0-563cf0209398)) 
 
 #### 2. Clone the repository:
@@ -23,7 +21,12 @@ The app measures the runner's step rhythm and compares it to the tempo of chosen
 `git clone https://github.com/Ohjelmistoprojekti-2-BeatRunner/BeatRunner.git`
 `cd beatrunner`
 
-#### 3. Run the app:
+#### 3. Install Expo CLI and Node modules:
+
+`npm install -g expo-cli`
+`npm install`
+
+#### 4. Run the app:
 
 - Start development server
 `npx expo start`
