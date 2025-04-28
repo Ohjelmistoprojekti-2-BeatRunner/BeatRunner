@@ -11,6 +11,7 @@ export interface Score {
 }
 
 
+// Submit a new score document after a successful run
 export async function submitRunScore(score: number, levelId: string): Promise<DocumentReference | undefined> {
     const user = auth.currentUser;
 
@@ -26,6 +27,7 @@ export async function submitRunScore(score: number, levelId: string): Promise<Do
     }
 }
 
+// Fetch the top 30 result in scores-document filtered by level id. For each result also get the username associated by user-id stored in score document.
 export const fetchLevelTopResultsWithUsername = async (levelId: string) => {
 
     try {
@@ -63,6 +65,7 @@ export const fetchLevelTopResultsWithUsername = async (levelId: string) => {
     }
 }
 
+// not in use anymore. Function fetch all score-documents ordered by score
 export const fetchAllUserResults = async () => {
 
     try {

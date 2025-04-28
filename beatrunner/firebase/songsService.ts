@@ -7,6 +7,7 @@ interface Song {
     bpm: number;
 }
 
+// Fetch songs by their ids. The ids provided in a list (which is get from the level-document in the app's logic)
 export const fetchSongs = async (songIds: string[]) => {
 
     const ids = typeof songIds[0] === "string" ? songIds[0].split(",") : songIds;

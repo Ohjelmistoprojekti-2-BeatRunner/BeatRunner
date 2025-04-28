@@ -16,6 +16,11 @@ type ProfileScoresModalProps = {
     mode: "profile" | "levelScores"
 };
 
+
+// Modal displays either a user profile or the results for a apecific level. 
+// Clicking a username in the level's score list or a level title in user's results opens the corresponding page
+// App keeps the previous user profile and the previous level page in memory to avoid unnecessary database fetches
+
 export default function ProfileScoresModal({ visible, onClose, userId, levelId, mode }: Readonly<ProfileScoresModalProps>) {
     const [selectedMode, setSelectedMode] = useState<"profile" | "levelScores">(mode)
     const [currentUserId, setCurrentUserId] = useState<string | undefined>(userId);
@@ -29,7 +34,7 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
 
     const { height: screenHeight } = Dimensions.get('window');
 
-    const { user, bestScores, userData, loading: authLoading } = useUserContext();
+    const { bestScores, userData } = useUserContext();
 
 
 
@@ -40,19 +45,16 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
         setSelectedMode(mode);
     }, []);
 
-    // Fetch user profile for profile view mode
+    // Fetch data for "profile view" mode
     useEffect(() => {
         const fetchProfile = async () => {
-            console.log("fetch started in profile")
             if (!currentUserId || selectedMode !== 'profile') return;
-            console.log("fetch profile", currentUserId)
             // check if data for user already fetched:
             if (currentUserId === previousUserId && profileData) return;
-            console.log("fetch new profile")
             setLoading(true);
             try {
                 const data = await fetchUserById(currentUserId);
-                console.log("fetch", data)
+                console.log("Fetched data for user: ", currentUserId);
                 setProfileData(data);
                 setPreviousUserId(currentUserId);
             } catch (error) {
@@ -67,22 +69,20 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
         }
     }, [currentUserId, visible, selectedMode]);
 
-    // Fetch levels scores for level scores view mode
+    // Fetch data for "level view" mode
     useEffect(() => {
         const fetchLevel = async () => {
-            console.log("fetch started in level")
             if (!currentLevelId || selectedMode !== 'levelScores') return;
-            console.log("fetch level", currentLevelId)
             // check if data for level already fetched:
             if (currentLevelId === previousLevelId && levelData) return;
-            console.log("fetch new level")
             setLoading(true);
             try {
                 const data = await fetchLevelTopResultsWithUsername(currentLevelId);
-                console.log("fetch", data)
+                console.log("Fetched data for level: ", currentLevelId);
                 setLevelData(data);
                 const level = await fetchLevelById(currentLevelId);
                 setLevelTitle(level?.title ?? "Unknown");
+                console.log("Fetched title for level: ", level?.title);
                 setPreviousLevelId(currentLevelId);
             } catch (error) {
                 console.error("Error fetching levelr results: ", error);
@@ -96,16 +96,18 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
         }
     }, [currentLevelId, visible, selectedMode]);
 
+    // Clicked level title in modal: change to "level view".
     const handleLevelClick = (levelId: string) => {
         setCurrentLevelId(levelId);
         setSelectedMode('levelScores')
     }
-
+    // Clicked username in modal: change to user "profile view".
     const handleUserClick = (userId: string) => {
         setCurrentUserId(userId);
         setSelectedMode('profile')
     }
 
+    // Render "profile view": data is fetched in fetchProfile useEffect-hook.  
     const returnProfile = () => {
         if (profileData) return (
 
@@ -178,6 +180,7 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
         )
     }
 
+    // Render "level view": data is fetched in fetchLevel useEffect-hook.  
     const returnLevelScores = () => (
         <View style={{ flex: 1 }}>
             <View style={{ paddingBottom: 10 }}>
@@ -256,11 +259,9 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
                     {loading && (
                         <ActivityIndicator size="large" color="#fff" style={{ marginTop: 50 }} />
                     )}
-                    {/* profile mode: show users profile */}
                     {!loading && selectedMode === 'profile' && profileData && (
                         returnProfile()
                     )}
-                    {/* levelScores mode: show best results for a level*/}
                     {!loading && selectedMode === 'levelScores' && (
                         returnLevelScores()
                     )}
@@ -288,17 +289,13 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 15,
         right: 15,
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-        borderRadius: 20,
+        backgroundColor: 'rgba(226, 44, 250, 0.18)',
+        boxShadow: 'inset 0 1px 2px 3px #111',
+        borderRadius: 30,
         width: 40,
         height: 40,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.4,
-        shadowRadius: 3,
-        elevation: 5,
     },
 
     closeButtonText: {

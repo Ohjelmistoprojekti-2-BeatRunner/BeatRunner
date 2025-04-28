@@ -8,9 +8,10 @@ import { Text, TextStyle, View } from 'react-native';
 
 export default function LevelScreen() {
 
-    const { id, title, difficulty, calories, songs } = useLocalSearchParams();
+    const { id, title, difficulty, calories, songs, duration } = useLocalSearchParams();
 
     const levelId = Array.isArray(id) ? id[0] : id;
+
 
     const getColorForDifficulty = (difficulty: string): TextStyle => {
         switch (difficulty.split(" ")[0]) {
@@ -28,12 +29,14 @@ export default function LevelScreen() {
     }
 
 
-
     return (
         <View style={globalStyles.levelContainer}>
-            <View style={globalStyles.levelTopContainer}>
+            <View style={[globalStyles.levelTopContainer, {flexDirection: 'row', alignItems: 'center' }]}>
                 <Text style={globalStyles.levelTitle}>{title}</Text>
-                <Text style={[getColorForDifficulty(difficulty.toString()), globalStyles.levelDifficultyText]}>{difficulty}</Text>
+                <View>
+                    <Text style={[getColorForDifficulty(difficulty.toString()), globalStyles.levelDifficultyText]}>{difficulty}</Text>
+                    <Text style={[getColorForDifficulty(difficulty.toString()), globalStyles.levelDifficultyText]}>{duration} min</Text>
+                </View>
             </View>
             <View style={globalStyles.levelBottomContainer}>
                 <Player levelId={levelId}

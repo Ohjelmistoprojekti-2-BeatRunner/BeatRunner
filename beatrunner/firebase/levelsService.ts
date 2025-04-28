@@ -4,9 +4,10 @@ import { collection, doc, getDoc, getDocs, orderBy, query } from 'firebase/fires
 export interface Level {
     id: string;
     title: string;
-    levelOrder: number
+    levelOrder: number;
     difficulty: string;
     calories: number;
+    duration: number;
     songs: [];
 }
 
@@ -26,6 +27,7 @@ export const fetchLevelById = async (levelId: string) => {
             id: levelId,
             title: levelData.title,
             difficulty: levelData.difficulty,
+            duration: levelData.duration,
             calories: levelData.calories,
         };
     } catch (error) {
@@ -50,6 +52,7 @@ export const fetchLevels = async () => {
                 levelOrder: data.levelOrder,
                 difficulty: data.difficulty,
                 calories: data.calories,
+                duration: data.duration,
                 songs: data.songs,
             };
         });

@@ -60,18 +60,18 @@ export default function HomeScreen() {
     };
 
     //gets levels from levels and sets color for difficulty
-    const Item = ({ id, title, difficulty, calories, songs }: Level) => {
+    const Item = ({ id, title, difficulty, calories, songs, duration }: Level) => {
 
         const levelCompleted = !!bestScores[id];
         return (
             <View style={{ margin: 10, width: 300 }}>
                 <TouchableOpacity style={levelCompleted ? indexStyles.levelButtonCompleted : indexStyles.levelButton} onPress={() => router.replace({
                     pathname: "/level",
-                    params: { id, title, difficulty, calories, songs, }
+                    params: { id, title, difficulty, calories, songs, duration }
                 })}>
                     <View>
                         <Text style={[indexStyles.buttonText, { color: 'white' }]}>{title}</Text>
-                        <Text style={[getColorForDifficulty(difficulty), indexStyles.difficultyText]}>{difficulty}</Text>
+                        <Text style={[getColorForDifficulty(difficulty), indexStyles.difficultyText]}>{difficulty} {duration} min</Text>
                     </View>
                     <View>
                         {bestScores[id] ?
@@ -120,7 +120,7 @@ export default function HomeScreen() {
 
                     <FlatList
                         data={levels}
-                        renderItem={({ item }) => <Item id={item.id} levelOrder={item.levelOrder} title={item.title} difficulty={item.difficulty} calories={item.calories} songs={item.songs} />}
+                        renderItem={({ item }) => <Item id={item.id} levelOrder={item.levelOrder} title={item.title} difficulty={item.difficulty} calories={item.calories} songs={item.songs} duration={item.duration} />}
 
                         ListHeaderComponent={() => (
                             <Text style={indexStyles.title}>Levels</Text>

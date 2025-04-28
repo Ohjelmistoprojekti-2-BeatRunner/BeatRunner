@@ -1,16 +1,16 @@
+import { useMusicContext } from '@/contexts/MusicContext';
 import { useStepDetectorContext } from '@/contexts/StepDetectorContext';
 import { useTimerContext } from '@/contexts/TimerContext';
-import { useMusicContext } from '@/contexts/MusicContext';
+import { useUserContext } from '@/contexts/UserContext';
 import { updateUserThreshold } from '@/firebase/usersService';
 import { globalStyles } from '@/styles/globalStyles';
+import { Ionicons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
 import { Audio } from 'expo-av';
 import { Accelerometer } from 'expo-sensors';
 import React, { useEffect, useRef, useState } from 'react';
-import { Modal, StyleSheet, Text, TouchableOpacity, View, Switch } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { useUserContext } from '@/contexts/UserContext';
-import { Ionicons } from '@expo/vector-icons';
 
 interface StepDetectorProps {
     onStepDetected?: (stepCount: number, tempo: number, timestamp: number) => void;
@@ -28,7 +28,7 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
     const [modalVisible, setModalVisible] = useState(false);
     const [stepSoundEnabled, setStepSoundEnabled] = useState(false);
     const stepSoundEnabledRef = useRef(false);
-    
+
     const { user } = useUserContext();
 
     const localStepCountRef = useRef<number>(0);
@@ -75,7 +75,7 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
         if (shouldDetectSteps && !subscriptionRef.current) {
             console.log("Starting step detection due to autoStart or step sound enabled");
             startStepDetection();
-        } 
+        }
         else if (!shouldDetectSteps && subscriptionRef.current) {
             console.log("Stopping step detection");
             stopStepDetection();
@@ -121,15 +121,15 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
         // Calculate the minimum step interval based on the song's BPM
         // Use songBpm if available, otherwise fall back to detected tempo
         const currentBpm = songBpm > 0 ? songBpm : (tempo > 0 ? tempo : 120);
-        
+
         // Calculate minimum time between steps (45% of the beat interval)
-        const beatInterval = 60000 / currentBpm; 
+        const beatInterval = 60000 / currentBpm;
         const minimumStepInterval = beatInterval * 0.45;
 
         // Check if we're in an inactive state to avoid false positives
         if (isInInactiveStateRef.current) {
             const inactiveTime = now - lastStepTimeRef.current;
-            
+
             if (inactiveTime > minimumStepInterval) {
                 isInInactiveStateRef.current = false;
             } else {
@@ -232,6 +232,8 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
                 visible={modalVisible}
                 onRequestClose={() => setModalVisible(false)}
             >
+                {/*Close Modal on press outside modal box*/}
+                <Pressable style={StyleSheet.absoluteFill} onPress={() => setModalVisible(false)} />
                 <View style={globalStyles.levelModalCentered}>
                     <View style={globalStyles.levelSettingsModal}>
 
@@ -260,9 +262,9 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
                         {/* Step sound toggle UI */}
                         <View style={styles.toggleContainer}>
                             <View style={styles.toggleRow}>
-                                <TouchableOpacity 
+                                <TouchableOpacity
                                     style={[
-                                        styles.toggleButton, 
+                                        styles.toggleButton,
                                         stepSoundEnabled ? styles.toggleButtonActive : styles.toggleButtonInactive
                                     ]}
                                     onPress={() => {
@@ -270,10 +272,10 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
                                         toggleStepSound();
                                     }}
                                 >
-                                    <Ionicons 
-                                        name={stepSoundEnabled ? "volume-high" : "volume-mute"} 
-                                        size={22} 
-                                        color="white" 
+                                    <Ionicons
+                                        name={stepSoundEnabled ? "volume-high" : "volume-mute"}
+                                        size={22}
+                                        color="white"
                                     />
                                     <Text style={styles.toggleText}>
                                         {stepSoundEnabled ? "Steps Sound On" : "Steps Sound Off"}
@@ -282,8 +284,8 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
                             </View>
                         </View>
 
-                        <TouchableOpacity 
-                            style={[globalStyles.smallButton, { flexDirection: 'row', gap: 10, margin: 20 }]} 
+                        <TouchableOpacity
+                            style={[globalStyles.smallButton, { flexDirection: 'row', gap: 10, margin: 20 }]}
                             onPress={() => setModalVisible(false)}
                         >
                             <Ionicons name="close" size={25} color="white" />
@@ -295,8 +297,8 @@ const StepDetector: React.FC<StepDetectorProps> = ({ onStepDetected, autoStart =
             </Modal>
 
             <View style={globalStyles.buttonContainer}>
-                <TouchableOpacity 
-                    style={[globalStyles.smallButton, { flexDirection: 'row', gap: 10 }]} 
+                <TouchableOpacity
+                    style={[globalStyles.smallButton, { flexDirection: 'row', gap: 10 }]}
                     onPress={() => setModalVisible(true)}
                 >
                     <Ionicons name="settings-outline" size={25} color="white" />

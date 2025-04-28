@@ -1,5 +1,5 @@
 import { auth, db } from "@/firebaseConfig";
-import { collection, doc, DocumentData, DocumentReference, getDoc, getDocs, orderBy, limit, query, runTransaction, serverTimestamp, where } from "firebase/firestore";
+import { collection, doc, DocumentData, DocumentReference, getDoc, getDocs, limit, orderBy, query, runTransaction, serverTimestamp, where } from "firebase/firestore";
 
 interface BestScore {
     score: number;
@@ -7,6 +7,7 @@ interface BestScore {
     title: string;
 }
 
+// User has a bestScores collection, documents named by the level-ID, where users best result for each level is stored and updated 
 export interface UserProfile {
     id: string;
     username: string;
@@ -41,6 +42,8 @@ export const fetchUserIdByName = async (userName: string): Promise<string | null
 
 };
 
+// Fetch an user by their Id. Also fetch their bestScores documents. 
+// For each bestScore-documents get the level title, assosiated with the level-id stored in the document  
 export const fetchUserById = async (userId: string): Promise<UserProfile | null> => {
     try {
         const userRef = doc(db, "users", userId);
@@ -112,6 +115,7 @@ export const fetchAllUsers = async () => {
     }
 }
 
+// Fetch the top 20 users for the high score lists, ordered by their total score
 export const fetchUsersOrderByTotalScore = async () => {
     try {
         const allUsersRef = collection(db, 'users');
@@ -144,6 +148,7 @@ export const fetchUsersOrderByTotalScore = async () => {
     }
 }
 
+// Fetch the top 20 users for the high score lists, ordered by their total runs
 export const fetchUsersOrderByTotalRuns = async () => {
     try {
         const allUsersRef = collection(db, 'users');
@@ -176,7 +181,8 @@ export const fetchUsersOrderByTotalRuns = async () => {
     }
 }
 
-
+// After a succesful run, update user's total stats: 
+// First get the old stats, add the new results to the existing ones, and then update with the new sums.  
 export async function updateUserTotalScore(score: number, time: number, steps: number) {
     const user = auth.currentUser;
 
@@ -187,7 +193,7 @@ export async function updateUserTotalScore(score: number, time: number, steps: n
     const userRef = doc(db, "users", user.uid);
 
     try {
-        await runTransaction(db, async (transaction) => {
+        await runTransaction(db, async (transaction) => { // firebase transaction.update to prevent problems with asynchronised updates
             const userDoc = await transaction.get(userRef);
             if (!userDoc.exists()) {
                 throw new Error("User not found");
@@ -267,7 +273,7 @@ export const updateUserThreshold = async (threshold: number) => {
 
 
 
-//not in use anymore, handled in UserContext with snapshot.
+{/*not in use anymore, handled in UserContext with snapshot.
 export const fetchUserBestScores = async () => {
     const user = auth.currentUser;
     if (!user) {
@@ -326,4 +332,4 @@ export const fetchUserByName = async (userName: string) => {
         console.error("Error fetching user by name: ", error);
         return null;
     }
-};
+};*/}

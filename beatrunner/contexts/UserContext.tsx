@@ -17,6 +17,8 @@ const UserContext = createContext<UserContextType>({
     loading: true,
 });
 
+// UserContext keep track current user's User document and bestScores documents in Firestore 
+// and receives updates to them via Firebase snapshots.
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<FirebaseUser | null>(null);
     const [userData, setUserData] = useState<DocumentData | null>(null);
@@ -24,27 +26,27 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Unsubscribe from snapshots first to prevent issues during userAuth unsubscription
+        // Unsubscribe from snapshots first to avoid issues during userAuth unsubscription
         let unsubscribeUserDoc: (() => void) | null = null;
         let unsubscribeBestScores: (() => void) | null = null;
 
         const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
             if (firebaseUser) {
                 setUser(firebaseUser);
-                // subsbribe to real-time updates on user's doc
+                // Subsbribe to real-time updates on user's doc.
                 const userRef = doc(db, "users", firebaseUser.uid);
                 unsubscribeUserDoc = onSnapshot(userRef, (docSnap) => {
                     setUserData(docSnap.exists() ? docSnap.data() : null);
                     setLoading(false);
                 });
-                // subsbribe to real-time updates on user's bestScores-collections docs
+                // Subsbribe to real-time updates on user's bestScores-collections docs.
                 const bestScoresRef = collection(db, "users", firebaseUser.uid, "bestScores");
                 unsubscribeBestScores = onSnapshot(query(bestScoresRef), (snapshot) => {
                     const scores: Record<string, any> = {};
                     snapshot.docs.forEach((doc) => {
                         scores[doc.id] = doc.data();
                     });
-                    //sort bestScores to right level order
+                    // Sort bestScores in the correct level order
                     const scoresArray = Object.entries(scores)
                         .sort(([, a], [, b]) => a.levelOrder - b.levelOrder)
                         .reduce((acc, [key, value]) => {
@@ -55,7 +57,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
                 });
             } else {
 
-                // handle logout
+                // Handle logout
                 if (unsubscribeUserDoc) unsubscribeUserDoc();
                 if (unsubscribeBestScores) unsubscribeBestScores();
                 setUserData(null);

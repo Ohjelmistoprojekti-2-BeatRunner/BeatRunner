@@ -1,5 +1,4 @@
 import { useUserContext } from '@/contexts/UserContext';
-import { useThemeColor } from '@/hooks/useThemeColor';
 import { globalStyles } from '@/styles/globalStyles';
 import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { Drawer } from 'expo-router/drawer';
@@ -7,7 +6,6 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 function DrawerTitleLogo(props: any) {
-  const titleColor = useThemeColor({ light: 'black', dark: 'white' }, 'text');
   const { user, userData, loading } = useUserContext();
 
 
@@ -18,16 +16,16 @@ function DrawerTitleLogo(props: any) {
   //shows how is logged in if logged in
   return (
     <DrawerContentScrollView {...props}>
-      <Text style={[styles.title, { color: titleColor }]}>BeatRunner</Text>
+      <Text style={[styles.title, { color: 'white' }]}>BeatRunner</Text>
       {user ? (
         <View>
-          <Text style={[globalStyles.contentText, { color: titleColor }]}>Logged in as:</Text>
-          <Text style={[globalStyles.contentText, { color: titleColor }]}>
+          <Text style={[globalStyles.contentText]}>Logged in as:</Text>
+          <Text style={[globalStyles.contentText]}>
             {userData?.username || user.email}
           </Text>
         </View>
       ) : (
-        <Text style={[globalStyles.contentText, { color: titleColor }]}>Not logged in</Text>
+        <Text style={[globalStyles.contentText]}>Not logged in</Text>
       )}
       <DrawerItemList {...props} />
     </DrawerContentScrollView>

@@ -8,13 +8,13 @@ export const useMusicDetector = () => {
     const startMusicDetector = () => {
         setSongPlaying(true);
         setIsDetecting(true);
-        console.log("Both started");
+        console.log("Music player and step detector started");
     };
 
     const stopMusicDetector = () => {
         setSongPlaying(false);
         setIsDetecting(false);
-        console.log("Both stopped");
+        console.log("Music player and step detector stopped");
     };
 
     return { startMusicDetector, stopMusicDetector};

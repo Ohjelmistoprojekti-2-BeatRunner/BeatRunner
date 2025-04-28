@@ -12,6 +12,8 @@ export interface UserResults {
 }
 
 
+// Not in use
+
 export const useGetResults = () => {
 
     const [allUsersResults, setAllUsersResults] = useState<UserResults[]>([]);

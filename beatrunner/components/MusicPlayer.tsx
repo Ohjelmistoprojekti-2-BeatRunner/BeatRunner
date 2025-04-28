@@ -17,7 +17,6 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
 
     const [levelSongs, setLevelSongs] = useState<Song[]>([]);
     const [loading, setLoading] = useState(true);
-    const [currentIndex, setCurrentIndex] = useState(Number);
 
     const { setPlayer, audioUri, songPlaying, currentSongId, setCurrentSongId, setSongBpm, setLevelEnd, levelEnd } = useMusicContext();
     const { time, resetTimer } = useTimerContext();
@@ -70,6 +69,7 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
         }
     }, [levelSongs]);
 
+    // if audioUri changes, set new music player
     useEffect(() => {
         setPlayer(player);
     }, [audioUri]);
@@ -88,18 +88,25 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
         if (!currentSongId) return;
 
         console.log(currentSongId);
-        setCurrentIndex(levelSongs.findIndex(song => Number(song.id) === currentSongId));
+        // Check current songs id from songs-list and set to current index
+        const currentIndex = levelSongs.findIndex(song => Number(song.id) === currentSongId);
+        // Set next song's index. Return to 0 if current index is last element in list.
         const nextIndex = (currentIndex + 1) % levelSongs.length;
+        // Set next song to new index
         const nextSong = levelSongs[nextIndex];
+        // Stop and null musicplayer for handling song change.
         await stopMusic();
-        setPlayer(null); // if it aint broke, dont fix it. 
+        setPlayer(null);
         resetTimer();
 
+        // If index has returned to 0, end level.
         if (nextIndex === 0 && !levelEnd) {
             setTimeout(() => {
                 setLevelEnd(true);
             }, 300);
         } else {
+            // Set new currentSongId which calls function handleSongSelection in musicContext, 
+            // and triggers updating audioUri -> when audioUri change, useEffect in MusicPlayer sets new music player
             setTimeout(() => {
                 setCurrentSongId(Number(nextSong.id));
                 setSongBpm(nextSong.bpm);
@@ -132,10 +139,9 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
         <>
             <Text style={globalStyles.playerHeader}>
                 {songPlaying
-                    ? `Playing song ${currentIndex + 1} of ${levelSongs.length}`
-                    : `Paused - song ${currentIndex + 1} of ${levelSongs.length}`}
+                    ? `Playing song ${levelSongs.findIndex(song => Number(song.id) === currentSongId) + 1} of ${levelSongs.length}`
+                    : `Paused - song ${levelSongs.findIndex(song => Number(song.id) === currentSongId) + 1} of ${levelSongs.length}`}
             </Text>
-            <Text style={globalStyles.buttonLabel}>Time: {(time / 1000).toFixed(2)} s</Text>
             <LottieView ref={animationRef} source={require('../assets/images/musicanimation.json')} loop autoPlay={false} resizeMode='cover' style={{ width: screenWidth, height: 80, zIndex: 0 }} />
         </>
     );
