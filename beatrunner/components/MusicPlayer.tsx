@@ -89,7 +89,6 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
     const handleNextSong = async () => {
         if (!currentSongId) return;
 
-        console.log(currentSongId);
         // Check current songs id from songs-list and set to current index
         const currentIndex = levelSongs.findIndex(song => Number(song.id) === currentSongId);
         // Set next song's index. Return to 0 if current index is last element in list.

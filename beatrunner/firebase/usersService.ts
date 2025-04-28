@@ -273,7 +273,7 @@ export const updateUserThreshold = async (threshold: number) => {
 
 
 
-{/*not in use anymore, handled in UserContext with snapshot.
+/*not in use anymore, handled in UserContext with snapshot.
 export const fetchUserBestScores = async () => {
     const user = auth.currentUser;
     if (!user) {
@@ -332,4 +332,4 @@ export const fetchUserByName = async (userName: string) => {
         console.error("Error fetching user by name: ", error);
         return null;
     }
-};*/}
+};*/

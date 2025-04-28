@@ -53,7 +53,7 @@ export function useScores() {
 
 
     // end level and Reset points 
-    const endLevel = async (levelId: string) => {
+    const endLevel = async (levelId: string, playTime: number) => {
         const time = getCurrentTime()
 
         if (score > 0) { 
