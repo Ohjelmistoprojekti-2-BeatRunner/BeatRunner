@@ -25,7 +25,10 @@ The app measures the runner's step rhythm and compares it to the tempo of chosen
 
 #### 3. Run the app:
 
+- Start development server
 `npx expo start`
+
+- Scan QR code from console to open the project in a development build. 
 
 ## User Interface
 
