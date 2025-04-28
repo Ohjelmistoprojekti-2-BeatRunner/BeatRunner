@@ -50,7 +50,7 @@ const Player = ({ levelId, songs }: PlayerProps) => {
             setStarted(true);
         }
 
-        InteractionManager.runAfterInteractions(() => {  //Delay starting/stopping player and detector before UI is ready to prevent problems with timings   
+        InteractionManager.runAfterInteractions(() => {
             if (!isPlaying) {
                 startMusicDetector();
             } else {
@@ -59,8 +59,9 @@ const Player = ({ levelId, songs }: PlayerProps) => {
         });
     };
 
+    // Handles step detection and updates step count, tempo, and score
     const handleStepDetected = (detectedStepCount: number, detectedTempo: number, timestamp: number) => {
-        console.log(`Step Count: ${detectedStepCount}, Tempo: ${detectedTempo}, Time: ${(timestamp / 1000).toFixed(3)}s`);
+        // console.log(`Step Count: ${detectedStepCount}, Tempo: ${detectedTempo}, Time: ${(timestamp / 1000).toFixed(3)}s`);
         calculateStepScore(timestamp, songBpm);
         setStepCount(detectedStepCount);
         setTempo(detectedTempo);
@@ -122,23 +123,12 @@ const Player = ({ levelId, songs }: PlayerProps) => {
     }, [levelEnd]);
 
 
+    // Handles back button press to either exit or pause the game
     useEffect(() => {
         const backAction = () => {
             pauseTimer();
-
-            if (!started) {
-                stopMusicDetector();
-                endLevel(levelId);
-                setTimeout(() => {
-                    resetTimer();
-                    router.replace({ pathname: "/(tabs)" });
-                }, 500);
-                setStarted(false);
-                return true;
-            } else {
-                askBeforeExit();
-                return true;
-            }
+            askBeforeExit();
+            return true;
         };
 
         const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
@@ -146,25 +136,15 @@ const Player = ({ levelId, songs }: PlayerProps) => {
         return () => {
             backHandler.remove();
         };
-    }, [started]);
+    }, []);
 
     return (
         <View>
-
-            {/* 
-       <Text style={globalStyles.contentText}>Step Count: {stepCount}</Text>
-        <Text style={globalStyles.contentText}>Tempo: {tempo} SPM</Text>
-        <Text style={globalStyles.contentText}> Score: {score} points</Text>
-
-        <Text style={globalStyles.contentText}> Songs bpm: {songBpm} </Text>
-
-          */}
-
             <StepDetector onStepDetected={handleStepDetected} autoStart={isPlaying} />
 
             <View style={globalStyles.levelContentContainer}>
                 <Text style={globalStyles.levelSectionTitle}> Score: {score} points</Text>
-                <Text style={globalStyles.levelSectionTitle}> Highscore: {bestScores[levelId]?.score ?? 0} points</Text>
+                <Text style={globalStyles.levelSectionTitle}> Time: {(time / 1000).toFixed(2)} s </Text>
                 <Text style={globalStyles.levelSectionTitle}> Step Count: {stepCount} </Text>
             </View>
 

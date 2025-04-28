@@ -1,6 +1,6 @@
-import { AudioPlayer } from 'expo-audio';
-import React, { createContext, useContext, useState, ReactNode, useMemo, useEffect, useRef } from 'react';
 import { musicFiles } from '@/assets/musics/MusicFiles';
+import { AudioPlayer } from 'expo-audio';
+import React, { createContext, ReactNode, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 interface MusicContextType {
     player: AudioPlayer | null;

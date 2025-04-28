@@ -1,11 +1,11 @@
 import { useMusicContext } from '@/contexts/MusicContext';
+import { useTimerContext } from '@/contexts/TimerContext';
+import { fetchSongs } from '@/firebase/songsService';
 import { globalStyles } from '@/styles/globalStyles';
 import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
-import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View, Dimensions, InteractionManager } from 'react-native';
-import { fetchSongs } from '@/firebase/songsService';
-import { useTimerContext } from '@/contexts/TimerContext';
 import LottieView from 'lottie-react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Dimensions, InteractionManager, Text } from 'react-native';
 
 interface Song {
     id: string;
@@ -42,10 +42,12 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
         fetchLevelSongs();
     }, [songs]);
 
+    // Log the list of level songs for debugging
     useEffect(() => {
         console.log("Level Songs:", levelSongs);
     }, [levelSongs]);
 
+    // Log the current song ID for debugging
     useEffect(() => {
         console.log("Current Song ID:", currentSongId);
     }, [currentSongId]);
@@ -75,7 +77,7 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
     }, [audioUri]);
 
 
-    // checking if song finished
+    // Check if the current song has finished playing
     useEffect(() => {
         if (status?.didJustFinish) {
             handleNextSong();
@@ -83,7 +85,7 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
     }, [status]);
 
 
-    // handling next song or end of playlist
+    // Handle transitioning to the next song or ending the playlist
     const handleNextSong = async () => {
         if (!currentSongId) return;
 
@@ -92,7 +94,7 @@ export default function MusicPlayer({ songs }: { songs: string[] }) {
         const nextIndex = (currentIndex + 1) % levelSongs.length;
         const nextSong = levelSongs[nextIndex];
         await stopMusic();
-        setPlayer(null); // if it aint broke, dont fix it. 
+        setPlayer(null);
         resetTimer();
 
         if (nextIndex === 0 && !levelEnd) {

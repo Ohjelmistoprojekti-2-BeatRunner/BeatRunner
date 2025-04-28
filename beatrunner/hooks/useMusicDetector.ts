@@ -10,12 +10,10 @@ export const useMusicDetector = () => {
         setIsDetecting(true);
         console.log("Both started");
     };
-
     const stopMusicDetector = () => {
         setSongPlaying(false);
         setIsDetecting(false);
         console.log("Both stopped");
     };
-
     return { startMusicDetector, stopMusicDetector};
 };

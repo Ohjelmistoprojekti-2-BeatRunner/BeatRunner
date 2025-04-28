@@ -43,16 +43,12 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
     // Fetch user profile for profile view mode
     useEffect(() => {
         const fetchProfile = async () => {
-            console.log("fetch started in profile")
             if (!currentUserId || selectedMode !== 'profile') return;
-            console.log("fetch profile", currentUserId)
-            // check if data for user already fetched:
+            // Check if data for user already fetched:
             if (currentUserId === previousUserId && profileData) return;
-            console.log("fetch new profile")
             setLoading(true);
             try {
                 const data = await fetchUserById(currentUserId);
-                console.log("fetch", data)
                 setProfileData(data);
                 setPreviousUserId(currentUserId);
             } catch (error) {
@@ -61,7 +57,6 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
                 setLoading(false);
             }
         };
-
         if (visible) {
             fetchProfile();
         }
@@ -70,17 +65,16 @@ export default function ProfileScoresModal({ visible, onClose, userId, levelId, 
     // Fetch levels scores for level scores view mode
     useEffect(() => {
         const fetchLevel = async () => {
-            console.log("fetch started in level")
             if (!currentLevelId || selectedMode !== 'levelScores') return;
-            console.log("fetch level", currentLevelId)
-            // check if data for level already fetched:
+
+            // Avoid re-fetching if the data for the current level is already loaded
             if (currentLevelId === previousLevelId && levelData) return;
-            console.log("fetch new level")
             setLoading(true);
             try {
                 const data = await fetchLevelTopResultsWithUsername(currentLevelId);
-                console.log("fetch", data)
                 setLevelData(data);
+
+                // Fetch level metadata (e.g., title)
                 const level = await fetchLevelById(currentLevelId);
                 setLevelTitle(level?.title ?? "Unknown");
                 setPreviousLevelId(currentLevelId);
