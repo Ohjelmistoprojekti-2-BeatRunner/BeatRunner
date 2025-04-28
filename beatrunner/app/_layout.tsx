@@ -52,7 +52,7 @@ export default function RootLayout() {
                     loggedIn = false;
                 }
             } else {
-                loggedIn = false; // Jos avaimia ei ole
+                loggedIn = false; // if no keys are found
             }
 
             if (loaded && loggedIn === false) {
