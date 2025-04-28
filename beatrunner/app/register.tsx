@@ -14,7 +14,7 @@ export default function RegisterScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [userId, setUserId] = useState('');
 
-  // Prevents user from getting to the app without setting a username first
+  // Disable back button during registration
   useEffect(() => {
     const backAction = () => { return true; };
     const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
@@ -33,12 +33,14 @@ export default function RegisterScreen() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Sets the user document in Firestore with a timestamp
+      // Initialize a blank user document in Firestore with timestamp and null username
+
       await setDoc(doc(db, 'users', user.uid), {
         createdAt: serverTimestamp(),
         username: null,
       });
 
+      // save user ID
       setUserId(user.uid);
       setModalVisible(true);
     } catch (error: any) {
@@ -74,7 +76,7 @@ export default function RegisterScreen() {
       // Check if username is already taken
       const usernameQuery = query(
         collection(db, 'users'),
-        where('usernameLowercase', '==', nameLowercase) // firestore is case-sensitive: usernameLowercase for username comparisons.
+        where('usernameLowercase', '==', nameLowercase)
       );
       const existing = await getDocs(usernameQuery);
 
@@ -83,7 +85,7 @@ export default function RegisterScreen() {
         return;
       }
 
-      // Update the user document with the username
+      // Update user document with username
       await updateDoc(doc(db, 'users', userId), {
         username: trimmedUsername,
         usernameLowercase: nameLowercase,
@@ -92,7 +94,7 @@ export default function RegisterScreen() {
       Alert.alert('Success', 'Account created!');
       setModalVisible(false);
 
-      // Redirect to the home screen as logged in
+      // Redirect to home page
       router.replace('/');
     } catch (error: any) {
       Alert.alert('Error saving username', error.message);
@@ -101,7 +103,6 @@ export default function RegisterScreen() {
 
   return (
     <>
-      {/* Username Modal */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -122,8 +123,6 @@ export default function RegisterScreen() {
           </View>
         </View>
       </Modal>
-
-      {/* Registration Form */}
       <View style={globalStyles.container}>
         <View style={globalStyles.topContainer}>
           <Text style={globalStyles.title}>Register</Text>
